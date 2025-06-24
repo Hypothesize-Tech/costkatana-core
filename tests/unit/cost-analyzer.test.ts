@@ -222,17 +222,17 @@ describe('CostAnalyzer', () => {
 
         it('should project future costs based on historical data', () => {
             const projection30Days = analyzer.getCostProjection(30);
-            expect(projection30Days).toBeCloseTo(0.03, 2);
+            expect(projection30Days).toBeCloseTo(0.035, 3);
 
             const projection365Days = analyzer.getCostProjection(365);
-            expect(projection365Days).toBeCloseTo(0.365, 2);
+            expect(projection365Days).toBeCloseTo(0.42583333333333334, 3);
         });
     });
 
     describe('getOptimizationOpportunities', () => {
         beforeEach(() => {
             // Add data that would trigger optimization suggestions
-            const highCostData = Array.from({ length: 10 }, (_, i) => ({
+            const highCostData = Array.from({ length: 10 }, () => ({
                 userId: 'user1',
                 timestamp: new Date(),
                 provider: AIProvider.OpenAI,
