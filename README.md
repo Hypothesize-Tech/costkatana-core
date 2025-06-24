@@ -296,6 +296,6 @@ MIT © ABDUL SAGHEER
 
 ## 📞 Support
 
-- [Documentation](https://github.com/yourusername/ai-cost-tracker/wiki)
-- [Issues](https://github.com/yourusername/ai-cost-tracker/issues)
-- [Discussions](https://github.com/yourusername/ai-cost-tracker/discussions)# ai-cost-optimizer-core
+- [Documentation](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/wiki)
+- [Issues](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/issues)
+- [Discussions](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/discussions)
