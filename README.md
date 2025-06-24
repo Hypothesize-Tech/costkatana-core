@@ -286,7 +286,7 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## 📄 License
 
-MIT © ABDUL SAGHEER
+MIT © HYPOTHESIZE TECH
 
 ## 🙏 Acknowledgments
 
