@@ -20,11 +20,13 @@ new AICostTracker(config: TrackerConfig)
 ```
 
 #### Parameters
+
 - `config`: Configuration object for the tracker
 
 ### Methods
 
 #### estimateCost
+
 ```typescript
 async estimateCost(
   prompt: string,
@@ -37,6 +39,7 @@ async estimateCost(
 Estimates the cost of a prompt before making the API call.
 
 #### makeRequest
+
 ```typescript
 async makeRequest(
   request: ProviderRequest,
@@ -47,6 +50,7 @@ async makeRequest(
 Makes an API request and automatically tracks usage.
 
 #### trackUsage
+
 ```typescript
 async trackUsage(metadata: UsageMetadata): Promise<void>
 ```
@@ -54,6 +58,7 @@ async trackUsage(metadata: UsageMetadata): Promise<void>
 Manually tracks usage for existing API integrations.
 
 #### getAnalytics
+
 ```typescript
 async getAnalytics(
   startDate?: Date,
@@ -65,6 +70,7 @@ async getAnalytics(
 Retrieves usage analytics for a specific time period.
 
 #### getOptimizationSuggestions
+
 ```typescript
 async getOptimizationSuggestions(
   startDate?: Date,
@@ -76,6 +82,7 @@ async getOptimizationSuggestions(
 Gets AI-powered optimization suggestions based on usage patterns.
 
 #### optimizePrompt
+
 ```typescript
 async optimizePrompt(
   prompt: string,
@@ -87,6 +94,7 @@ async optimizePrompt(
 Optimizes a prompt using AI to reduce token usage.
 
 #### generateReport
+
 ```typescript
 async generateReport(
   startDate?: Date,
@@ -98,6 +106,7 @@ async generateReport(
 Generates a comprehensive optimization report in Markdown format.
 
 #### exportData
+
 ```typescript
 async exportData(
   format: 'json' | 'csv' = 'json',
@@ -110,6 +119,7 @@ async exportData(
 Exports usage data in the specified format.
 
 #### getUserStats
+
 ```typescript
 async getUserStats(userId: string): Promise<UserStats>
 ```
@@ -117,6 +127,7 @@ async getUserStats(userId: string): Promise<UserStats>
 Gets statistics for a specific user.
 
 #### getModelStats
+
 ```typescript
 async getModelStats(model: string): Promise<ModelStats>
 ```
@@ -124,6 +135,7 @@ async getModelStats(model: string): Promise<ModelStats>
 Gets statistics for a specific model.
 
 #### clearData
+
 ```typescript
 async clearData(): Promise<void>
 ```
@@ -133,6 +145,7 @@ Clears all tracked data.
 ## Types and Interfaces
 
 ### TrackerConfig
+
 ```typescript
 interface TrackerConfig {
   providers: ProviderConfig[];
@@ -143,6 +156,7 @@ interface TrackerConfig {
 ```
 
 ### ProviderConfig
+
 ```typescript
 interface ProviderConfig {
   provider: AIProvider;
@@ -154,6 +168,7 @@ interface ProviderConfig {
 ```
 
 ### UsageMetadata
+
 ```typescript
 interface UsageMetadata {
   userId: string;
@@ -173,6 +188,7 @@ interface UsageMetadata {
 ```
 
 ### CostEstimate
+
 ```typescript
 interface CostEstimate {
   promptCost: number;
@@ -189,6 +205,7 @@ interface CostEstimate {
 ```
 
 ### OptimizationSuggestion
+
 ```typescript
 interface OptimizationSuggestion {
   id: string;
@@ -203,6 +220,7 @@ interface OptimizationSuggestion {
 ```
 
 ### UsageAnalytics
+
 ```typescript
 interface UsageAnalytics {
   totalCost: number;
@@ -218,6 +236,7 @@ interface UsageAnalytics {
 ## Providers
 
 ### BaseProvider
+
 Abstract base class for all providers.
 
 ```typescript
@@ -225,13 +244,13 @@ abstract class BaseProvider {
   abstract countTokens(text: string, model: string): Promise<number>;
   abstract makeRequest(request: ProviderRequest): Promise<ProviderResponse>;
   abstract parseUsage(usage: any): AnyUsage;
-  
+
   async estimateCost(
     prompt: string,
     model: string,
     expectedCompletion?: number
   ): Promise<CostEstimate>;
-  
+
   async trackUsage(
     request: ProviderRequest,
     response: ProviderResponse,
@@ -242,6 +261,7 @@ abstract class BaseProvider {
 ```
 
 ### OpenAIProvider
+
 Provider implementation for OpenAI.
 
 ```typescript
@@ -253,38 +273,33 @@ class OpenAIProvider extends BaseProvider {
 ```
 
 ### BedrockProvider
+
 Provider implementation for AWS Bedrock.
 
 ```typescript
 class BedrockProvider extends BaseProvider {
   constructor(config: ProviderConfig);
   async listFoundationModels();
-  async invokeModelWithOptimization(
-    request: ProviderRequest,
-    optimizationModel?: string
-  );
+  async invokeModelWithOptimization(request: ProviderRequest, optimizationModel?: string);
 }
 ```
 
 ## Analyzers
 
 ### CostAnalyzer
+
 Analyzes usage data to provide insights.
 
 ```typescript
 class CostAnalyzer {
   constructor(initialData?: UsageMetadata[]);
-  
+
   addUsageData(data: UsageMetadata | UsageMetadata[]): void;
   clearData(): void;
   getData(): UsageMetadata[];
-  
-  analyzeUsage(
-    startDate?: Date,
-    endDate?: Date,
-    userId?: string
-  ): UsageAnalytics;
-  
+
+  analyzeUsage(startDate?: Date, endDate?: Date, userId?: string): UsageAnalytics;
+
   getCostProjection(days: number): number;
   getOptimizationOpportunities(): OptimizationOpportunity[];
   getAnomalies(threshold?: number): UsageMetadata[];
@@ -292,22 +307,19 @@ class CostAnalyzer {
 ```
 
 ### TokenCounter
+
 Utilities for counting tokens across different providers.
 
 ```typescript
 class TokenCounter {
-  static async countTokens(
-    text: string,
-    provider: AIProvider,
-    model: string
-  ): Promise<number>;
-  
+  static async countTokens(text: string, provider: AIProvider, model: string): Promise<number>;
+
   static async countConversationTokens(
     messages: Message[],
     provider: AIProvider,
     model: string
   ): Promise<number>;
-  
+
   static async splitTextByTokens(
     text: string,
     maxTokens: number,
@@ -315,7 +327,7 @@ class TokenCounter {
     model: string,
     overlap?: number
   ): Promise<string[]>;
-  
+
   static async estimateOptimizationSavings(
     originalPrompt: string,
     optimizedPrompt: string,
@@ -326,21 +338,22 @@ class TokenCounter {
 ```
 
 ### UsageTracker
+
 Tracks and stores usage data.
 
 ```typescript
 class UsageTracker {
   constructor(config: TrackingConfig);
-  
+
   async track(metadata: UsageMetadata): Promise<void>;
-  
+
   async getUsageHistory(
     userId?: string,
     startDate?: Date,
     endDate?: Date,
     limit?: number
   ): Promise<UsageMetadata[]>;
-  
+
   async getUserStats(userId: string): Promise<UserStats>;
   async getModelStats(model: string): Promise<ModelStats>;
   async exportData(format: 'json' | 'csv'): Promise<string>;
@@ -352,31 +365,32 @@ class UsageTracker {
 ## Optimizers
 
 ### PromptOptimizer
+
 Optimizes prompts to reduce token usage.
 
 ```typescript
 class PromptOptimizer {
   constructor(bedrockConfig?: BedrockConfig);
-  
+
   async optimizePrompt(
     prompt: string,
     targetModel: string,
     targetProvider: AIProvider,
     context?: OptimizationContext
   ): Promise<OptimizationSuggestion[]>;
-  
+
   async suggestBatching(
     prompts: string[],
     targetModel: string,
     targetProvider: AIProvider
   ): Promise<OptimizationSuggestion>;
-  
+
   async suggestCaching(
     prompt: string,
     frequency: number,
     avgResponseTokens: number
   ): Promise<OptimizationSuggestion>;
-  
+
   async suggestModelDowngrade(
     prompt: string,
     currentModel: string,
@@ -386,25 +400,23 @@ class PromptOptimizer {
 ```
 
 ### SuggestionEngine
+
 Generates optimization suggestions based on usage patterns.
 
 ```typescript
 class SuggestionEngine {
   constructor(config?: SuggestionEngineConfig);
-  
-  async generateSuggestions(
-    usageData: UsageMetadata[]
-  ): Promise<OptimizationSuggestion[]>;
-  
-  async generateReport(
-    usageData: UsageMetadata[]
-  ): Promise<string>;
+
+  async generateSuggestions(usageData: UsageMetadata[]): Promise<OptimizationSuggestion[]>;
+
+  async generateReport(usageData: UsageMetadata[]): Promise<string>;
 }
 ```
 
 ## Utilities
 
 ### Pricing Utilities
+
 ```typescript
 function calculateCost(
   promptTokens: number,
@@ -437,6 +449,7 @@ function calculateROI(
 ```
 
 ### Validation Utilities
+
 ```typescript
 function validateProvider(provider: string): AIProvider;
 function validateModel(modelId: string): void;
@@ -449,15 +462,16 @@ function sanitizeInput(input: string): string;
 ```
 
 ### Logger
+
 ```typescript
 class Logger {
   constructor(config?: LoggerConfig);
-  
+
   debug(message: string, ...args: any[]): void;
   info(message: string, ...args: any[]): void;
   warn(message: string, ...args: any[]): void;
   error(message: string, error?: Error, ...args: any[]): void;
-  
+
   startTimer(label: string): () => number;
   logStructured(level: LogLevel, event: string, data: any): void;
   logRequest(provider: string, model: string, tokens: number, cost: number, duration: number): void;
@@ -470,6 +484,7 @@ class Logger {
 ## Constants and Configuration
 
 ### Model Registry
+
 ```typescript
 const MODELS: Record<string, ProviderModel>;
 function getModelById(modelId: string): ProviderModel | undefined;
@@ -478,6 +493,7 @@ function getAllModels(): ProviderModel[];
 ```
 
 ### Pricing Data
+
 ```typescript
 const PRICING_DATA: Record<AIProvider, ModelPricing>;
 const REGIONAL_PRICING_ADJUSTMENTS: Record<string, number>;
@@ -487,6 +503,7 @@ const RATE_LIMITS: Record<AIProvider, RateLimits>;
 ```
 
 ### Default Configuration
+
 ```typescript
 const defaultConfig: Partial<TrackerConfig>;
 const defaultBedrockRegion: string;

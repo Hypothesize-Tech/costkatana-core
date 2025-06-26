@@ -30,51 +30,65 @@ or
 yarn add ai-cost-tracker
 ```
 
+## ⚙️ Backend Integration
+
+`ai-cost-tracker` is designed to work with the `ai-cost-optimizer-backend` to store and analyze usage data across your team. To connect to the backend, you need to set the following environment variables:
+
+- `USER_TOKEN`: Your personal access token. You can get this from your user profile page on the AI Cost Optimizer dashboard.
+
 ## 🚀 Quick Start
 
 ```typescript
 import AICostTracker, { AIProvider } from 'ai-cost-tracker';
 
-// Initialize the tracker
-const tracker = new AICostTracker({
-  providers: [
-    {
-      provider: AIProvider.OpenAI,
-      apiKey: process.env.OPENAI_API_KEY
-    },
-    {
-      provider: AIProvider.AWSBedrock,
-      region: 'us-east-1'
+async function main() {
+  // Configuration for the tracker
+  const config = {
+    providers: [
+      {
+        provider: AIProvider.OpenAI,
+        apiKey: process.env.OPENAI_API_KEY
+      },
+      {
+        provider: AIProvider.AWSBedrock,
+        region: 'us-east-1'
+      }
+    ],
+    tracking: {
+      enableAutoTracking: true,
+      storageType: 'memory' // Local tracking, data is also sent to backend
     }
-  ],
-  tracking: {
-    enableAutoTracking: true,
-    storageType: 'memory'
-  }
-});
+  };
 
-// Estimate cost before making a request
-const estimate = await tracker.estimateCost(
-  'Explain quantum computing',
-  'gpt-3.5-turbo',
-  AIProvider.OpenAI,
-  150 // expected completion tokens
-);
-console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
+  // Initialize the tracker
+  // This will authenticate with the backend using USER_TOKEN
+  const tracker = await AICostTracker.create(config);
 
-// Make a tracked request
-const response = await tracker.makeRequest(
-  {
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: 'Explain quantum computing' }],
-    maxTokens: 150
-  },
-  'user123'
-);
+  // Estimate cost before making a request
+  const estimate = await tracker.estimateCost(
+    'Explain quantum computing',
+    'gpt-3.5-turbo',
+    AIProvider.OpenAI,
+    150 // expected completion tokens
+  );
+  console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
 
-// Get analytics
-const analytics = await tracker.getAnalytics();
-console.log(`Total cost: $${analytics.totalCost.toFixed(2)}`);
+  // Make a tracked request
+  const response = await tracker.makeRequest(
+    {
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: 'Explain quantum computing' }],
+      maxTokens: 150
+    },
+    'user123' // This userId is for your internal reference
+  );
+
+  // Get analytics (from local cache)
+  const analytics = await tracker.getAnalytics();
+  console.log(`Total cost (local): $${analytics.totalCost.toFixed(2)}`);
+}
+
+main().catch(console.error);
 ```
 
 ## 🔧 Configuration

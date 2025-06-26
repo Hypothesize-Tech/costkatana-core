@@ -1,6 +1,4 @@
 export interface UsageMetadata {
-  userId: string;
-  timestamp: Date;
   provider: AIProvider;
   model: string;
   promptTokens: number;
@@ -9,7 +7,7 @@ export interface UsageMetadata {
   estimatedCost: number;
   prompt: string;
   completion?: string;
-  duration?: number;
+  responseTime?: number;
   tags?: string[];
   sessionId?: string;
 }

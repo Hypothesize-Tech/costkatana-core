@@ -42,7 +42,6 @@ export abstract class BaseProvider {
   trackUsage(
     request: ProviderRequest,
     response: ProviderResponse,
-    userId: string,
     startTime: number
   ): UsageMetadata {
     const endTime = Date.now();
@@ -65,8 +64,6 @@ export abstract class BaseProvider {
     const completion = response.choices[0]?.text || response.choices[0]?.message?.content || '';
 
     return {
-      userId,
-      timestamp: new Date(),
       provider: this.provider,
       model: request.model,
       promptTokens,
@@ -75,7 +72,7 @@ export abstract class BaseProvider {
       estimatedCost: cost.totalCost,
       prompt,
       completion,
-      duration: endTime - startTime,
+      responseTime: endTime - startTime,
       tags: request.metadata?.tags,
       sessionId: request.metadata?.sessionId || uuidv4()
     };
