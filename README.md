@@ -74,14 +74,8 @@ async function main() {
   console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
 
   // Make a tracked request
-  const response = await tracker.makeRequest(
-    {
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: 'Explain quantum computing' }],
-      maxTokens: 150
-    },
-    'user123' // This userId is for your internal reference
-  );
+
+
 
   // Get analytics (from local cache)
   const analytics = await tracker.getAnalytics();

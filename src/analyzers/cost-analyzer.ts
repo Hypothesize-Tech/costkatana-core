@@ -59,7 +59,9 @@ export class CostAnalyzer {
     };
   }
 
-  private filterData(startDate?: Date, endDate?: Date, userId?: string): UsageMetadata[] {
+  private filterData(_startDate?: Date, _endDate?: Date, _userId?: string): UsageMetadata[] {
+    // The filtering logic now needs to happen in the storage layer,
+    // since UsageMetadata no longer contains userId or timestamp.
     return this.usageData;
   }
 
@@ -115,7 +117,7 @@ export class CostAnalyzer {
       .sort((a, b) => b.totalCost - a.totalCost);
   }
 
-  private getUsageOverTime(data: UsageMetadata[]): TimeSeriesData[] {
+  private getUsageOverTime(_data: UsageMetadata[]): TimeSeriesData[] {
     // This method cannot be implemented correctly without timestamps on UsageMetadata.
     // It requires the storage layer to provide time-aggregated data.
     // Returning an empty array to fix the build.

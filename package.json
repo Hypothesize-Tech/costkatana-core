@@ -1,6 +1,6 @@
 {
   "name": "ai-cost-tracker",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Track, analyze, and optimize AI API costs across multiple providers with intelligent suggestions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "format": "prettier --write 'src/**/*.ts'",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run test && npm run build",
     "prepare": "npm run build",
     "dev": "tsc -w"
   },

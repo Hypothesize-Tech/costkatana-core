@@ -174,7 +174,7 @@ export class UsageTracker {
     return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
   }
 
-  async cleanOldData(retentionDays: number): Promise<void> {
+  async cleanOldData(_retentionDays: number): Promise<void> {
     // This method is no longer possible without timestamps.
     // The storage implementation will need to handle its own retention.
     return Promise.resolve();

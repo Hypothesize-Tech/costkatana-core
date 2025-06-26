@@ -238,7 +238,7 @@ export class SuggestionEngine {
     return groups;
   }
 
-  private getRecentPrompts(prompts: UsageMetadata[], minutes: number): UsageMetadata[] {
+  private getRecentPrompts(prompts: UsageMetadata[], _minutes: number): UsageMetadata[] {
     // This is no longer possible without timestamps.
     // Returning the last 5 prompts as a fallback.
     return prompts.slice(-5);
