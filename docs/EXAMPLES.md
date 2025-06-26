@@ -30,8 +30,7 @@ const tracker = new AICostTracker({
     }
   ],
   tracking: {
-    enableAutoTracking: true,
-    storageType: 'memory'
+    enableAutoTracking: true
   }
 });
 ```
@@ -73,7 +72,6 @@ const tracker = new AICostTracker({
   },
   tracking: {
     enableAutoTracking: true,
-    storageType: 'file',
     retentionDays: 90
   },
   alerts: {
@@ -420,8 +418,7 @@ const tracker = new AICostTracker({
     /* ... */
   ],
   tracking: {
-    enableAutoTracking: true,
-    storageType: 'memory'
+    enableAutoTracking: true
   }
 });
 ```
@@ -435,7 +432,6 @@ const tracker = new AICostTracker({
   ],
   tracking: {
     enableAutoTracking: true,
-    storageType: 'file',
     retentionDays: 90 // Keep data for 90 days
   }
 });

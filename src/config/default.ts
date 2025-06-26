@@ -18,7 +18,6 @@ export const defaultConfig: Partial<TrackerConfig> = {
   },
   tracking: {
     enableAutoTracking: true,
-    storageType: 'memory',
     retentionDays: 30
   },
   alerts: {

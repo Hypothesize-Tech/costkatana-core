@@ -15,7 +15,12 @@ async function fileStorageExample() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0,
+                highTokenUsage: 0,
+                frequencyThreshold: 0
+            }
         },
         tracking: {
             enableAutoTracking: true,
@@ -93,7 +98,12 @@ async function customStorageExample() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0,  
+                highTokenUsage: 0,
+                frequencyThreshold: 0
+            }
         },
         tracking: {
             enableAutoTracking: true,
@@ -129,7 +139,12 @@ async function realtimeDashboard() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0,
+                highTokenUsage: 0,
+                frequencyThreshold: 0
+            }
         },
         tracking: {
             enableAutoTracking: true,
@@ -196,7 +211,12 @@ async function exportAndBackup() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0,
+                highTokenUsage: 0,
+                frequencyThreshold: 0
+            }
         },
         tracking: {
             enableAutoTracking: true,

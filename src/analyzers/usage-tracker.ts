@@ -1,31 +1,13 @@
-import { UsageMetadata, TrackingConfig, CustomStorage } from '../types';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { UsageMetadata, TrackingConfig } from '../types';
 
 export class UsageTracker {
   private config: TrackingConfig;
-  private storage: UsageStorage;
+  private storage: MemoryStorage;
   private cache: Map<string, UsageMetadata[]> = new Map();
 
   constructor(config: TrackingConfig) {
     this.config = config;
-    this.storage = this.initializeStorage(config);
-  }
-
-  private initializeStorage(config: TrackingConfig): UsageStorage {
-    switch (config.storageType) {
-      case 'memory':
-        return new MemoryStorage();
-      case 'file':
-        return new FileStorage();
-      case 'custom':
-        if (!config.customStorage) {
-          throw new Error('Custom storage implementation required');
-        }
-        return new CustomStorageAdapter(config.customStorage);
-      default:
-        return new MemoryStorage();
-    }
+    this.storage = new MemoryStorage();
   }
 
   async track(metadata: UsageMetadata): Promise<void> {
@@ -193,13 +175,7 @@ interface UsageFilter {
 }
 
 // Storage implementations
-interface UsageStorage {
-  save(data: UsageMetadata): Promise<void>;
-  load(filter: UsageFilter): Promise<UsageMetadata[]>;
-  clear(): Promise<void>;
-}
-
-class MemoryStorage implements UsageStorage {
+class MemoryStorage {
   private data: UsageMetadata[] = [];
 
   save(data: UsageMetadata): Promise<void> {
@@ -222,61 +198,5 @@ class MemoryStorage implements UsageStorage {
   clear(): Promise<void> {
     this.data = [];
     return Promise.resolve();
-  }
-}
-
-class FileStorage implements UsageStorage {
-  private filePath: string;
-
-  constructor(filePath?: string) {
-    this.filePath = filePath || join(process.cwd(), 'usage-data.json');
-  }
-
-  async save(data: UsageMetadata): Promise<void> {
-    const allData = await this.load({});
-    allData.push(data);
-    writeFileSync(this.filePath, JSON.stringify(allData, null, 2));
-  }
-
-  load(filter: UsageFilter): Promise<UsageMetadata[]> {
-    if (!existsSync(this.filePath)) {
-      return Promise.resolve([]);
-    }
-    const fileContent = readFileSync(this.filePath, 'utf-8');
-    const allData: UsageMetadata[] = JSON.parse(fileContent) as UsageMetadata[];
-
-    let result = allData.map(item => ({
-      ...item
-    }));
-
-    // Filtering by userId, startDate, endDate is no longer possible here
-    if (filter.limit) {
-      result = result.slice(0, filter.limit);
-    }
-
-    return Promise.resolve(result);
-  }
-
-  async clear(): Promise<void> {
-    if (existsSync(this.filePath)) {
-      writeFileSync(this.filePath, '[]');
-    }
-    return Promise.resolve();
-  }
-}
-
-class CustomStorageAdapter implements UsageStorage {
-  constructor(private customStorage: CustomStorage) { }
-
-  async save(data: UsageMetadata): Promise<void> {
-    await this.customStorage.save(data);
-  }
-
-  async load(filter: UsageFilter): Promise<UsageMetadata[]> {
-    return this.customStorage.load(filter);
-  }
-
-  async clear(): Promise<void> {
-    await this.customStorage.clear();
   }
 }

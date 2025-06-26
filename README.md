@@ -14,7 +14,6 @@
 - **AI-Powered Optimization**: Get intelligent suggestions to reduce costs using AWS Bedrock
 - **Prompt Optimization**: Automatically optimize prompts to reduce token usage
 - **Usage Analytics**: Comprehensive analytics and insights about your AI usage
-- **Multiple Storage Options**: Memory, file, or custom storage implementations
 - **Cost Alerts**: Set thresholds and get notified when costs exceed limits
 - **Export & Reporting**: Export data in JSON/CSV formats with detailed reports
 
@@ -55,8 +54,7 @@ async function main() {
       }
     ],
     tracking: {
-      enableAutoTracking: true,
-      storageType: 'memory' // Local tracking, data is also sent to backend
+      enableAutoTracking: true
     }
   };
 
@@ -119,7 +117,6 @@ const config = {
   },
   tracking: {
     enableAutoTracking: true,
-    storageType: 'file',
     retentionDays: 30
   },
   alerts: {
@@ -128,37 +125,6 @@ const config = {
     webhookUrl: 'https://your-webhook.com/alerts'
   }
 };
-```
-
-### Storage Options
-
-#### Memory Storage (Default)
-
-```typescript
-tracking: {
-  storageType: 'memory';
-}
-```
-
-#### File Storage
-
-```typescript
-tracking: {
-  storageType: 'file';
-}
-```
-
-#### Custom Storage
-
-```typescript
-tracking: {
-  storageType: 'custom',
-  customStorage: {
-    save: async (data) => { /* your implementation */ },
-    load: async (filter) => { /* your implementation */ },
-    clear: async () => { /* your implementation */ }
-  }
-}
 ```
 
 ## 📊 Analytics & Reporting

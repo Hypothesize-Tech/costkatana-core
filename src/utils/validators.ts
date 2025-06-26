@@ -100,24 +100,6 @@ export function validateTrackerConfig(config: TrackerConfig): void {
     }
   }
 
-  // Validate tracking config
-  if (config.tracking) {
-    const validStorageTypes = ['memory', 'file', 'custom'];
-    if (!validStorageTypes.includes(config.tracking.storageType)) {
-      throw new Error(
-        `Invalid storage type: ${config.tracking.storageType}. ` +
-          `Valid types are: ${validStorageTypes.join(', ')}`
-      );
-    }
-
-    if (config.tracking.storageType === 'custom' && !config.tracking.customStorage) {
-      throw new Error('Custom storage type requires a customStorage implementation');
-    }
-
-    if (config.tracking.retentionDays && config.tracking.retentionDays < 1) {
-      throw new Error('Retention days must be at least 1');
-    }
-  }
 
   // Validate alert config
   if (config.alerts) {

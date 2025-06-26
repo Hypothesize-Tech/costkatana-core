@@ -16,7 +16,6 @@ export type {
   TrackingConfig,
   AlertConfig,
   CustomPricing,
-  CustomStorage,
   AIResponse
 } from './types';
 
@@ -120,7 +119,7 @@ import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 
 
-const DEFAULT_API_URL = 'http://localhost:8000/api';  
+const DEFAULT_API_URL = 'http://localhost:8000/api';
 
 export class AICostTracker {
   private config: TrackerConfig;
@@ -270,32 +269,41 @@ export class AICostTracker {
   }
 
   /**
-   * Get usage analytics for a specific time period
+   * Get usage analytics for a specific time period by calling the backend
    */
   async getAnalytics(startDate?: Date, endDate?: Date, userId?: string): Promise<any> {
-    const usageData = await this.usageTracker.getUsageHistory(userId, startDate, endDate);
-
-    this.costAnalyzer.clearData();
-    this.costAnalyzer.addUsageData(usageData);
-
-    return this.costAnalyzer.analyzeUsage(startDate, endDate, userId);
+    try {
+      const response = await this.apiClient.get('/analytics', {
+        params: { startDate, endDate, userId }
+      });
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to fetch analytics from backend.', error as Error);
+      throw error;
+    }
   }
 
   /**
-   * Get optimization suggestions based on usage patterns
+   * Get optimization suggestions based on usage patterns by calling the backend
    */
   async getOptimizationSuggestions(
     startDate?: Date,
     endDate?: Date,
     userId?: string
   ): Promise<OptimizationSuggestion[]> {
-    const usageData = await this.usageTracker.getUsageHistory(userId, startDate, endDate);
-
-    return this.suggestionEngine.generateSuggestions(usageData);
+    try {
+      const response = await this.apiClient.get('/optimizations/suggestions', {
+        params: { startDate, endDate, userId }
+      });
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to fetch optimization suggestions from backend.', error as Error);
+      throw error;
+    }
   }
 
   /**
-   * Optimize a prompt using AI
+   * Optimize a prompt using AI by calling the backend
    */
   async optimizePrompt(
     prompt: string,
@@ -303,9 +311,17 @@ export class AICostTracker {
     targetProvider: AIProvider
   ): Promise<OptimizationSuggestion[]> {
     validatePrompt(prompt);
-
-    const optimizer = this.suggestionEngine['promptOptimizer'];
-    return optimizer.optimizePrompt(prompt, targetModel, targetProvider);
+    try {
+      const response = await this.apiClient.post('/optimizations/optimize-prompt', {
+        prompt,
+        model: targetModel,
+        service: targetProvider
+      });
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to optimize prompt via backend.', error as Error);
+      throw error;
+    }
   }
 
   /**

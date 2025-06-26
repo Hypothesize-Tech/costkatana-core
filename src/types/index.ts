@@ -141,8 +141,6 @@ export interface BedrockConfig {
 
 export interface TrackingConfig {
   enableAutoTracking: boolean;
-  storageType: 'memory' | 'file' | 'custom';
-  customStorage?: CustomStorage;
   retentionDays?: number;
 }
 
@@ -159,12 +157,6 @@ export interface CustomPricing {
     completionPrice: number;
     unit: 'per-token' | 'per-1k-tokens' | 'per-1m-tokens';
   };
-}
-
-export interface CustomStorage {
-  save: (data: UsageMetadata) => Promise<void>;
-  load: (filter?: any) => Promise<UsageMetadata[]>;
-  clear: () => Promise<void>;
 }
 
 export interface AIResponse<T = any> {

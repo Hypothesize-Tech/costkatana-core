@@ -147,7 +147,7 @@ Clears all tracked data.
 ### TrackerConfig
 
 ```typescript
-interface TrackerConfig {
+export interface TrackerConfig {
   providers: ProviderConfig[];
   optimization: OptimizationConfig;
   tracking: TrackingConfig;
@@ -230,6 +230,23 @@ interface UsageAnalytics {
   costByProvider: ProviderCost[];
   usageOverTime: TimeSeriesData[];
   topExpensivePrompts: ExpensivePrompt[];
+}
+```
+
+### TrackingConfig
+
+```typescript
+export interface TrackingConfig {
+  enableAutoTracking: boolean;
+  retentionDays?: number;
+}
+```
+
+### AlertConfig
+
+```typescript
+export interface AlertConfig {
+  // ... existing code ...
 }
 ```
 
