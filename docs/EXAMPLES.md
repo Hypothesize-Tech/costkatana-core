@@ -981,8 +981,8 @@ app.post('/api/ai/optimize', async (req, res) => {
   res.json({ suggestions });
 });
 
-app.listen(3000, () => {
-  console.log('AI Cost Tracker API running on port 3000');
+app.listen(8000, () => {
+  console.log('AI Cost Tracker API running on port 8000');
 });
 ```
 

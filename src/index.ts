@@ -164,7 +164,8 @@ export class AICostTracker {
     const apiClient = axios.create({
       baseURL: apiUrl,
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
 
@@ -255,17 +256,93 @@ export class AICostTracker {
   /**
    * Track usage manually (for existing API integrations)
    */
-  async trackUsage(metadata: UsageMetadata): Promise<void> {
-    // Also send to backend
+  async trackUsage(metadata: UsageMetadata | any): Promise<void> {
+    // Defensive: transform payload if user passes 'usage' object or 'service' field
+    let payload = { ...metadata };
+    let transformed = false;
+
+    // If 'usage' object exists, flatten its fields
+    if (payload.usage && typeof payload.usage === 'object') {
+      payload = { ...payload, ...payload.usage };
+      delete payload.usage;
+      transformed = true;
+    }
+    // If 'service' is present but 'provider' is not, rename
+    if (payload.service && !payload.provider) {
+      payload.provider = payload.service;
+      delete payload.service;
+      transformed = true;
+    }
+    // If 'cost' is present but 'estimatedCost' is not, rename
+    if (payload.cost && !payload.estimatedCost) {
+      payload.estimatedCost = payload.cost;
+      delete payload.cost;
+      transformed = true;
+    }
+    // Always flatten tokens if nested
+    if (payload.usage && typeof payload.usage === 'object') {
+      payload.promptTokens = payload.usage.promptTokens;
+      payload.completionTokens = payload.usage.completionTokens;
+      payload.totalTokens = payload.usage.totalTokens ?? (payload.usage.promptTokens + payload.usage.completionTokens);
+      delete payload.usage;
+      transformed = true;
+    }
+    // Warn if transformation was needed
+    if (transformed) {
+      logger.warn('trackUsage: Transformed payload to match backend schema. Please use the flat UsageMetadata structure.');
+    }
+
+    // Ensure required fields are present for backend API
+    const requiredFields = ['provider', 'model', 'promptTokens', 'completionTokens'];
+    for (const field of requiredFields) {
+      if (payload[field] === undefined || payload[field] === null) {
+        throw new Error(`Required field '${field}' is missing from usage metadata`);
+      }
+    }
+
+    // Calculate totalTokens if not provided
+    if (!payload.totalTokens) {
+      payload.totalTokens = payload.promptTokens + payload.completionTokens;
+    }
+
+    // Prepare the payload for the backend API
+    const backendPayload = {
+      provider: payload.provider,
+      model: payload.model,
+      promptTokens: payload.promptTokens,
+      completionTokens: payload.completionTokens,
+      totalTokens: payload.totalTokens,
+      ...(payload.prompt && { prompt: payload.prompt }),
+      ...(payload.completion && { completion: payload.completion }),
+      ...(payload.estimatedCost && { cost: payload.estimatedCost }),
+      ...(payload.responseTime && { responseTime: payload.responseTime }),
+      ...(payload.metadata && { metadata: payload.metadata }),
+      ...(payload.tags && { tags: payload.tags }),
+      ...(payload.optimizationApplied && { optimizationApplied: payload.optimizationApplied }),
+      ...(payload.optimizationId && { optimizationId: payload.optimizationId }),
+      ...(payload.errorOccurred && { errorOccurred: payload.errorOccurred }),
+      ...(payload.errorMessage && { errorMessage: payload.errorMessage }),
+      ...(payload.ipAddress && { ipAddress: payload.ipAddress }),
+      ...(payload.userAgent && { userAgent: payload.userAgent })
+    };
+
+    // Send to backend
     try {
-      await this.apiClient.post('/usage/sdk', metadata);
+      const response = await this.apiClient.post('/usage/sdk', backendPayload);
+      logger.info('Usage data sent to backend successfully', {
+        id: response.data?.data?.id,
+        cost: response.data?.data?.cost,
+        totalTokens: response.data?.data?.totalTokens
+      });
     } catch (error) {
       logger.error('Failed to send usage data to AI Cost Optimizer backend', error as Error);
-      // We can decide if we want to throw here or just log. For now, just log.
+      // Don't throw here to allow local tracking to continue
     }
-    await this.usageTracker.track(metadata);
-    this.costAnalyzer.addUsageData(metadata);
-    await this.checkAlerts(metadata);
+
+    // Continue with local tracking
+    await this.usageTracker.track(payload);
+    this.costAnalyzer.addUsageData(payload);
+    await this.checkAlerts(payload);
   }
 
   /**
@@ -380,8 +457,6 @@ export class AICostTracker {
 
   private async checkAlerts(_metadata: Omit<UsageMetadata, 'prompt' | 'completion'>): Promise<void> {
     if (!this.config.alerts) return;
-
-    // const { costThreshold, tokenThreshold } = this.config.alerts;
 
     // The backend now handles user-specific alerts based on the token.
     // This client-side check can be simplified or removed if backend handles all alerting.
