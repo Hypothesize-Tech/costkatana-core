@@ -1,7 +1,9 @@
+/// <reference types="node" />
+
 import AICostTracker, {
     AIProvider,
     TrackerConfig,
-} from 'ai-cost-tracker';
+} from '../src';
 
 // Example 1: Prompt optimization
 async function optimizePrompts() {
@@ -36,7 +38,7 @@ async function optimizePrompts() {
         }
     };
 
-    const tracker = new AICostTracker(config);
+    const tracker = await AICostTracker.create(config);
 
     // Example verbose prompt
     const verbosePrompt = `
@@ -74,7 +76,7 @@ async function optimizePrompts() {
 
 // Example 2: Get AI-powered optimization suggestions
 async function getAIOptimizations() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             {
                 provider: AIProvider.AWSBedrock,
@@ -125,8 +127,6 @@ async function getAIOptimizations() {
     for (const pattern of usagePatterns) {
         for (let i = 0; i < pattern.frequency; i++) {
             await tracker.trackUsage({
-                userId: 'optimization-test',
-                timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
                 provider: AIProvider.OpenAI,
                 model: pattern.model,
                 promptTokens: Math.floor(pattern.prompt.length / 4),
@@ -134,7 +134,7 @@ async function getAIOptimizations() {
                 totalTokens: Math.floor(pattern.prompt.length / 4) + 50,
                 estimatedCost: 0.003,
                 prompt: pattern.prompt,
-                duration: 1000 + Math.random() * 2000
+                responseTime: 1000 + Math.random() * 2000
             });
         }
     }
@@ -157,7 +157,7 @@ async function getAIOptimizations() {
 
 // Example 3: Generate optimization report
 async function generateOptimizationReport() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! },
             { provider: AIProvider.AWSBedrock, region: 'us-east-1' }
@@ -186,8 +186,6 @@ async function generateOptimizationReport() {
             const frequency = Math.floor(Math.random() * 20) + 1;
             for (let i = 0; i < frequency; i++) {
                 await tracker.trackUsage({
-                    userId: 'report-test',
-                    timestamp: new Date(Date.now() - day * 24 * 60 * 60 * 1000),
                     provider: scenario.model.includes('claude') ? AIProvider.AWSBedrock : AIProvider.OpenAI,
                     model: scenario.model,
                     promptTokens: Math.floor(scenario.tokens * 0.3),
@@ -195,7 +193,7 @@ async function generateOptimizationReport() {
                     totalTokens: scenario.tokens,
                     estimatedCost: scenario.cost,
                     prompt: scenario.prompt,
-                    duration: 2000
+                    responseTime: 2000
                 });
             }
         }
@@ -204,8 +202,7 @@ async function generateOptimizationReport() {
     // Generate comprehensive report
     const report = await tracker.generateReport(
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        new Date(),
-        'report-test'
+        new Date()
     );
 
     console.log('\n=== OPTIMIZATION REPORT ===\n');
@@ -214,7 +211,7 @@ async function generateOptimizationReport() {
 
 // Example 4: Batching optimization
 async function batchingExample() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
         ],
@@ -269,7 +266,7 @@ async function batchingExample() {
 
 // Example 5: Model downgrade suggestions
 async function modelDowngradeExample() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
         ],

@@ -1,7 +1,9 @@
+/// <reference types="node" />
+
 import AICostTracker, {
     AIProvider,
     TrackerConfig
-} from 'ai-cost-tracker';
+} from '../src';
 
 // Example 1: Basic setup and cost estimation
 async function basicExample() {
@@ -29,7 +31,7 @@ async function basicExample() {
     };
 
     // Initialize the tracker
-    const tracker = new AICostTracker(config);
+    const tracker = await AICostTracker.create(config);
 
     // Example 1: Estimate cost before making a request
     const prompt = "Explain quantum computing in simple terms";
@@ -56,18 +58,17 @@ async function basicExample() {
         ],
         maxTokens: 150,
         temperature: 0.7
-    }, 'user123');
+    });
 
     console.log('Response:', response.choices[0].message.content);
 
-    // Example 3: Get usage analytics
+    // Example 3: Get usage analytics from local cache
     const analytics = await tracker.getAnalytics(
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // last 7 days
-        new Date(),
-        'user123'
+        new Date()
     );
 
-    console.log('Usage Analytics:', {
+    console.log('Usage Analytics (Local Cache):', {
         totalCost: analytics.totalCost.toFixed(2),
         totalTokens: analytics.totalTokens,
         averageTokensPerRequest: analytics.averageTokensPerRequest.toFixed(0),
@@ -77,7 +78,7 @@ async function basicExample() {
 
 // Example 2: Cost comparison across models
 async function compareModels() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! },
             { provider: AIProvider.AWSBedrock, region: 'us-east-1' }
@@ -126,7 +127,7 @@ async function compareModels() {
 
 // Example 3: Manual usage tracking (for existing integrations)
 async function manualTracking() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
         ],
@@ -143,8 +144,6 @@ async function manualTracking() {
 
     // Track usage from your existing API calls
     await tracker.trackUsage({
-        userId: 'user456',
-        timestamp: new Date(),
         provider: AIProvider.OpenAI,
         model: 'gpt-4',
         promptTokens: 150,
@@ -153,24 +152,17 @@ async function manualTracking() {
         estimatedCost: 0.035, // You can calculate this or let the tracker do it
         prompt: "Analyze this data...",
         completion: "Based on the analysis...",
-        duration: 2500,
+        responseTime: 2500,
         tags: ['analysis', 'data-science'],
         sessionId: 'session-789'
     });
 
-    // Get user statistics
-    const userStats = await tracker.getUserStats('user456');
-    console.log('User Statistics:', {
-        totalRequests: userStats.totalRequests,
-        totalCost: userStats.totalCost.toFixed(2),
-        averageCostPerRequest: userStats.averageCostPerRequest.toFixed(3),
-        lastUsed: userStats.lastUsed
-    });
+    console.log('Usage tracked manually.');
 }
 
 // Example 4: Set up alerts
 async function setupAlerts() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
         ],
@@ -197,15 +189,15 @@ async function setupAlerts() {
             model: 'gpt-4',
             prompt: "Complex analysis task...",
             maxTokens: 1000
-        }, 'heavy-user');
+        });
     }
 
-    // Check if alerts were triggered (check logs)
+    console.log('Alerts example finished. Check logs for potential alerts.');
 }
 
 // Example 5: Export data
 async function exportUsageData() {
-    const tracker = new AICostTracker({
+    const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
         ],
@@ -221,7 +213,10 @@ async function exportUsageData() {
     });
 
     // Add some usage data...
-    // ... (make some requests)
+    await tracker.makeRequest({
+        model: 'gpt-3.5-turbo',
+        prompt: 'Export test prompt'
+    });
 
     // Export as JSON
     const jsonData = await tracker.exportData('json');
@@ -244,9 +239,8 @@ if (require.main === module) {
         console.log('\n=== Manual Tracking Example ===\n');
         await manualTracking();
 
-        // Uncomment to run alert example
-        // console.log('\n=== Alerts Example ===\n');
-        // await setupAlerts();
+        console.log('\n=== Alerts Example ===\n');
+        await setupAlerts();
 
         console.log('\n=== Export Data Example ===\n');
         await exportUsageData();

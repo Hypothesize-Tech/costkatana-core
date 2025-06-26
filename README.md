@@ -74,10 +74,14 @@ async function main() {
   console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
 
   // Make a tracked request
-
-
+  const response = await tracker.makeRequest({
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Explain quantum computing' }]
+  });
+  console.log('Response received.');
 
   // Get analytics (from local cache)
+  // Note: For comprehensive, user-specific analytics, use the dashboard.
   const analytics = await tracker.getAnalytics();
   console.log(`Total cost (local): $${analytics.totalCost.toFixed(2)}`);
 }
@@ -162,7 +166,7 @@ tracking: {
 ### Get Usage Analytics
 
 ```typescript
-const analytics = await tracker.getAnalytics(startDate, endDate, userId);
+const analytics = await tracker.getAnalytics(startDate, endDate);
 
 console.log(analytics);
 // {
