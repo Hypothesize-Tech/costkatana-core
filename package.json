@@ -1,6 +1,6 @@
 {
   "name": "ai-cost-tracker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Track, analyze, and optimize AI API costs across multiple providers with intelligent suggestions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
