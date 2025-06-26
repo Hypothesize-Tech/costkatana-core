@@ -175,7 +175,6 @@ export class AICostTracker {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         throw new Error('Invalid or expired USER_TOKEN. Please get a new token from the AI Cost Optimizer dashboard.');
       }
-      throw new Error(`Failed to connect to AI Cost Optimizer backend at ${apiUrl}. Please check the URL and your network connection.`);
     }
 
     const tracker = new AICostTracker(config, apiClient);
