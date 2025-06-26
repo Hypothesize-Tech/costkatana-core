@@ -85,7 +85,6 @@ export enum AIProvider {
   Anthropic = 'anthropic',
   Google = 'google',
   Cohere = 'cohere',
-  Nova = 'nova-pro',
   Gemini = 'gemini',
   DeepSeek = 'deepseek',
   Groq = 'groq',

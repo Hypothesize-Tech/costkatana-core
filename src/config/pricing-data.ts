@@ -178,7 +178,6 @@ export const PRICING_DATA = {
   [AIProvider.HuggingFace]: {},
   [AIProvider.Ollama]: {},
   [AIProvider.Replicate]: {},
-  [AIProvider.Nova]: {},
   [AIProvider.Gemini]: {}
 };
 

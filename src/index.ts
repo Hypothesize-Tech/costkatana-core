@@ -198,12 +198,7 @@ export class AICostTracker {
 
       // Track usage if enabled
       if (this.config.tracking.enableAutoTracking) {
-        const usageMetadata = await providerInstance.trackUsage(
-          request,
-          response,
-          userId,
-          startTime
-        );
+        const usageMetadata = providerInstance.trackUsage(request, response, userId, startTime);
 
         await this.usageTracker.track(usageMetadata);
         this.costAnalyzer.addUsageData(usageMetadata);

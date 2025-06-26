@@ -34,7 +34,8 @@ export const supportedProviders = [
   AIProvider.Groq,
   AIProvider.HuggingFace,
   AIProvider.Ollama,
-  AIProvider.Replicate
+  AIProvider.Replicate,
+  AIProvider.Gemini
 ];
 
 export const providerEndpoints: Record<AIProvider, string> = {
@@ -49,7 +50,6 @@ export const providerEndpoints: Record<AIProvider, string> = {
   [AIProvider.HuggingFace]: 'https://api-inference.huggingface.co/v1',
   [AIProvider.Ollama]: 'http://localhost:11434/v1',
   [AIProvider.Replicate]: 'https://api.replicate.com/v1',
-  [AIProvider.Nova]: 'https://api.nova.ai/v1',
   [AIProvider.Gemini]: 'https://generativelanguage.googleapis.com/v1'
 };
 

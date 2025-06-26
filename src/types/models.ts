@@ -216,6 +216,31 @@ export const MODELS: Record<string, ProviderModel> = {
     }
   },
 
+  // ==== AWS Bedrock ====
+  'nova-pro': {
+    id: 'nova-pro',
+    name: 'Nova Pro',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 5000,
+    contextWindow: 300000,
+    pricing: {
+      prompt: 0.0008,
+      completion: 0.0032,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-12-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
+
   // ==== Anthropic (Claude) ====
   'claude-3-opus-20240229': {
     id: 'claude-3-opus-20240229',
