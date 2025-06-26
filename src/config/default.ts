@@ -28,7 +28,13 @@ export const supportedProviders = [
   AIProvider.AWSBedrock,
   AIProvider.Anthropic,
   AIProvider.Google,
-  AIProvider.Cohere
+  AIProvider.Cohere,
+  AIProvider.Azure,
+  AIProvider.DeepSeek,
+  AIProvider.Groq,
+  AIProvider.HuggingFace,
+  AIProvider.Ollama,
+  AIProvider.Replicate
 ];
 
 export const providerEndpoints: Record<AIProvider, string> = {
@@ -36,7 +42,15 @@ export const providerEndpoints: Record<AIProvider, string> = {
   [AIProvider.AWSBedrock]: 'bedrock-runtime.{region}.amazonaws.com',
   [AIProvider.Anthropic]: 'https://api.anthropic.com/v1',
   [AIProvider.Google]: 'https://generativelanguage.googleapis.com/v1',
-  [AIProvider.Cohere]: 'https://api.cohere.ai/v1'
+  [AIProvider.Cohere]: 'https://api.cohere.ai/v1',
+  [AIProvider.Azure]: 'https://{resourceName}.openai.azure.com',
+  [AIProvider.DeepSeek]: 'https://api.deepseek.com/v1',
+  [AIProvider.Groq]: 'https://api.groq.com/openai/v1',
+  [AIProvider.HuggingFace]: 'https://api-inference.huggingface.co/v1',
+  [AIProvider.Ollama]: 'http://localhost:11434/v1',
+  [AIProvider.Replicate]: 'https://api.replicate.com/v1',
+  [AIProvider.Nova]: 'https://api.nova.ai/v1',
+  [AIProvider.Gemini]: 'https://generativelanguage.googleapis.com/v1'
 };
 
 export const defaultHeaders: Record<string, string> = {

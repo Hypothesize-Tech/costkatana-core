@@ -1,11 +1,62 @@
 import { AIProvider } from './index';
 import { ProviderModel, PricingUnit } from './providers';
 
+/**
+ * Comprehensive model registry for major AI providers.
+ * Pricing and capabilities are based on official documentation as of June 2024.
+ * For the latest, always check provider docs.
+ */
 export const MODELS: Record<string, ProviderModel> = {
-  // OpenAI Models
+  // ==== OpenAI ====
+  'gpt-4o': {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: AIProvider.OpenAI,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 0.005,
+      completion: 0.015,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-05-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
   'gpt-4-turbo-preview': {
     id: 'gpt-4-turbo-preview',
     name: 'GPT-4 Turbo Preview',
+    provider: AIProvider.OpenAI,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 0.01,
+      completion: 0.03,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-4-turbo': {
+    id: 'gpt-4-turbo',
+    name: 'GPT-4 Turbo',
     provider: AIProvider.OpenAI,
     maxTokens: 4096,
     contextWindow: 128000,
@@ -49,6 +100,29 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
+  'gpt-4-32k': {
+    id: 'gpt-4-32k',
+    name: 'GPT-4-32k',
+    provider: AIProvider.OpenAI,
+    maxTokens: 32768,
+    contextWindow: 32768,
+    pricing: {
+      prompt: 0.06,
+      completion: 0.12,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
   'gpt-3.5-turbo': {
     id: 'gpt-3.5-turbo',
     name: 'GPT-3.5 Turbo',
@@ -72,18 +146,89 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
-  'gpt-4.5': {
-    id: 'gpt-4.5',
-    name: 'GPT-4.5',
+  'gpt-3.5-turbo-16k': {
+    id: 'gpt-3.5-turbo-16k',
+    name: 'GPT-3.5 Turbo 16K',
     provider: AIProvider.OpenAI,
-    maxTokens: 8192,
-    contextWindow: 128000,
+    maxTokens: 16384,
+    contextWindow: 16384,
     pricing: {
-      prompt: 0.015,
-      completion: 0.045,
+      prompt: 0.003,
+      completion: 0.004,
       unit: PricingUnit.Per1KTokens,
       currency: 'USD',
       effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'text-davinci-003': {
+    id: 'text-davinci-003',
+    name: 'Text-DaVinci-003',
+    provider: AIProvider.OpenAI,
+    maxTokens: 4097,
+    contextWindow: 4097,
+    pricing: {
+      prompt: 0.02,
+      completion: 0.02,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: false,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+  'text-embedding-ada-002': {
+    id: 'text-embedding-ada-002',
+    name: 'Text Embedding Ada 002',
+    provider: AIProvider.OpenAI,
+    maxTokens: 8191,
+    contextWindow: 8191,
+    pricing: {
+      prompt: 0.0001,
+      completion: 0,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: true,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+
+  // ==== Anthropic (Claude) ====
+  'claude-3-opus-20240229': {
+    id: 'claude-3-opus-20240229',
+    name: 'Claude 3 Opus',
+    provider: AIProvider.Anthropic,
+    maxTokens: 4096,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 15.0,
+      completion: 75.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-03-01'
     },
     capabilities: {
       chat: true,
@@ -95,18 +240,64 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
-  'gpt-4.1': {
-    id: 'gpt-4.1',
-    name: 'GPT-4.1',
-    provider: AIProvider.OpenAI,
-    maxTokens: 8192,
-    contextWindow: 128000,
+  'claude-3-sonnet-20240229': {
+    id: 'claude-3-sonnet-20240229',
+    name: 'Claude 3 Sonnet',
+    provider: AIProvider.Anthropic,
+    maxTokens: 4096,
+    contextWindow: 200000,
     pricing: {
-      prompt: 0.012,
-      completion: 0.036,
-      unit: PricingUnit.Per1KTokens,
+      prompt: 3.0,
+      completion: 15.0,
+      unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2024-01-01'
+      effectiveDate: '2024-03-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'claude-3-haiku-20240307': {
+    id: 'claude-3-haiku-20240307',
+    name: 'Claude 3 Haiku',
+    provider: AIProvider.Anthropic,
+    maxTokens: 4096,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 0.25,
+      completion: 1.25,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-03-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'claude-3-5-sonnet-20240620': {
+    id: 'claude-3-5-sonnet-20240620',
+    name: 'Claude 3.5 Sonnet',
+    provider: AIProvider.Anthropic,
+    maxTokens: 4096,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 3.0,
+      completion: 15.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-20'
     },
     capabilities: {
       chat: true,
@@ -119,10 +310,10 @@ export const MODELS: Record<string, ProviderModel> = {
     }
   },
 
-  // AWS Bedrock Models
+  // ==== AWS Bedrock (Anthropic, Amazon, Meta, Cohere, Mistral, etc.) ====
   'anthropic.claude-3-5-sonnet-20240620-v1:0': {
     id: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
-    name: 'Claude 3.5 Sonnet',
+    name: 'Claude 3.5 Sonnet (Bedrock)',
     provider: AIProvider.AWSBedrock,
     maxTokens: 4096,
     contextWindow: 200000,
@@ -131,7 +322,7 @@ export const MODELS: Record<string, ProviderModel> = {
       completion: 15.0,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2024-01-01'
+      effectiveDate: '2024-06-20'
     },
     capabilities: {
       chat: true,
@@ -145,7 +336,7 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'anthropic.claude-3-opus-20240229-v1:0': {
     id: 'anthropic.claude-3-opus-20240229-v1:0',
-    name: 'Claude 3 Opus',
+    name: 'Claude 3 Opus (Bedrock)',
     provider: AIProvider.AWSBedrock,
     maxTokens: 4096,
     contextWindow: 200000,
@@ -154,7 +345,7 @@ export const MODELS: Record<string, ProviderModel> = {
       completion: 75.0,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2024-01-01'
+      effectiveDate: '2024-03-01'
     },
     capabilities: {
       chat: true,
@@ -168,7 +359,7 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'anthropic.claude-3-haiku-20240307-v1:0': {
     id: 'anthropic.claude-3-haiku-20240307-v1:0',
-    name: 'Claude 3 Haiku',
+    name: 'Claude 3 Haiku (Bedrock)',
     provider: AIProvider.AWSBedrock,
     maxTokens: 4096,
     contextWindow: 200000,
@@ -177,7 +368,7 @@ export const MODELS: Record<string, ProviderModel> = {
       completion: 1.25,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2024-01-01'
+      effectiveDate: '2024-03-01'
     },
     capabilities: {
       chat: true,
@@ -212,17 +403,15 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
-
-  // Direct Anthropic Models
-  'claude-3-opus-20240229': {
-    id: 'claude-3-opus-20240229',
-    name: 'Claude 3 Opus',
-    provider: AIProvider.Anthropic,
+  'meta.llama2-70b-chat-v1': {
+    id: 'meta.llama2-70b-chat-v1',
+    name: 'Meta Llama 2 70B Chat',
+    provider: AIProvider.AWSBedrock,
     maxTokens: 4096,
-    contextWindow: 200000,
+    contextWindow: 4096,
     pricing: {
-      prompt: 15.0,
-      completion: 75.0,
+      prompt: 0.8,
+      completion: 0.8,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
       effectiveDate: '2024-01-01'
@@ -231,21 +420,21 @@ export const MODELS: Record<string, ProviderModel> = {
       chat: true,
       completion: true,
       embedding: false,
-      functionCalling: true,
-      vision: true,
+      functionCalling: false,
+      vision: false,
       audio: false,
       streaming: true
     }
   },
-  'claude-3-5-sonnet-20240620': {
-    id: 'claude-3-5-sonnet-20240620',
-    name: 'Claude 3.5 Sonnet',
-    provider: AIProvider.Anthropic,
-    maxTokens: 4096,
-    contextWindow: 200000,
+  'mistral.mistral-large-2402-v1:0': {
+    id: 'mistral.mistral-large-2402-v1:0',
+    name: 'Mistral Large (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 32000,
+    contextWindow: 32000,
     pricing: {
-      prompt: 3.0,
-      completion: 15.0,
+      prompt: 2.0,
+      completion: 6.0,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
       effectiveDate: '2024-01-01'
@@ -254,14 +443,14 @@ export const MODELS: Record<string, ProviderModel> = {
       chat: true,
       completion: true,
       embedding: false,
-      functionCalling: true,
-      vision: true,
+      functionCalling: false,
+      vision: false,
       audio: false,
       streaming: true
     }
   },
 
-  // Google Models
+  // ==== Google Gemini ====
   'gemini-1.5-pro': {
     id: 'gemini-1.5-pro',
     name: 'Gemini 1.5 Pro',
@@ -273,7 +462,7 @@ export const MODELS: Record<string, ProviderModel> = {
       completion: 10.5,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2024-01-01'
+      effectiveDate: '2024-06-01'
     },
     capabilities: {
       chat: true,
@@ -296,6 +485,29 @@ export const MODELS: Record<string, ProviderModel> = {
       completion: 1.05,
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
+  'gemini-1.0-pro': {
+    id: 'gemini-1.0-pro',
+    name: 'Gemini 1.0 Pro',
+    provider: AIProvider.Google,
+    maxTokens: 8192,
+    contextWindow: 32000,
+    pricing: {
+      prompt: 0.5,
+      completion: 1.5,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
       effectiveDate: '2024-01-01'
     },
     capabilities: {
@@ -309,6 +521,7 @@ export const MODELS: Record<string, ProviderModel> = {
     }
   },
 
+  // ==== Cohere ====
   'command-r-plus': {
     id: 'command-r-plus',
     name: 'Command R+',
@@ -352,6 +565,179 @@ export const MODELS: Record<string, ProviderModel> = {
       functionCalling: true,
       vision: false,
       audio: false,
+      streaming: true
+    }
+  },
+
+  // ==== DeepSeek ====
+  'deepseek-chat': {
+    id: 'deepseek-chat',
+    name: 'DeepSeek Chat',
+    provider: AIProvider.DeepSeek,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 0.2,
+      completion: 0.4,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+
+  // ==== Groq ====
+  'llama3-70b-8192': {
+    id: 'llama3-70b-8192',
+    name: 'Llama 3 70B (Groq)',
+    provider: AIProvider.Groq,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 0.0008,
+      completion: 0.0012,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'mixtral-8x7b-32768': {
+    id: 'mixtral-8x7b-32768',
+    name: 'Mixtral 8x7B (Groq)',
+    provider: AIProvider.Groq,
+    maxTokens: 32768,
+    contextWindow: 32768,
+    pricing: {
+      prompt: 0.0005,
+      completion: 0.00075,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+
+  // ==== HuggingFace ====
+  'mistralai/Mixtral-8x7B-Instruct-v0.1': {
+    id: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    name: 'Mixtral-8x7B-Instruct-v0.1',
+    provider: AIProvider.HuggingFace,
+    maxTokens: 32768,
+    contextWindow: 32768,
+    pricing: {
+      prompt: 0,
+      completion: 0,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+
+  // ==== Ollama ====
+  'llama2-7b': {
+    id: 'llama2-7b',
+    name: 'Llama 2 7B',
+    provider: AIProvider.Ollama,
+    maxTokens: 4096,
+    contextWindow: 4096,
+    pricing: {
+      prompt: 0,
+      completion: 0,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+
+  // ==== Replicate ====
+  'meta/llama-2-70b-chat': {
+    id: 'meta/llama-2-70b-chat',
+    name: 'Llama 2 70B Chat (Replicate)',
+    provider: AIProvider.Replicate,
+    maxTokens: 4096,
+    contextWindow: 4096,
+    pricing: {
+      prompt: 0.2,
+      completion: 0.2,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-06-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+
+  // ==== Azure OpenAI ====
+  'azure-gpt-4o': {
+    id: 'azure-gpt-4o',
+    name: 'Azure GPT-4o',
+    provider: AIProvider.Azure,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 0.005,
+      completion: 0.015,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-05-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
       streaming: true
     }
   }

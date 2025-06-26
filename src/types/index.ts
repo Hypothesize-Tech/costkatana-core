@@ -83,7 +83,15 @@ export enum AIProvider {
   AWSBedrock = 'aws-bedrock',
   Anthropic = 'anthropic',
   Google = 'google',
-  Cohere = 'cohere'
+  Cohere = 'cohere',
+  Nova = 'nova-pro',
+  Gemini = 'gemini',
+  DeepSeek = 'deepseek',
+  Groq = 'groq',
+  HuggingFace = 'huggingface',
+  Ollama = 'ollama',
+  Replicate = 'replicate',
+  Azure = 'azure'
 }
 
 export interface TrackerConfig {
@@ -100,6 +108,11 @@ export interface ProviderConfig {
   endpoint?: string;
   customPricing?: CustomPricing;
   optimization?: OptimizationConfig;
+
+  // Azure specific
+  resourceName?: string;
+  deploymentId?: string;
+  apiVersion?: string;
 }
 
 export interface OptimizationConfig {

@@ -1,5 +1,5 @@
 import { BaseProvider } from './base';
-import { ProviderConfig, AIProvider } from '../types';
+import { ProviderConfig } from '../types';
 import { ProviderRequest, ProviderResponse, OpenAIUsage, AnyUsage } from '../types/providers';
 import { encode } from 'gpt-3-encoder';
 
@@ -36,7 +36,7 @@ export class OpenAIProvider extends BaseProvider {
   private apiUrl: string;
 
   constructor(config: ProviderConfig) {
-    super({ ...config, provider: AIProvider.OpenAI });
+    super(config);
 
     if (!config.apiKey) {
       throw new Error('OpenAI API key is required');

@@ -8,7 +8,7 @@
 
 ## 🌟 Features
 
-- **Multi-Provider Support**: Track costs across OpenAI, AWS Bedrock, Anthropic, Google, and Cohere
+- **Multi-Provider Support**: Track costs across OpenAI, AWS Bedrock, Anthropic, Google, Cohere, Azure, DeepSeek, and more.
 - **Real-time Cost Estimation**: Calculate costs before making API calls
 - **Automatic Usage Tracking**: Seamlessly track all API requests and responses
 - **AI-Powered Optimization**: Get intelligent suggestions to reduce costs using AWS Bedrock
@@ -55,21 +55,22 @@ const tracker = new AICostTracker({
 
 // Estimate cost before making a request
 const estimate = await tracker.estimateCost(
-  "Explain quantum computing",
-  "gpt-3.5-turbo",
+  'Explain quantum computing',
+  'gpt-3.5-turbo',
   AIProvider.OpenAI,
   150 // expected completion tokens
 );
 console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
 
 // Make a tracked request
-const response = await tracker.makeRequest({
-  model: 'gpt-3.5-turbo',
-  messages: [
-    { role: 'user', content: 'Explain quantum computing' }
-  ],
-  maxTokens: 150
-}, 'user123');
+const response = await tracker.makeRequest(
+  {
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Explain quantum computing' }],
+    maxTokens: 150
+  },
+  'user123'
+);
 
 // Get analytics
 const analytics = await tracker.getAnalytics();
@@ -120,20 +121,23 @@ const config = {
 ### Storage Options
 
 #### Memory Storage (Default)
+
 ```typescript
 tracking: {
-  storageType: 'memory'
+  storageType: 'memory';
 }
 ```
 
 #### File Storage
+
 ```typescript
 tracking: {
-  storageType: 'file'
+  storageType: 'file';
 }
 ```
 
 #### Custom Storage
+
 ```typescript
 tracking: {
   storageType: 'custom',
@@ -150,11 +154,7 @@ tracking: {
 ### Get Usage Analytics
 
 ```typescript
-const analytics = await tracker.getAnalytics(
-  startDate,
-  endDate,
-  userId
-);
+const analytics = await tracker.getAnalytics(startDate, endDate, userId);
 
 console.log(analytics);
 // {
@@ -192,8 +192,8 @@ const csvData = await tracker.exportData('csv');
 
 ```typescript
 const suggestions = await tracker.optimizePrompt(
-  "Your verbose prompt here...",
-  "gpt-3.5-turbo",
+  'Your verbose prompt here...',
+  'gpt-3.5-turbo',
   AIProvider.OpenAI
 );
 
@@ -220,31 +220,60 @@ const suggestions = await tracker.getOptimizationSuggestions();
 
 ## 📈 Supported Models & Pricing
 
+This library supports a wide range of models from major AI providers. The internal model list is kept up-to-date with the latest pricing, but you can also provide your own custom pricing.
+
 ### OpenAI Models
-- GPT-4, GPT-4 Turbo
+
+- GPT-4, GPT-4o, GPT-4 Turbo
 - GPT-3.5 Turbo
-- Custom GPT-4.5, GPT-4.1
 
 ### AWS Bedrock Models
+
 - Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
 - Amazon Titan Text
 - Llama 3 (8B, 70B)
 - Command R, Command R+
+- Mistral Large
+
+### Google
+
+- Gemini 1.5 Pro
+- Gemini 1.5 Flash
+- Gemini 1.0 Pro
+
+### Anthropic
+
+- Claude 3 Opus
+- Claude 3.5 Sonnet
+- Claude 3 Sonnet
+- Claude 3 Haiku
+
+### Cohere
+
+- Command R+
+- Command R
+
+### Azure OpenAI
+
+- Support for all models available through Azure OpenAI, including GPT-4o, GPT-4, and GPT-3.5 series.
 
 ### Other Providers
-- Google: Gemini 1.5 Pro, Gemini 1.5 Flash
-- Anthropic: Claude models (direct API)
-- Cohere: Command models
+
+- **DeepSeek**: DeepSeek Coder, DeepSeek LLM
+- **Groq**: Llama3, Mixtral
+- **HuggingFace**: Support for various open-source models.
+- **Ollama**: Run open-source models locally.
+- **Replicate**: Access a wide variety of models via Replicate's API.
 
 ## 🛠️ Advanced Features
 
 ### Batch Processing
 
 ```typescript
-const prompts = ["Question 1", "Question 2", "Question 3"];
+const prompts = ['Question 1', 'Question 2', 'Question 3'];
 const batchingSuggestion = await optimizer.suggestBatching(
   prompts,
-  "gpt-3.5-turbo",
+  'gpt-3.5-turbo',
   AIProvider.OpenAI
 );
 ```
@@ -254,11 +283,7 @@ const batchingSuggestion = await optimizer.suggestBatching(
 ```typescript
 import { TokenCounter } from 'ai-cost-tracker';
 
-const tokens = await TokenCounter.countTokens(
-  "Your text here",
-  AIProvider.OpenAI,
-  "gpt-3.5-turbo"
-);
+const tokens = await TokenCounter.countTokens('Your text here', AIProvider.OpenAI, 'gpt-3.5-turbo');
 ```
 
 ### Cost Comparison

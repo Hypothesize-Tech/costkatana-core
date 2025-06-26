@@ -171,7 +171,15 @@ export const PRICING_DATA = {
       unit: PricingUnit.Per1MTokens,
       notes: 'Lightweight model'
     }
-  }
+  },
+  [AIProvider.Azure]: {},
+  [AIProvider.DeepSeek]: {},
+  [AIProvider.Groq]: {},
+  [AIProvider.HuggingFace]: {},
+  [AIProvider.Ollama]: {},
+  [AIProvider.Replicate]: {},
+  [AIProvider.Nova]: {},
+  [AIProvider.Gemini]: {}
 };
 
 // Regional pricing adjustments (multipliers)
