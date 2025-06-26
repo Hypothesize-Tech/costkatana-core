@@ -405,6 +405,98 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
+  'anthropic.claude-v2:1': {
+    id: 'anthropic.claude-v2:1',
+    name: 'Claude 2.1 (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 8.0,
+      completion: 24.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-11-21'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'anthropic.claude-v2': {
+    id: 'anthropic.claude-v2',
+    name: 'Claude 2 (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 100000,
+    pricing: {
+      prompt: 8.0,
+      completion: 24.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-07-18'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'anthropic.claude-instant-v1': {
+    id: 'anthropic.claude-instant-v1',
+    name: 'Claude Instant (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 100000,
+    pricing: {
+      prompt: 0.8,
+      completion: 2.4,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-07-18'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'amazon.titan-text-lite-v1': {
+    id: 'amazon.titan-text-lite-v1',
+    name: 'Titan Text Lite',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 4096,
+    pricing: {
+      prompt: 0.3,
+      completion: 0.4,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
   'amazon.titan-text-express-v1': {
     id: 'amazon.titan-text-express-v1',
     name: 'Titan Text Express',
@@ -417,6 +509,259 @@ export const MODELS: Record<string, ProviderModel> = {
       unit: PricingUnit.Per1MTokens,
       currency: 'USD',
       effectiveDate: '2024-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'amazon.titan-embed-text-v1': {
+    id: 'amazon.titan-embed-text-v1',
+    name: 'Titan Text Embeddings',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 0.1,
+      completion: 0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: true,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+  'amazon.titan-image-generator-v1': {
+    id: 'amazon.titan-image-generator-v1',
+    name: 'Titan Image Generator',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 0,
+    contextWindow: 0,
+    pricing: {
+      prompt: 0.0,
+      completion: 0.0,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2023-11-29'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: false,
+      functionCalling: false,
+      vision: true,
+      audio: false,
+      streaming: false
+    }
+  },
+  'ai21.jamba-instruct-v1:0': {
+    id: 'ai21.jamba-instruct-v1:0',
+    name: 'Jamba Instruct',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 256000,
+    pricing: {
+      prompt: 0.5,
+      completion: 1.5,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-24'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'ai21.jurassic-2-ultra': {
+    id: 'ai21.jurassic-2-ultra',
+    name: 'Jurassic-2 Ultra',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 18.75,
+      completion: 18.75,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'ai21.jurassic-2-mid': {
+    id: 'ai21.jurassic-2-mid',
+    name: 'Jurassic-2 Mid',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 12.5,
+      completion: 12.5,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'cohere.command-text-v14': {
+    id: 'cohere.command-text-v14',
+    name: 'Command',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 4096,
+    pricing: {
+      prompt: 1.5,
+      completion: 2.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'cohere.command-r-v1:0': {
+    id: 'cohere.command-r-v1:0',
+    name: 'Command R',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 0.5,
+      completion: 1.5,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-23'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'cohere.command-r-plus-v1:0': {
+    id: 'cohere.command-r-plus-v1:0',
+    name: 'Command R+',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 3.0,
+      completion: 15.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-23'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'cohere.embed-english-v3': {
+    id: 'cohere.embed-english-v3',
+    name: 'Embed English',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 512,
+    contextWindow: 512,
+    pricing: {
+      prompt: 0.1,
+      completion: 0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: true,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+  'cohere.embed-multilingual-v3': {
+    id: 'cohere.embed-multilingual-v3',
+    name: 'Embed Multilingual',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 512,
+    contextWindow: 512,
+    pricing: {
+      prompt: 0.1,
+      completion: 0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-04-13'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: true,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: false
+    }
+  },
+  'meta.llama2-13b-chat-v1': {
+    id: 'meta.llama2-13b-chat-v1',
+    name: 'Meta Llama 2 13B Chat',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 4096,
+    contextWindow: 4096,
+    pricing: {
+      prompt: 0.75,
+      completion: 1.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2023-07-18'
     },
     capabilities: {
       chat: true,
@@ -451,12 +796,104 @@ export const MODELS: Record<string, ProviderModel> = {
       streaming: true
     }
   },
+  'meta.llama3-8b-instruct-v1:0': {
+    id: 'meta.llama3-8b-instruct-v1:0',
+    name: 'Llama 3 8B Instruct',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 0.4,
+      completion: 0.4,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-18'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'meta.llama3-70b-instruct-v1:0': {
+    id: 'meta.llama3-70b-instruct-v1:0',
+    name: 'Llama 3 70B Instruct',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 8192,
+    contextWindow: 8192,
+    pricing: {
+      prompt: 2.65,
+      completion: 2.65,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-18'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'mistral.mistral-7b-instruct-v0:2': {
+    id: 'mistral.mistral-7b-instruct-v0:2',
+    name: 'Mistral 7B Instruct (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 32000,
+    contextWindow: 32000,
+    pricing: {
+      prompt: 0.15,
+      completion: 0.2,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-10'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'mistral.mixtral-8x7b-instruct-v0:1': {
+    id: 'mistral.mixtral-8x7b-instruct-v0:1',
+    name: 'Mixtral 8x7B Instruct (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 32000,
+    contextWindow: 32000,
+    pricing: {
+      prompt: 0.45,
+      completion: 0.7,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-10'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: false,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
   'mistral.mistral-large-2402-v1:0': {
     id: 'mistral.mistral-large-2402-v1:0',
     name: 'Mistral Large (Bedrock)',
     provider: AIProvider.AWSBedrock,
-    maxTokens: 32000,
-    contextWindow: 32000,
+    maxTokens: 32768,
+    contextWindow: 32768,
     pricing: {
       prompt: 2.0,
       completion: 6.0,
@@ -472,6 +909,29 @@ export const MODELS: Record<string, ProviderModel> = {
       vision: false,
       audio: false,
       streaming: true
+    }
+  },
+  'stability.stable-diffusion-xl-v1': {
+    id: 'stability.stable-diffusion-xl-v1',
+    name: 'Stable Diffusion XL 1.0',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 0,
+    contextWindow: 0,
+    pricing: {
+      prompt: 0.0,
+      completion: 0.0,
+      unit: PricingUnit.Per1KTokens,
+      currency: 'USD',
+      effectiveDate: '2024-04-10'
+    },
+    capabilities: {
+      chat: false,
+      completion: false,
+      embedding: false,
+      functionCalling: false,
+      vision: true,
+      audio: false,
+      streaming: false
     }
   },
 
