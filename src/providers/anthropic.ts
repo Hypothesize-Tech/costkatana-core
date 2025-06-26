@@ -15,6 +15,18 @@ interface AnthropicErrorResponse {
   };
 }
 
+interface AnthropicResponse {
+  id: string;
+  content: Array<{ text: string }>;
+  stop_reason: string;
+  usage: AnthropicUsageResponse;
+}
+
+interface AnthropicUsageResponse {
+  input_tokens: number;
+  output_tokens: number;
+}
+
 export class AnthropicProvider extends BaseProvider {
   private apiKey: string;
   private apiUrl: string;
@@ -65,7 +77,7 @@ export class AnthropicProvider extends BaseProvider {
         throw new Error(`Anthropic API error: ${errorMsg}`);
       }
 
-      const data = await response.json();
+      const data: AnthropicResponse = (await response.json()) as AnthropicResponse;
       return this.formatResponse(data, request);
     } catch (error) {
       if (error instanceof Error) {
@@ -99,8 +111,8 @@ export class AnthropicProvider extends BaseProvider {
     return messages.filter(m => m.role !== 'system');
   }
 
-  private formatResponse(response: any, request: ProviderRequest): ProviderResponse {
-    const content = response.content?.[0]?.text || '';
+  private formatResponse(response: AnthropicResponse, request: ProviderRequest): ProviderResponse {
+    const content = response.content?.[0]?.text ?? '';
     return {
       id: response.id,
       model: request.model,
@@ -115,16 +127,16 @@ export class AnthropicProvider extends BaseProvider {
         }
       ],
       usage: {
-        input_tokens: response.usage?.input_tokens || 0,
-        output_tokens: response.usage?.output_tokens || 0
+        input_tokens: response.usage?.input_tokens ?? 0,
+        output_tokens: response.usage?.output_tokens ?? 0
       }
     };
   }
 
-  parseUsage(usage: any): AnthropicUsage {
+  parseUsage(usage: AnthropicUsageResponse): AnthropicUsage {
     return {
-      input_tokens: usage.input_tokens || 0,
-      output_tokens: usage.output_tokens || 0
+      input_tokens: usage.input_tokens ?? 0,
+      output_tokens: usage.output_tokens ?? 0
     };
   }
 

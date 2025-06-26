@@ -146,77 +146,62 @@ export class BedrockProvider extends BaseProvider {
   }
 
   private formatResponse(
-    response: Record<string, any>,
+    response: Record<string, unknown>,
     request: ProviderRequest
   ): ProviderResponse {
     const { model } = request;
 
     if (model.includes('claude')) {
-      // Anthropic Claude response format
+      const claudeResponse = response as ClaudeResponse;
       return {
-        id: typeof response.id === 'string' ? response.id : `bedrock-${Date.now()}`,
+        id: claudeResponse.id ?? `bedrock-${Date.now()}`,
         model,
         choices: [
           {
-            text: typeof response.completion === 'string' ? response.completion : '',
+            text: claudeResponse.completion ?? '',
             index: 0,
-            finishReason: typeof response.stop_reason === 'string' ? response.stop_reason : 'stop'
+            finishReason: claudeResponse.stop_reason ?? 'stop'
           }
         ],
         usage: {
-          inputTokens:
-            typeof response.usage?.input_tokens === 'number' ? response.usage.input_tokens : 0,
-          outputTokens:
-            typeof response.usage?.output_tokens === 'number' ? response.usage.output_tokens : 0,
+          inputTokens: claudeResponse.usage?.input_tokens ?? 0,
+          outputTokens: claudeResponse.usage?.output_tokens ?? 0,
           totalTokens:
-            (typeof response.usage?.input_tokens === 'number' ? response.usage.input_tokens : 0) +
-            (typeof response.usage?.output_tokens === 'number' ? response.usage.output_tokens : 0)
+            (claudeResponse.usage?.input_tokens ?? 0) + (claudeResponse.usage?.output_tokens ?? 0)
         },
-        metadata: response.metrics
+        metadata: claudeResponse.metrics
       };
     } else if (model.includes('titan')) {
-      // Amazon Titan response format
       const result =
         Array.isArray(response.results) && response.results.length > 0
-          ? response.results[0]
-          : response;
+          ? (response.results[0] as TitanResult)
+          : (response as TitanResult);
       return {
         id: `bedrock-${Date.now()}`,
         model,
         choices: [
           {
-            text:
-              typeof result.outputText === 'string'
-                ? result.outputText
-                : typeof result.text === 'string'
-                  ? result.text
-                  : '',
+            text: result.outputText ?? result.text ?? '',
             index: 0,
-            finishReason:
-              typeof result.completionReason === 'string' ? result.completionReason : 'stop'
+            finishReason: result.completionReason ?? 'stop'
           }
         ],
         usage: {
-          inputTokens: typeof result.tokenCount === 'number' ? result.tokenCount : 0,
-          outputTokens: typeof result.tokenCount === 'number' ? result.tokenCount : 0,
-          totalTokens: typeof result.tokenCount === 'number' ? result.tokenCount * 2 : 0
+          inputTokens: result.tokenCount ?? 0,
+          outputTokens: result.tokenCount ?? 0,
+          totalTokens: (result.tokenCount ?? 0) * 2
         }
       };
     } else {
       // Default response format
+      const defaultResponse = response as DefaultResponse;
       return {
-        id: typeof response.id === 'string' ? response.id : `bedrock-${Date.now()}`,
+        id: defaultResponse.id ?? `bedrock-${Date.now()}`,
         model,
         choices: [
           {
             text:
-              typeof response.text === 'string'
-                ? response.text
-                : typeof response.completion === 'string'
-                  ? response.completion
-                  : typeof response.output === 'string'
-                    ? response.output
-                    : '',
+              defaultResponse.text ?? defaultResponse.completion ?? defaultResponse.output ?? '',
             index: 0,
             finishReason: 'stop'
           }
@@ -231,12 +216,13 @@ export class BedrockProvider extends BaseProvider {
   }
 
   parseUsage(usage: any): BedrockUsage {
+    const usageAsAny = usage;
     return {
-      inputTokens: usage.inputTokens || usage.input_tokens || 0,
-      outputTokens: usage.outputTokens || usage.output_tokens || 0,
-      totalTokens: usage.totalTokens || usage.total_tokens || 0,
-      invocationLatency: usage.invocationLatency,
-      firstByteLatency: usage.firstByteLatency
+      inputTokens: usageAsAny.inputTokens ?? usageAsAny.input_tokens ?? 0,
+      outputTokens: usageAsAny.outputTokens ?? usageAsAny.output_tokens ?? 0,
+      totalTokens: usageAsAny.totalTokens ?? usageAsAny.total_tokens ?? 0,
+      invocationLatency: usageAsAny.invocationLatency,
+      firstByteLatency: usageAsAny.firstByteLatency
     };
   }
 
@@ -249,16 +235,16 @@ export class BedrockProvider extends BaseProvider {
   }
 
   // Bedrock specific methods
-  async listFoundationModels() {
+  listFoundationModels(): Promise<string[]> {
     // This would require BedrockClient, not BedrockRuntimeClient
     // For now, return a static list
-    return [
+    return Promise.resolve([
       'anthropic.claude-3-5-sonnet-20240620-v1:0',
       'anthropic.claude-3-opus-20240229-v1:0',
       'anthropic.claude-3-haiku-20240307-v1:0',
       'amazon.titan-text-express-v1',
       'amazon.titan-text-lite-v1'
-    ];
+    ]);
   }
 
   async invokeModelWithOptimization(
@@ -289,7 +275,7 @@ Format as JSON.`;
       const optimizationText = optimizationResponse.choices[0]?.text || '';
 
       // Try to parse optimization suggestions
-      let optimization;
+      let optimization: any;
       try {
         optimization = JSON.parse(optimizationText);
       } catch {
@@ -306,4 +292,29 @@ Format as JSON.`;
       return { response };
     }
   }
+}
+
+interface ClaudeResponse {
+  id?: string;
+  completion?: string;
+  stop_reason?: string;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
+  metrics?: any;
+}
+
+interface TitanResult {
+  outputText?: string;
+  text?: string;
+  completionReason?: string;
+  tokenCount?: number;
+}
+
+interface DefaultResponse {
+  id?: string;
+  text?: string;
+  completion?: string;
+  output?: string;
 }

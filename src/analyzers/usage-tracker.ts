@@ -197,41 +197,51 @@ export class UsageTracker {
   }
 }
 
+interface UsageFilter {
+  userId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+}
+
 // Storage implementations
 interface UsageStorage {
   save(data: UsageMetadata): Promise<void>;
-  load(filter: any): Promise<UsageMetadata[]>;
+  load(filter: UsageFilter): Promise<UsageMetadata[]>;
   clear(): Promise<void>;
 }
 
 class MemoryStorage implements UsageStorage {
   private data: UsageMetadata[] = [];
 
-  async save(data: UsageMetadata): Promise<void> {
+  save(data: UsageMetadata): Promise<void> {
     this.data.push(data);
+    return Promise.resolve();
   }
 
-  async load(filter: any): Promise<UsageMetadata[]> {
+  load(filter: UsageFilter): Promise<UsageMetadata[]> {
     let result = [...this.data];
 
     if (filter.userId) {
       result = result.filter(item => item.userId === filter.userId);
     }
-    if (filter.startDate) {
-      result = result.filter(item => item.timestamp >= filter.startDate);
+    const { startDate, endDate } = filter;
+    if (startDate) {
+      result = result.filter(item => item.timestamp >= startDate);
     }
-    if (filter.endDate) {
-      result = result.filter(item => item.timestamp <= filter.endDate);
+    if (endDate) {
+      result = result.filter(item => item.timestamp <= endDate);
     }
     if (filter.limit) {
       result = result.slice(0, filter.limit);
     }
 
-    return result;
+    return Promise.resolve(result);
   }
 
-  async clear(): Promise<void> {
+  clear(): Promise<void> {
     this.data = [];
+    return Promise.resolve();
   }
 }
 
@@ -248,37 +258,40 @@ class FileStorage implements UsageStorage {
     writeFileSync(this.filePath, JSON.stringify(allData, null, 2));
   }
 
-  async load(filter: any): Promise<UsageMetadata[]> {
+  load(filter: UsageFilter): Promise<UsageMetadata[]> {
     if (!existsSync(this.filePath)) {
-      return [];
+      return Promise.resolve([]);
     }
+    const fileContent = readFileSync(this.filePath, 'utf-8');
+    const allData: UsageMetadata[] = JSON.parse(fileContent) as UsageMetadata[];
 
-    const rawData = readFileSync(this.filePath, 'utf-8');
-    const allData: UsageMetadata[] = JSON.parse(rawData).map((item: any) => ({
+    let result = allData.map(item => ({
       ...item,
       timestamp: new Date(item.timestamp)
     }));
 
-    let result = allData;
-
     if (filter.userId) {
       result = result.filter(item => item.userId === filter.userId);
     }
-    if (filter.startDate) {
-      result = result.filter(item => item.timestamp >= filter.startDate);
+    const { startDate: fileStartDate, endDate: fileEndDate } = filter;
+    if (fileStartDate) {
+      result = result.filter(item => item.timestamp >= fileStartDate);
     }
-    if (filter.endDate) {
-      result = result.filter(item => item.timestamp <= filter.endDate);
+    if (fileEndDate) {
+      result = result.filter(item => item.timestamp <= fileEndDate);
     }
     if (filter.limit) {
       result = result.slice(0, filter.limit);
     }
 
-    return result;
+    return Promise.resolve(result);
   }
 
   async clear(): Promise<void> {
-    writeFileSync(this.filePath, '[]');
+    if (existsSync(this.filePath)) {
+      writeFileSync(this.filePath, '[]');
+    }
+    return Promise.resolve();
   }
 }
 
@@ -289,8 +302,8 @@ class CustomStorageAdapter implements UsageStorage {
     await this.customStorage.save(data);
   }
 
-  async load(filter: any): Promise<UsageMetadata[]> {
-    return await this.customStorage.load(filter);
+  async load(filter: UsageFilter): Promise<UsageMetadata[]> {
+    return this.customStorage.load(filter);
   }
 
   async clear(): Promise<void> {

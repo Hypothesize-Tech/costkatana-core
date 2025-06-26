@@ -38,23 +38,23 @@ export class Logger {
     this.config.level = level;
   }
 
-  debug(message: string, ...args: any[]): void {
+  debug(message: string, ...args: unknown[]): void {
     this.log(LogLevel.DEBUG, message, ...args);
   }
 
-  info(message: string, ...args: any[]): void {
+  info(message: string, ...args: unknown[]): void {
     this.log(LogLevel.INFO, message, ...args);
   }
 
-  warn(message: string, ...args: any[]): void {
+  warn(message: string, ...args: unknown[]): void {
     this.log(LogLevel.WARN, message, ...args);
   }
 
-  error(message: string, error?: Error, ...args: any[]): void {
+  error(message: string, error?: Error, ...args: unknown[]): void {
     this.log(LogLevel.ERROR, message, error, ...args);
   }
 
-  private log(level: LogLevel, message: string, ...args: any[]): void {
+  private log(level: LogLevel, message: string, ...args: unknown[]): void {
     if (level < this.config.level) {
       return;
     }
@@ -79,7 +79,7 @@ export class Logger {
         console.info(formattedMessage, ...args);
         break;
       case LogLevel.DEBUG:
-        console.log(formattedMessage, ...args);
+        console.info(formattedMessage, ...args);
         break;
     }
   }

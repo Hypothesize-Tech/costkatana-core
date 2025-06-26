@@ -15,6 +15,27 @@ interface CohereErrorResponse {
   message?: string;
 }
 
+interface CohereResponse {
+  generation_id: string;
+  text: string;
+  finish_reason: string;
+  meta?: {
+    billed_units: {
+      input_tokens: number;
+      output_tokens: number;
+    };
+  };
+}
+
+interface CohereRequestBody {
+  model: string;
+  message: string;
+  chat_history: Array<{ role: string; message: string }>;
+  max_tokens?: number;
+  temperature?: number;
+  p?: number;
+}
+
 export class CohereProvider extends BaseProvider {
   private apiKey: string;
   private apiUrl: string;
@@ -69,7 +90,7 @@ export class CohereProvider extends BaseProvider {
         throw new Error(`Cohere API error: ${errorMsg}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as CohereResponse;
       return this.formatResponse(data, request);
     } catch (error) {
       if (error instanceof Error) {
@@ -79,7 +100,7 @@ export class CohereProvider extends BaseProvider {
     }
   }
 
-  private formatRequestBody(request: ProviderRequest): any {
+  private formatRequestBody(request: ProviderRequest): CohereRequestBody {
     const { model, messages, prompt, maxTokens, temperature, topP } = request;
 
     const lastMessage = messages ? messages[messages.length - 1] : { content: prompt || '' };
@@ -97,14 +118,14 @@ export class CohereProvider extends BaseProvider {
     };
   }
 
-  private messagesToCohereHistory(messages: Message[]): any[] {
+  private messagesToCohereHistory(messages: Message[]): Array<{ role: string; message: string }> {
     return messages.map(msg => ({
       role: msg.role === 'user' ? 'USER' : 'CHATBOT',
       message: msg.content
     }));
   }
 
-  private formatResponse(response: any, request: ProviderRequest): ProviderResponse {
+  private formatResponse(response: CohereResponse, request: ProviderRequest): ProviderResponse {
     return {
       id: response.generation_id,
       model: request.model,
@@ -118,7 +139,7 @@ export class CohereProvider extends BaseProvider {
           finishReason: response.finish_reason
         }
       ],
-      usage: response.meta?.billed_units || { input_tokens: 0, output_tokens: 0 }
+      usage: response.meta?.billed_units ?? { input_tokens: 0, output_tokens: 0 }
     };
   }
 

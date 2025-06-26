@@ -10,6 +10,21 @@ interface OpenAIErrorResponse {
   };
 }
 
+interface AzureResponse {
+  id: string;
+  model: string;
+  choices: Array<{
+    text: string;
+    message: any;
+    index: number;
+    finish_reason: string;
+  }>;
+  usage: any;
+  created: number;
+  object: string;
+  system_fingerprint: string;
+}
+
 export class AzureProvider extends BaseProvider {
   private apiKey: string;
   private apiUrl: string;
@@ -83,7 +98,7 @@ export class AzureProvider extends BaseProvider {
       }
 
       const data = await response.json();
-      const apiData = data as any; // Cast to any to handle slightly different response shapes
+      const apiData = data as AzureResponse;
 
       return {
         id: apiData.id,

@@ -1,6 +1,12 @@
 import { AIProvider, ProviderConfig, UsageMetadata, CostEstimate } from '../types';
-import { ProviderRequest, ProviderResponse, ProviderModel, AnyUsage } from '../types/providers';
-import { getModelById } from '../types/models';
+import {
+  ProviderRequest,
+  ProviderResponse,
+  ProviderModel,
+  AnyUsage,
+  Message
+} from '../types/providers';
+import { getModelById, MODELS } from '../types/models';
 import { calculateCost } from '../utils/pricing';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -33,12 +39,12 @@ export abstract class BaseProvider {
     return calculateCost(promptTokens, completionTokens, modelInfo, this.config.customPricing);
   }
 
-  async trackUsage(
+  trackUsage(
     request: ProviderRequest,
     response: ProviderResponse,
     userId: string,
     startTime: number
-  ): Promise<UsageMetadata> {
+  ): UsageMetadata {
     const endTime = Date.now();
     const usage = this.parseUsage(response.usage);
     const model = getModelById(request.model);
@@ -78,7 +84,7 @@ export abstract class BaseProvider {
   protected abstract getPromptTokens(usage: AnyUsage): number;
   protected abstract getCompletionTokens(usage: AnyUsage): number;
 
-  protected messagesToPrompt(messages: any[]): string {
+  protected messagesToPrompt(messages: Message[]): string {
     return messages.map(msg => `${msg.role}: ${msg.content}`).join('\n\n');
   }
 
@@ -96,6 +102,6 @@ export abstract class BaseProvider {
   }
 
   getSupportedModels(): ProviderModel[] {
-    return Object.values(getModelById).filter(model => model && model.provider === this.provider);
+    return Object.values(MODELS).filter(model => model && model.provider === this.provider);
   }
 }

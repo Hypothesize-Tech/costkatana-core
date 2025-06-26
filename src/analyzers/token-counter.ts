@@ -73,21 +73,21 @@ export class TokenCounter {
   /**
    * Estimate tokens for a conversation (array of messages)
    */
-  static async countConversationTokens(
+  static countConversationTokens(
     messages: Array<{ role: string; content: string }>,
     provider: AIProvider,
     model: string
-  ): Promise<number> {
+  ): number {
     let totalTokens = 0;
 
     // Add tokens for message formatting overhead
     const messageOverhead = provider === AIProvider.OpenAI ? 4 : 3;
 
     for (const message of messages) {
-      const contentTokens = await this.countTokens(message.content, provider, model);
+      const contentTokens = this.countTokens(message.content, provider, model);
 
       // Add role tokens
-      const roleTokens = await this.countTokens(message.role, provider, model);
+      const roleTokens = this.countTokens(message.role, provider, model);
 
       totalTokens += contentTokens + roleTokens + messageOverhead;
     }
@@ -102,13 +102,13 @@ export class TokenCounter {
   /**
    * Split text into chunks that fit within token limit
    */
-  static async splitTextByTokens(
+  static splitTextByTokens(
     text: string,
     maxTokens: number,
     provider: AIProvider,
     model: string,
     overlap: number = 0
-  ): Promise<string[]> {
+  ): string[] {
     const chunks: string[] = [];
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
 
@@ -116,7 +116,7 @@ export class TokenCounter {
     let currentTokens = 0;
 
     for (const sentence of sentences) {
-      const sentenceTokens = await this.countTokens(sentence, provider, model);
+      const sentenceTokens = this.countTokens(sentence, provider, model);
 
       if (currentTokens + sentenceTokens > maxTokens && currentChunk) {
         chunks.push(currentChunk.trim());
@@ -128,7 +128,7 @@ export class TokenCounter {
             .filter(s => s.trim())
             .slice(-overlap);
           currentChunk = `${overlapSentences.join('. ')}. `;
-          currentTokens = await this.countTokens(currentChunk, provider, model);
+          currentTokens = this.countTokens(currentChunk, provider, model);
         } else {
           currentChunk = '';
           currentTokens = 0;
@@ -149,20 +149,20 @@ export class TokenCounter {
   /**
    * Estimate token reduction from prompt optimization
    */
-  static async estimateOptimizationSavings(
+  static estimateOptimizationSavings(
     originalPrompt: string,
     optimizedPrompt: string,
     provider: AIProvider,
     model: string
-  ): Promise<{
+  ): {
     originalTokens: number;
     optimizedTokens: number;
     savedTokens: number;
     savingsPercentage: number;
-  }> {
-    const originalTokens = await this.countTokens(originalPrompt, provider, model);
+  } {
+    const originalTokens = this.countTokens(originalPrompt, provider, model);
 
-    const optimizedTokens = await this.countTokens(optimizedPrompt, provider, model);
+    const optimizedTokens = this.countTokens(optimizedPrompt, provider, model);
 
     const savedTokens = originalTokens - optimizedTokens;
     const savingsPercentage = (savedTokens / originalTokens) * 100;

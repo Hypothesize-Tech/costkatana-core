@@ -108,7 +108,7 @@ import {
   CostEstimate,
   OptimizationSuggestion
 } from './types';
-import { createProvider } from './providers';
+import { createProvider, BaseProvider } from './providers';
 import { CostAnalyzer } from './analyzers/cost-analyzer';
 import { UsageTracker } from './analyzers/usage-tracker';
 import { SuggestionEngine } from './optimizers/suggestion-engine';
@@ -120,7 +120,7 @@ import { ProviderRequest } from './types/providers';
 
 export class AICostTracker {
   private config: TrackerConfig;
-  private providers: Map<AIProvider, any> = new Map();
+  private providers: Map<AIProvider, BaseProvider> = new Map();
   private costAnalyzer: CostAnalyzer;
   private usageTracker: UsageTracker;
   private suggestionEngine: SuggestionEngine;
@@ -320,7 +320,7 @@ export class AICostTracker {
   /**
    * Clear all tracked data
    */
-  async clearData(): Promise<void> {
+  clearData(): void {
     this.costAnalyzer.clearData();
     this.usageTracker.clearCache();
     logger.info('All tracked data cleared');

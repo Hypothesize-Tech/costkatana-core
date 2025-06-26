@@ -28,16 +28,12 @@ export class PromptOptimizer {
     prompt: string,
     targetModel: string,
     targetProvider: AIProvider,
-    context?: {
-      previousPrompts?: string[];
-      expectedOutput?: string;
-      constraints?: string[];
-    }
+    context?: Context
   ): Promise<OptimizationSuggestion[]> {
     const suggestions: OptimizationSuggestion[] = [];
 
     // Local optimizations (no AI required)
-    suggestions.push(...(await this.getLocalOptimizations(prompt, targetModel, targetProvider)));
+    suggestions.push(...this.getLocalOptimizations(prompt, targetModel, targetProvider));
 
     // AI-powered optimizations (if Bedrock is configured)
     if (this.bedrockProvider) {
@@ -49,22 +45,17 @@ export class PromptOptimizer {
     return suggestions.sort((a, b) => b.confidence - a.confidence);
   }
 
-  private async getLocalOptimizations(
+  private getLocalOptimizations(
     prompt: string,
     targetModel: string,
     targetProvider: AIProvider
-  ): Promise<OptimizationSuggestion[]> {
+  ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
 
     // 1. Remove redundant whitespace
     const cleanedPrompt = prompt.replace(/\s+/g, ' ').trim();
     if (cleanedPrompt.length < prompt.length) {
-      const savings = await this.calculateSavings(
-        prompt,
-        cleanedPrompt,
-        targetProvider,
-        targetModel
-      );
+      const savings = this.calculateSavings(prompt, cleanedPrompt, targetProvider, targetModel);
 
       suggestions.push({
         id: uuidv4(),
@@ -100,12 +91,7 @@ export class PromptOptimizer {
     optimizedPrompt = optimizedPrompt.replace(/\s+/g, ' ').trim();
 
     if (optimizedPrompt.length < prompt.length * 0.95) {
-      const savings = await this.calculateSavings(
-        prompt,
-        optimizedPrompt,
-        targetProvider,
-        targetModel
-      );
+      const savings = this.calculateSavings(prompt, optimizedPrompt, targetProvider, targetModel);
 
       suggestions.push({
         id: uuidv4(),
@@ -138,7 +124,7 @@ export class PromptOptimizer {
     const uniqueSentences = [...new Set(sentences)];
     if (uniqueSentences.length < sentences.length) {
       const deduplicatedPrompt = uniqueSentences.join('. ').trim();
-      const savings = await this.calculateSavings(
+      const savings = this.calculateSavings(
         prompt,
         deduplicatedPrompt,
         targetProvider,
@@ -164,7 +150,7 @@ export class PromptOptimizer {
     prompt: string,
     targetModel: string,
     targetProvider: AIProvider,
-    context?: any
+    context?: Context
   ): Promise<OptimizationSuggestion[]> {
     if (!this.bedrockProvider) return [];
 
@@ -202,12 +188,12 @@ export class PromptOptimizer {
       });
 
       const responseText = response.choices[0]?.text || '';
-      const analysis = JSON.parse(responseText);
+      const analysis: BedrockOptimizationResponse = JSON.parse(responseText);
 
       const suggestions: OptimizationSuggestion[] = [];
 
       for (const opt of analysis.optimizations || []) {
-        const savings = await this.calculateSavings(
+        const savings = this.calculateSavings(
           prompt,
           opt.optimizedPrompt,
           targetProvider,
@@ -222,7 +208,8 @@ export class PromptOptimizer {
           estimatedSavings: savings.savingsPercentage,
           confidence: opt.confidence || 0.7,
           explanation: opt.explanation,
-          implementation: opt.tradeoffs || 'AI-optimized prompt'
+          implementation: 'AI-optimized prompt',
+          tradeoffs: opt.tradeoffs
         });
       }
 
@@ -292,58 +279,74 @@ export class PromptOptimizer {
     frequency: number,
     _avgResponseTokens: number
   ): Promise<OptimizationSuggestion> {
-    const monthlyCallCost = frequency * 30; // Assuming frequency is daily
-    const estimatedMonthlySavings = monthlyCallCost * 0.95; // 95% savings with caching
-
-    return {
+    const estimatedSavings = frequency > 5 ? 20 : 10;
+    return Promise.resolve({
       id: uuidv4(),
       type: 'caching',
-      estimatedSavings: estimatedMonthlySavings,
-      confidence: frequency > 5 ? 0.95 : 0.7,
-      explanation: `This prompt is used ${frequency} times per day. Caching responses would save ~${estimatedMonthlySavings.toFixed(0)}% of costs.`,
-      implementation: 'Implement response caching with TTL based on data freshness requirements'
-    };
+      estimatedSavings,
+      confidence: 0.8,
+      explanation: `Cache frequently repeated requests to reduce redundant API calls. Frequency: ${frequency}`,
+      implementation: 'Implement a cache (e.g., Redis, in-memory) for API responses.'
+    });
   }
 
   async suggestModelDowngrade(
     currentModel: string,
     taskComplexity: 'simple' | 'moderate' | 'complex'
   ): Promise<OptimizationSuggestion | null> {
-    const modelSuggestions: Record<string, { downgrade: string; savings: number }> = {
-      'gpt-4': { downgrade: 'gpt-3.5-turbo', savings: 95 },
-      'gpt-4-turbo-preview': { downgrade: 'gpt-3.5-turbo', savings: 95 },
-      'claude-3-opus': { downgrade: 'claude-3-sonnet', savings: 80 },
-      'claude-3-sonnet': { downgrade: 'claude-3-haiku', savings: 92 }
-    };
+    const tierMap: Record<string, number> = { '3.5': 1, '4': 2, haiku: 1, sonnet: 2, opus: 3 };
+    const currentTier =
+      Object.entries(tierMap).find(([key]) => currentModel.includes(key))?.[1] || 2;
 
-    const suggestion = modelSuggestions[currentModel];
-    if (!suggestion || taskComplexity === 'complex') {
-      return null;
+    if (taskComplexity === 'simple' && currentTier > 1) {
+      return Promise.resolve({
+        id: uuidv4(),
+        type: 'model',
+        estimatedSavings: 50,
+        confidence: 0.7,
+        explanation: 'For simple tasks, a less powerful model can be more cost-effective.',
+        implementation: "Switch to a model like 'gpt-3.5-turbo' or 'claude-3-haiku'."
+      });
     }
-
-    const confidence = taskComplexity === 'simple' ? 0.9 : 0.6;
-
-    return {
-      id: uuidv4(),
-      type: 'model',
-      estimatedSavings: suggestion.savings,
-      confidence,
-      explanation: `For ${taskComplexity} tasks, ${suggestion.downgrade} should provide similar quality at ${suggestion.savings}% lower cost`,
-      implementation: `Change model from ${currentModel} to ${suggestion.downgrade}`
-    };
+    return Promise.resolve(null);
   }
 
-  private async calculateSavings(
+  private calculateSavings(
     originalPrompt: string,
     optimizedPrompt: string,
     provider: AIProvider,
     model: string
   ) {
-    return await TokenCounter.estimateOptimizationSavings(
-      originalPrompt,
-      optimizedPrompt,
-      provider,
-      model
-    );
+    const originalTokens = TokenCounter.countTokens(originalPrompt, provider, model);
+    const optimizedTokens = TokenCounter.countTokens(optimizedPrompt, provider, model);
+    const savedTokens = originalTokens - optimizedTokens;
+    const savingsPercentage = originalTokens > 0 ? (savedTokens / originalTokens) * 100 : 0;
+
+    return {
+      originalTokens,
+      optimizedTokens,
+      savedTokens,
+      savingsPercentage
+    };
   }
+}
+
+interface Context {
+  previousPrompts?: string[];
+  expectedOutput?: string;
+  constraints?: string[];
+}
+
+interface BedrockOptimization {
+  optimizedPrompt: string;
+  explanation: string;
+  estimatedTokenReduction: number;
+  confidence: number;
+  tradeoffs: string;
+}
+
+interface BedrockOptimizationResponse {
+  optimizations: BedrockOptimization[];
+  generalTips: string[];
+  modelSpecificAdvice: string;
 }

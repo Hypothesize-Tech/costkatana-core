@@ -34,7 +34,7 @@ export class CostAnalyzer {
   }
 
   analyzeUsage(startDate?: Date, endDate?: Date, userId?: string): UsageAnalytics {
-    let filteredData = this.filterData(startDate, endDate, userId);
+    const filteredData = this.filterData(startDate, endDate, userId);
 
     if (filteredData.length === 0) {
       return this.getEmptyAnalytics();

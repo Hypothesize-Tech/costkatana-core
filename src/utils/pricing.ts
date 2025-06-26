@@ -28,7 +28,7 @@ export function calculateCost(
   // Type guard for unit
   let unit: PricingUnit;
   if (isCustom) {
-    unit = toPricingUnit(custom!.unit);
+    unit = toPricingUnit(custom.unit);
   } else {
     unit = (pricing as typeof model.pricing).unit;
   }
@@ -39,10 +39,10 @@ export function calculateCost(
 
   // Calculate costs
   const promptCost = isCustom
-    ? promptUnits * custom!.promptPrice
+    ? promptUnits * custom.promptPrice
     : promptUnits * (pricing as typeof model.pricing).prompt;
   const completionCost = isCustom
-    ? completionUnits * custom!.completionPrice
+    ? completionUnits * custom.completionPrice
     : completionUnits * (pricing as typeof model.pricing).completion;
   const totalCost = promptCost + completionCost;
 
@@ -57,10 +57,10 @@ export function calculateCost(
       promptTokens,
       completionTokens,
       pricePerPromptToken: isCustom
-        ? custom!.promptPrice / getUnitMultiplier(unit)
+        ? custom.promptPrice / getUnitMultiplier(unit)
         : (pricing as typeof model.pricing).prompt / getUnitMultiplier(unit),
       pricePerCompletionToken: isCustom
-        ? custom!.completionPrice / getUnitMultiplier(unit)
+        ? custom.completionPrice / getUnitMultiplier(unit)
         : (pricing as typeof model.pricing).completion / getUnitMultiplier(unit)
     }
   };
@@ -75,7 +75,7 @@ function convertTokensToUnit(tokens: number, unit: PricingUnit): number {
     case PricingUnit.Per1MTokens:
       return tokens / 1000000;
     default:
-      throw new Error(`Unknown pricing unit: ${unit}`);
+      throw new Error(`Unknown pricing unit: ${unit as string}`);
   }
 }
 

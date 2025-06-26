@@ -36,6 +36,7 @@ export interface OptimizationSuggestion {
   confidence: number;
   explanation: string;
   implementation?: string;
+  tradeoffs?: string;
 }
 
 export interface UsageAnalytics {
