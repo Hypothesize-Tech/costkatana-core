@@ -119,6 +119,9 @@ import { getModelById } from './types/models';
 import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 
+
+const DEFAULT_API_URL = 'http://localhost:8000/api';  
+
 export class AICostTracker {
   private config: TrackerConfig;
   private providers: Map<AIProvider, BaseProvider> = new Map();
@@ -153,13 +156,14 @@ export class AICostTracker {
 
   public static async create(config: TrackerConfig): Promise<AICostTracker> {
     const token = process.env.USER_TOKEN;
+    const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
     if (!token) {
       throw new Error('USER_TOKEN environment variable not set. Please get your token from the AI Cost Optimizer dashboard.');
     }
 
     const apiClient = axios.create({
-      baseURL: process.env.AI_COST_OPTIMIZER_API_URL || 'http://localhost:8000/api',
+      baseURL: apiUrl,
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -171,7 +175,7 @@ export class AICostTracker {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         throw new Error('Invalid or expired USER_TOKEN. Please get a new token from the AI Cost Optimizer dashboard.');
       }
-      throw new Error(`Failed to connect to AI Cost Optimizer backend at ${process.env.AI_COST_OPTIMIZER_API_URL}. Please check the URL and your network connection.`);
+      throw new Error(`Failed to connect to AI Cost Optimizer backend at ${apiUrl}. Please check the URL and your network connection.`);
     }
 
     const tracker = new AICostTracker(config, apiClient);

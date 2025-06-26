@@ -92,11 +92,15 @@ export enum AIProvider {
   Azure = 'azure'
 }
 
+import { LoggerConfig } from '../utils/logger';
+
 export interface TrackerConfig {
   providers: ProviderConfig[];
   optimization: OptimizationConfig;
   tracking: TrackingConfig;
   alerts?: AlertConfig;
+  logger?: LoggerConfig;
+  apiUrl?: string;
 }
 
 export interface ProviderConfig {
@@ -118,6 +122,11 @@ export interface OptimizationConfig {
   enableModelSuggestions: boolean;
   enableCachingSuggestions: boolean;
   bedrockConfig?: BedrockConfig;
+  thresholds: {
+    highCostPerRequest: number;
+    highTokenUsage: number;
+    frequencyThreshold: number;
+  };
 }
 
 export interface BedrockConfig {
