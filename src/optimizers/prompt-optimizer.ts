@@ -2,6 +2,7 @@ import { OptimizationSuggestion, BedrockConfig, AIProvider } from '../types';
 import { BedrockProvider } from '../providers/bedrock';
 import { TokenCounter } from '../analyzers/token-counter';
 import { v4 as uuidv4 } from 'uuid';
+import { optimizationThresholds } from '../config/default';
 
 export class PromptOptimizer {
   private bedrockProvider?: BedrockProvider;
@@ -18,7 +19,8 @@ export class PromptOptimizer {
           enablePromptOptimization: true,
           enableModelSuggestions: true,
           enableCachingSuggestions: true,
-          bedrockConfig
+          bedrockConfig,
+          thresholds: optimizationThresholds
         }
       });
     }

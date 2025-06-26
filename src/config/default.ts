@@ -1,11 +1,20 @@
 import { TrackerConfig, AIProvider } from '../types';
 
+export const optimizationThresholds = {
+  highCostPerRequest: 0.1, // $0.10
+  highTokenUsage: 2000,
+  frequencyThreshold: 10,
+  batchingThreshold: 3,
+  modelDowngradeConfidence: 0.7
+};
+
 export const defaultConfig: Partial<TrackerConfig> = {
   providers: [],
   optimization: {
     enablePromptOptimization: true,
     enableModelSuggestions: true,
-    enableCachingSuggestions: true
+    enableCachingSuggestions: true,
+    thresholds: optimizationThresholds
   },
   tracking: {
     enableAutoTracking: true,
@@ -69,14 +78,6 @@ export const cachingConfig = {
   defaultTTL: 3600, // 1 hour in seconds
   maxCacheSize: 100, // Maximum number of cached responses
   compressionEnabled: true
-};
-
-export const optimizationThresholds = {
-  highCostPerRequest: 0.1, // $0.10
-  highTokenUsage: 2000,
-  frequencyThreshold: 5,
-  batchingThreshold: 3,
-  modelDowngradeConfidence: 0.7
 };
 
 export const alertThresholds = {
