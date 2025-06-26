@@ -231,20 +231,17 @@ export class SuggestionEngine {
   private groupPromptsByUser(_usageData: UsageMetadata[]): Map<string, UsageMetadata[]> {
     const groups = new Map<string, UsageMetadata[]>();
 
-    _usageData.forEach(item => {
-      const userPrompts = groups.get(item.userId) || [];
-      userPrompts.push(item);
-      groups.set(item.userId, userPrompts);
-    });
+    // This is no longer possible without userId.
+    // We will group all prompts under a single key.
+    groups.set('all_users', _usageData);
 
     return groups;
   }
 
   private getRecentPrompts(prompts: UsageMetadata[], minutes: number): UsageMetadata[] {
-    const cutoff = new Date(Date.now() - minutes * 60 * 1000);
-    return prompts
-      .filter(p => p.timestamp > cutoff)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    // This is no longer possible without timestamps.
+    // Returning the last 5 prompts as a fallback.
+    return prompts.slice(-5);
   }
 
   private classifyTaskComplexity(prompt: string): 'simple' | 'moderate' | 'complex' {
@@ -303,28 +300,28 @@ export class SuggestionEngine {
   ## Top Optimization Opportunities
   
   ${suggestions
-    .slice(0, 5)
-    .map(
-      (s, i) => `
+        .slice(0, 5)
+        .map(
+          (s, i) => `
   ### ${i + 1}. ${s.type.charAt(0).toUpperCase() + s.type.slice(1)} Optimization
   - **Potential Savings**: ${s.estimatedSavings.toFixed(1)}%
   - **Confidence**: ${(s.confidence * 100).toFixed(0)}%
   - **Recommendation**: ${s.explanation}
   - **How to Implement**: ${s.implementation}
   `
-    )
-    .join('\n')}
+        )
+        .join('\n')}
   
   ## Model Usage Breakdown
   ${analytics.mostUsedModels
-    .slice(0, 5)
-    .map(m => `- **${m.model}**: ${m.requestCount} requests, $${m.totalCost.toFixed(2)} total cost`)
-    .join('\n')}
+        .slice(0, 5)
+        .map(m => `- **${m.model}**: ${m.requestCount} requests, $${m.totalCost.toFixed(2)} total cost`)
+        .join('\n')}
   
   ## Cost by Provider
   ${analytics.costByProvider
-    .map(p => `- **${p.provider}**: $${p.totalCost.toFixed(2)} (${p.percentage.toFixed(1)}%)`)
-    .join('\n')}
+        .map(p => `- **${p.provider}**: $${p.totalCost.toFixed(2)} (${p.percentage.toFixed(1)}%)`)
+        .join('\n')}
   
   ## Next Steps
   1. Implement high-confidence optimizations first

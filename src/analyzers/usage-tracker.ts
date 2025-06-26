@@ -40,11 +40,10 @@ export class UsageTracker {
 
     await this.storage.save(metadata);
 
-    // Update cache
-    const userId = metadata.userId;
-    const userCache = this.cache.get(userId) || [];
-    userCache.push(metadata);
-    this.cache.set(userId, userCache);
+    // Caching is no longer user-specific
+    const allCache = this.cache.get('all_users') || [];
+    allCache.push(metadata);
+    this.cache.set('all_users', allCache);
   }
 
   async getUsageHistory(
@@ -88,17 +87,14 @@ export class UsageTracker {
     const totalCost = userHistory.reduce((sum, item) => sum + item.estimatedCost, 0);
     const totalTokens = userHistory.reduce((sum, item) => sum + item.totalTokens, 0);
 
-    const sortedHistory = [...userHistory].sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-    );
-
+    // lastUsed is no longer available from UsageMetadata
     return {
       totalRequests,
       totalCost,
       totalTokens,
       averageCostPerRequest: totalCost / totalRequests,
       averageTokensPerRequest: totalTokens / totalRequests,
-      lastUsed: sortedHistory[0].timestamp
+      lastUsed: null
     };
   }
 
@@ -122,11 +118,14 @@ export class UsageTracker {
       };
     }
 
-    const uniqueUsers = new Set(modelHistory.map(item => item.userId)).size;
+    const uniqueUsers = 0; // Cannot determine unique users anymore
     const totalRequests = modelHistory.length;
     const totalCost = modelHistory.reduce((sum, item) => sum + item.estimatedCost, 0);
     const totalTokens = modelHistory.reduce((sum, item) => sum + item.totalTokens, 0);
-    const totalResponseTime = modelHistory.reduce((sum, item) => sum + (item.duration || 0), 0);
+    const totalResponseTime = modelHistory.reduce(
+      (sum, item) => sum + (item.responseTime || 0),
+      0
+    );
 
     return {
       totalRequests,
@@ -151,28 +150,24 @@ export class UsageTracker {
     if (data.length === 0) return '';
 
     const headers = [
-      'userId',
-      'timestamp',
       'provider',
       'model',
       'promptTokens',
       'completionTokens',
       'totalTokens',
       'estimatedCost',
-      'duration',
+      'responseTime',
       'sessionId'
     ];
 
     const rows = data.map(item => [
-      item.userId,
-      item.timestamp.toISOString(),
       item.provider,
       item.model,
       item.promptTokens,
       item.completionTokens,
       item.totalTokens,
       item.estimatedCost,
-      item.duration || '',
+      item.responseTime || '',
       item.sessionId || ''
     ]);
 
@@ -180,19 +175,12 @@ export class UsageTracker {
   }
 
   async cleanOldData(retentionDays: number): Promise<void> {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-
-    const allData = await this.storage.load({});
-    const filteredData = allData.filter(item => item.timestamp >= cutoffDate);
-
-    await this.storage.clear();
-    for (const item of filteredData) {
-      await this.storage.save(item);
-    }
+    // This method is no longer possible without timestamps.
+    // The storage implementation will need to handle its own retention.
+    return Promise.resolve();
   }
 
-  clearCache(): void {
+  async clearCache(): Promise<void> {
     this.cache.clear();
   }
 }
@@ -222,16 +210,8 @@ class MemoryStorage implements UsageStorage {
   load(filter: UsageFilter): Promise<UsageMetadata[]> {
     let result = [...this.data];
 
-    if (filter.userId) {
-      result = result.filter(item => item.userId === filter.userId);
-    }
-    const { startDate, endDate } = filter;
-    if (startDate) {
-      result = result.filter(item => item.timestamp >= startDate);
-    }
-    if (endDate) {
-      result = result.filter(item => item.timestamp <= endDate);
-    }
+    // Filtering by userId, startDate, endDate is no longer possible here
+    // as the data is not on the object. The custom storage would need to handle this.
     if (filter.limit) {
       result = result.slice(0, filter.limit);
     }
@@ -266,20 +246,10 @@ class FileStorage implements UsageStorage {
     const allData: UsageMetadata[] = JSON.parse(fileContent) as UsageMetadata[];
 
     let result = allData.map(item => ({
-      ...item,
-      timestamp: new Date(item.timestamp)
+      ...item
     }));
 
-    if (filter.userId) {
-      result = result.filter(item => item.userId === filter.userId);
-    }
-    const { startDate: fileStartDate, endDate: fileEndDate } = filter;
-    if (fileStartDate) {
-      result = result.filter(item => item.timestamp >= fileStartDate);
-    }
-    if (fileEndDate) {
-      result = result.filter(item => item.timestamp <= fileEndDate);
-    }
+    // Filtering by userId, startDate, endDate is no longer possible here
     if (filter.limit) {
       result = result.slice(0, filter.limit);
     }
@@ -296,7 +266,7 @@ class FileStorage implements UsageStorage {
 }
 
 class CustomStorageAdapter implements UsageStorage {
-  constructor(private customStorage: CustomStorage) {}
+  constructor(private customStorage: CustomStorage) { }
 
   async save(data: UsageMetadata): Promise<void> {
     await this.customStorage.save(data);
