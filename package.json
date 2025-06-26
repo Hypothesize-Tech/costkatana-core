@@ -1,6 +1,6 @@
 {
   "name": "ai-cost-tracker",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Track, analyze, and optimize AI API costs across multiple providers with intelligent suggestions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,7 +51,9 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.450.0",
     "@aws-sdk/credential-providers": "^3.450.0",
+    "ai-cost-tracker": "^1.0.7",
     "axios": "^1.10.0",
+    "dotenv": "^16.5.0",
     "gpt-3-encoder": "^1.1.4",
     "uuid": "^9.0.1"
   },
