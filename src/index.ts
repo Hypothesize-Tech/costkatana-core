@@ -168,17 +168,22 @@ export class AICostTracker {
 
   public static async create(config: TrackerConfig): Promise<AICostTracker> {
     const apiKey = process.env.API_KEY;
+    const projectId = process.env.PROJECT_ID;
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
     if (!apiKey) {
       throw new Error('API_KEY environment variable not set. Please get your API key from the AI Cost Optimizer dashboard.');
+    }
+    if (!projectId) {
+      throw new Error('PROJECT_ID environment variable not set. Please get your Project ID from the AI Cost Optimizer dashboard.');
     }
 
     const apiClient = axios.create({
       baseURL: apiUrl,
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-project-id': projectId
       }
     });
 
@@ -188,6 +193,11 @@ export class AICostTracker {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         throw new Error('Invalid or expired API_KEY. Please get a new API key from the AI Cost Optimizer dashboard.');
       }
+    }
+
+    // Optionally inject projectId into config for downstream use
+    if (!config.projectId) {
+      (config as any).projectId = projectId;
     }
 
     const tracker = new AICostTracker(config, apiClient);
@@ -316,6 +326,12 @@ export class AICostTracker {
     // Calculate totalTokens if not provided
     if (!payload.totalTokens) {
       payload.totalTokens = payload.promptTokens + payload.completionTokens;
+    }
+
+    // Always ensure projectId is set from env if not present
+    const projectId = process.env.PROJECT_ID;
+    if (!payload.projectId && projectId) {
+      payload.projectId = projectId;
     }
 
     // Prepare the payload for the backend API

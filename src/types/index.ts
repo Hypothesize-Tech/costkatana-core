@@ -139,6 +139,7 @@ export interface TrackerConfig {
   alerts?: AlertConfig;
   logger?: LoggerConfig;
   apiUrl?: string;
+  projectId?: string;
 }
 
 export interface ProviderConfig {
