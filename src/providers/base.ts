@@ -74,7 +74,8 @@ export abstract class BaseProvider {
       completion,
       responseTime: endTime - startTime,
       tags: request.metadata?.tags,
-      sessionId: request.metadata?.sessionId || uuidv4()
+      sessionId: request.metadata?.sessionId || uuidv4(),
+      projectId: request.metadata?.projectId
     };
   }
 

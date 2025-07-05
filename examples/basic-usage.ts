@@ -203,7 +203,7 @@ async function manualTracking() {
         projectId: 'project-analytics-dashboard'  // Track usage for specific project
     });
 
-    console.log('Usage tracked manually.');
+    console.log('Usage tracked manually with projectId.');
 }
 
 // Example 4: Set up alerts
