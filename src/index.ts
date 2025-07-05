@@ -331,6 +331,7 @@ export class AICostTracker {
       ...(payload.responseTime && { responseTime: payload.responseTime }),
       ...(payload.metadata && { metadata: payload.metadata }),
       ...(payload.tags && { tags: payload.tags }),
+      ...(payload.projectId && { projectId: payload.projectId }),
       ...(payload.optimizationApplied && { optimizationApplied: payload.optimizationApplied }),
       ...(payload.optimizationId && { optimizationId: payload.optimizationId }),
       ...(payload.errorOccurred && { errorOccurred: payload.errorOccurred }),

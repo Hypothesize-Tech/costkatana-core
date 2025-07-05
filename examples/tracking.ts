@@ -100,7 +100,7 @@ async function customStorageExample() {
             enableModelSuggestions: true,
             enableCachingSuggestions: true,
             thresholds: {
-                highCostPerRequest: 0,  
+                highCostPerRequest: 0,
                 highTokenUsage: 0,
                 frequencyThreshold: 0
             }
@@ -123,7 +123,8 @@ async function customStorageExample() {
         totalTokens: 300,
         estimatedCost: 0.021,
         prompt: "Custom storage test",
-        responseTime: 1500
+        responseTime: 1500,
+        projectId: "project-123"  // Project-specific tracking
     });
 
     console.log('Usage tracked successfully');
@@ -176,7 +177,8 @@ async function realtimeDashboard() {
             totalTokens: promptLength + completionLength,
             estimatedCost: (promptLength + completionLength) * 0.00002,
             prompt: `Request ${i + 1}`,
-            responseTime: Math.floor(Math.random() * 2000) + 500
+            responseTime: Math.floor(Math.random() * 2000) + 500,
+            projectId: i % 2 === 0 ? "project-a" : "project-b"  // Alternate between projects
         });
 
         // Update dashboard

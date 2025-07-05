@@ -199,7 +199,8 @@ async function manualTracking() {
         completion: "Based on the analysis...",
         responseTime: 2500,
         tags: ['analysis', 'data-science'],
-        sessionId: 'session-789'
+        sessionId: 'session-789',
+        projectId: 'project-analytics-dashboard'  // Track usage for specific project
     });
 
     console.log('Usage tracked manually.');

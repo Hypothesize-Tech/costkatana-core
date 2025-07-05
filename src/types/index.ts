@@ -10,6 +10,7 @@ export interface UsageMetadata {
   responseTime?: number;
   tags?: string[];
   sessionId?: string;
+  projectId?: string;
 }
 
 export interface CostEstimate {
