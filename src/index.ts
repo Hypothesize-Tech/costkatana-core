@@ -341,7 +341,7 @@ export class AICostTracker {
 
     // Send to backend
     try {
-      const response = await this.apiClient.post('/usage/sdk', backendPayload);
+      const response = await this.apiClient.post('/usage/track-sdk', backendPayload);
       logger.info('Usage data sent to backend successfully', {
         id: response.data?.data?.id,
         cost: response.data?.data?.cost,
