@@ -1,304 +1,366 @@
-# AI Cost Tracker 🚀💰
+# AI Cost Optimizer
 
-> Track, analyze, and optimize your AI API costs across multiple providers with intelligent insights powered by AWS Bedrock.
+A comprehensive toolkit for optimizing AI model costs, tracking usage, and analyzing performance across multiple providers.
 
-[![npm version](https://img.shields.io/npm/v/ai-cost-tracker.svg)](https://www.npmjs.com/package/ai-cost-tracker)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+## Features
 
-## 🌟 Features
+- **Multi-Provider Support**: OpenAI, Anthropic, Google AI, AWS Bedrock, Cohere, and more
+- **Cost Optimization**: Intelligent prompt compression, context trimming, and request fusion
+- **Usage Tracking**: Detailed analytics and cost monitoring
+- **Project Management**: Organize usage by projects with budget tracking
+- **Real-time Analytics**: Monitor costs, tokens, and performance metrics
+- **Suggestion Engine**: AI-powered recommendations for cost reduction
 
-- **Multi-Provider Support**: Track costs across OpenAI, AWS Bedrock, Anthropic, Google, Cohere, Azure, DeepSeek, and more.
-- **Real-time Cost Estimation**: Calculate costs before making API calls
-- **Automatic Usage Tracking**: Seamlessly track all API requests and responses
-- **AI-Powered Optimization**: Get intelligent suggestions to reduce costs using AWS Bedrock
-- **Prompt Optimization**: Automatically optimize prompts to reduce token usage
-- **Usage Analytics**: Comprehensive analytics and insights about your AI usage
-- **Cost Alerts**: Set thresholds and get notified when costs exceed limits
-- **Export & Reporting**: Export data in JSON/CSV formats with detailed reports
-
-## 📦 Installation
+## Installation
 
 ```bash
-npm install ai-cost-tracker
+npm install ai-cost-optimizer
 ```
 
-or
-
-```bash
-yarn add ai-cost-tracker
-```
-
-## ⚙️ Backend Integration
-
-`ai-cost-tracker` is designed to work with the `ai-cost-optimizer-backend` to store and analyze usage data across your team. To connect to the backend, you need to set the following environment variables:
-
-- `USER_TOKEN`: Your personal access token. You can get this from your user profile page on the AI Cost Optimizer dashboard.
-
-## 🚀 Quick Start
+## Quick Start
 
 ```typescript
-import AICostTracker, { AIProvider } from 'ai-cost-tracker';
+import { AICostOptimizer } from 'ai-cost-optimizer';
 
-async function main() {
-  // Configuration for the tracker
-  const config = {
-    providers: [
-      {
-        provider: AIProvider.OpenAI,
-        apiKey: process.env.OPENAI_API_KEY
-      },
-      {
-        provider: AIProvider.AWSBedrock,
-        region: 'us-east-1'
-      }
-    ],
-    tracking: {
-      enableAutoTracking: true
-    }
-  };
+const optimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true
+});
 
-  // Initialize the tracker
-  // This will authenticate with the backend using USER_TOKEN
-  const tracker = await AICostTracker.create(config);
-
-  // Estimate cost before making a request
-  const estimate = await tracker.estimateCost(
-    'Explain quantum computing',
-    'gpt-3.5-turbo',
-    AIProvider.OpenAI,
-    150 // expected completion tokens
-  );
-  console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
-
-  // Make a tracked request
-  const response = await tracker.makeRequest({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: 'Explain quantum computing' }]
-  });
-  console.log('Response received.');
-
-  // Get analytics (from local cache)
-  // Note: For comprehensive, user-specific analytics, use the dashboard.
-  const analytics = await tracker.getAnalytics();
-  console.log(`Total cost (local): $${analytics.totalCost.toFixed(2)}`);
-}
-
-main().catch(console.error);
+const result = await optimizer.optimize({
+  prompt: 'Your prompt here',
+  model: 'gpt-4',
+  projectId: 'project-123' // Optional: Associate with a project
+});
 ```
 
-## 🔧 Configuration
+## Project Integration
 
-### Basic Configuration
+### Why Use Projects?
+
+Projects help you:
+
+- **Organize Usage**: Group AI requests by project, team, or client
+- **Track Budgets**: Set spending limits and monitor utilization
+- **Generate Reports**: Get detailed analytics per project
+- **Control Access**: Manage team member permissions
+- **Allocate Costs**: Understand spending across different initiatives
+
+### Setting Up Projects
+
+#### 1. Basic Project Configuration
 
 ```typescript
-const config = {
-  providers: [
-    {
-      provider: AIProvider.OpenAI,
-      apiKey: 'your-api-key',
-      customPricing: {
-        'gpt-4': {
-          promptPrice: 0.03,
-          completionPrice: 0.06,
-          unit: 'per-1k-tokens'
-        }
-      }
-    }
-  ],
-  optimization: {
-    enablePromptOptimization: true,
-    enableModelSuggestions: true,
-    enableCachingSuggestions: true,
-    bedrockConfig: {
-      region: 'us-east-1',
-      modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0'
-    }
-  },
-  tracking: {
-    enableAutoTracking: true,
-    retentionDays: 30
-  },
-  alerts: {
-    costThreshold: 100, // $100 per day
-    tokenThreshold: 1000000, // 1M tokens per day
-    webhookUrl: 'https://your-webhook.com/alerts'
-  }
-};
+import { AICostOptimizer } from 'ai-cost-optimizer';
+
+const optimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true,
+  // Optional: Set default project for all requests
+  defaultProjectId: 'project-123'
+});
 ```
 
-## 📊 Analytics & Reporting
-
-### Get Usage Analytics
+#### 2. Per-Request Project Assignment
 
 ```typescript
-const analytics = await tracker.getAnalytics(startDate, endDate);
-
-console.log(analytics);
-// {
-//   totalCost: 45.23,
-//   totalTokens: 1234567,
-//   averageTokensPerRequest: 543,
-//   mostUsedModels: [...],
-//   costByProvider: [...],
-//   usageOverTime: [...],
-//   topExpensivePrompts: [...]
-// }
-```
-
-### Generate Optimization Report
-
-```typescript
-const report = await tracker.generateReport();
-console.log(report);
-// Markdown report with optimization suggestions
-```
-
-### Export Data
-
-```typescript
-// Export as JSON
-const jsonData = await tracker.exportData('json');
-
-// Export as CSV
-const csvData = await tracker.exportData('csv');
-```
-
-## 🧠 AI-Powered Optimization
-
-### Optimize Prompts
-
-```typescript
-const suggestions = await tracker.optimizePrompt(
-  'Your verbose prompt here...',
-  'gpt-3.5-turbo',
-  AIProvider.OpenAI
-);
-
-suggestions.forEach(suggestion => {
-  console.log(`${suggestion.explanation}`);
-  console.log(`Potential savings: ${suggestion.estimatedSavings}%`);
-  if (suggestion.optimizedPrompt) {
-    console.log(`Optimized: ${suggestion.optimizedPrompt}`);
+// Associate individual requests with projects
+const result = await optimizer.optimize({
+  prompt: 'Analyze this customer feedback',
+  model: 'gpt-4',
+  projectId: 'customer-analysis-2024',
+  metadata: {
+    department: 'marketing',
+    team: 'customer-success',
+    client: 'acme-corp'
   }
 });
 ```
 
-### Get Optimization Suggestions
+#### 3. Project-Based Usage Tracking
 
 ```typescript
-const suggestions = await tracker.getOptimizationSuggestions();
-
-// Suggestions include:
-// - Prompt optimization
-// - Model downgrade recommendations
-// - Batching opportunities
-// - Caching suggestions
+// Track usage with detailed project information
+const usageData = await optimizer.trackUsage({
+  prompt: 'Generate product description',
+  completion: 'AI-generated description...',
+  model: 'gpt-3.5-turbo',
+  cost: 0.002,
+  tokens: 150,
+  projectId: 'ecommerce-automation',
+  costAllocation: {
+    department: 'product',
+    team: 'content',
+    purpose: 'product-descriptions',
+    client: 'internal'
+  }
+});
 ```
 
-## 📈 Supported Models & Pricing
+### Project Configuration Options
 
-This library supports a wide range of models from major AI providers. The internal model list is kept up-to-date with the latest pricing, but you can also provide your own custom pricing.
-
-### OpenAI Models
-
-- GPT-4, GPT-4o, GPT-4 Turbo
-- GPT-3.5 Turbo
-
-### AWS Bedrock Models
-
-- Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
-- Amazon Titan Text
-- Llama 3 (8B, 70B)
-- Command R, Command R+
-- Mistral Large
-
-### Google
-
-- Gemini 1.5 Pro
-- Gemini 1.5 Flash
-- Gemini 1.0 Pro
-
-### Anthropic
-
-- Claude 3 Opus
-- Claude 3.5 Sonnet
-- Claude 3 Sonnet
-- Claude 3 Haiku
-
-### Cohere
-
-- Command R+
-- Command R
-
-### Azure OpenAI
-
-- Support for all models available through Azure OpenAI, including GPT-4o, GPT-4, and GPT-3.5 series.
-
-### Other Providers
-
-- **DeepSeek**: DeepSeek Coder, DeepSeek LLM
-- **Groq**: Llama3, Mixtral
-- **HuggingFace**: Support for various open-source models.
-- **Ollama**: Run open-source models locally.
-- **Replicate**: Access a wide variety of models via Replicate's API.
-
-## 🛠️ Advanced Features
-
-### Batch Processing
+#### Project Metadata Structure
 
 ```typescript
-const prompts = ['Question 1', 'Question 2', 'Question 3'];
-const batchingSuggestion = await optimizer.suggestBatching(
-  prompts,
-  'gpt-3.5-turbo',
-  AIProvider.OpenAI
-);
+interface ProjectConfig {
+  projectId: string;
+  name?: string;
+  description?: string;
+  budget?: {
+    amount: number;
+    currency: string;
+    period: 'monthly' | 'quarterly' | 'yearly';
+  };
+  costAllocation?: {
+    department?: string;
+    team?: string;
+    purpose?: string;
+    client?: string;
+    [key: string]: any;
+  };
+  tags?: string[];
+}
 ```
 
-### Token Counting
+#### Example: E-commerce Project Setup
 
 ```typescript
-import { TokenCounter } from 'ai-cost-tracker';
+const ecommerceOptimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true,
+  defaultProjectId: 'ecommerce-platform',
+  projectConfig: {
+    projectId: 'ecommerce-platform',
+    name: 'E-commerce AI Features',
+    description: 'AI-powered product recommendations and descriptions',
+    budget: {
+      amount: 1000,
+      currency: 'USD',
+      period: 'monthly'
+    },
+    costAllocation: {
+      department: 'product',
+      team: 'ai-ml',
+      purpose: 'customer-experience'
+    },
+    tags: ['production', 'customer-facing', 'revenue-generating']
+  }
+});
 
-const tokens = await TokenCounter.countTokens('Your text here', AIProvider.OpenAI, 'gpt-3.5-turbo');
+// Product description generation
+const productDesc = await ecommerceOptimizer.optimize({
+  prompt: 'Generate SEO-optimized description for wireless headphones',
+  model: 'gpt-4',
+  costAllocation: {
+    purpose: 'product-descriptions',
+    client: 'internal'
+  }
+});
+
+// Customer support automation
+const supportResponse = await ecommerceOptimizer.optimize({
+  prompt: 'Help customer with return policy question',
+  model: 'gpt-3.5-turbo',
+  projectId: 'customer-support', // Override default project
+  costAllocation: {
+    purpose: 'customer-support',
+    client: 'end-customer'
+  }
+});
 ```
 
-### Cost Comparison
+### Advanced Project Features
+
+#### 1. Multi-Project Analytics
 
 ```typescript
-import { compareCosts, MODELS } from 'ai-cost-tracker';
+// Get analytics for specific project
+const projectAnalytics = await optimizer.getProjectAnalytics('project-123', {
+  startDate: '2024-01-01',
+  endDate: '2024-01-31',
+  groupBy: 'day'
+});
 
-const comparison = compareCosts(
-  100, // prompt tokens
-  200, // completion tokens
-  [MODELS['gpt-4'], MODELS['gpt-3.5-turbo'], MODELS['claude-3-haiku']]
-);
+// Compare multiple projects
+const comparison = await optimizer.compareProjects(['project-123', 'project-456', 'project-789'], {
+  metric: 'cost',
+  period: 'last-30-days'
+});
 ```
 
-## 🔒 Security & Privacy
+#### 2. Budget Monitoring
 
-- API keys are never logged or transmitted
-- Local storage options for sensitive data
-- Configurable data retention policies
-- Support for custom storage implementations
+```typescript
+// Set up budget alerts
+const optimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true,
+  budgetAlerts: {
+    thresholds: [50, 75, 90], // Alert at 50%, 75%, 90% of budget
+    webhookUrl: 'https://your-app.com/budget-alerts',
+    email: 'admin@yourcompany.com'
+  }
+});
 
-## 🤝 Contributing
+// Check budget status
+const budgetStatus = await optimizer.getBudgetStatus('project-123');
+console.log(`Budget utilization: ${budgetStatus.utilizationPercentage}%`);
+```
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+#### 3. Team Collaboration
 
-## 📄 License
+```typescript
+// Set up team-based project access
+const optimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true,
+  teamConfig: {
+    userId: 'user-123',
+    teamId: 'ai-team',
+    role: 'developer', // developer, admin, viewer
+    accessibleProjects: ['project-123', 'project-456']
+  }
+});
+```
 
-MIT © HYPOTHESIZE TECH
+### Integration with Backend Dashboard
 
-## 🙏 Acknowledgments
+The npm package automatically syncs with the AI Cost Tracker dashboard when configured:
 
-- Built with TypeScript
-- Powered by AWS Bedrock for AI optimization
-- Inspired by the need for better AI cost management
+```typescript
+const optimizer = new AICostOptimizer({
+  apiKey: 'your-api-key',
+  provider: 'openai',
+  trackUsage: true,
+  dashboardConfig: {
+    endpoint: 'https://your-dashboard.com/api',
+    apiKey: 'dashboard-api-key', // Your dashboard API key from the AI Cost Optimizer dashboard
+    syncInterval: 60000, // Sync every minute
+    batchSize: 100 // Batch requests for efficiency
+  }
+});
+```
 
-## 📞 Support
+### Environment Variables
 
-- [Documentation](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/wiki)
-- [Issues](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/issues)
-- [Discussions](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/discussions)
+Set up your environment variables:
+
+```bash
+# Your AI Cost Optimizer Dashboard API Key
+API_KEY=dak_your_dashboard_api_key_here
+
+# Your AI Provider API Key (OpenAI, Anthropic, etc.)
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Best Practices for Project Integration
+
+#### 1. Consistent Project Naming
+
+```typescript
+// Use consistent naming conventions
+const PROJECT_IDS = {
+  CUSTOMER_SUPPORT: 'customer-support-2024',
+  PRODUCT_DESCRIPTIONS: 'product-desc-automation',
+  MARKETING_CONTENT: 'marketing-content-gen',
+  DATA_ANALYSIS: 'data-analysis-reports'
+};
+
+const result = await optimizer.optimize({
+  prompt: 'Analyze sales data',
+  model: 'gpt-4',
+  projectId: PROJECT_IDS.DATA_ANALYSIS
+});
+```
+
+#### 2. Hierarchical Project Structure
+
+```typescript
+// Use hierarchical project IDs for better organization
+const projectId = `${department}.${team}.${initiative}.${year}`;
+// Example: 'marketing.content.blog-automation.2024'
+
+const result = await optimizer.optimize({
+  prompt: 'Write blog post about AI trends',
+  model: 'gpt-4',
+  projectId: 'marketing.content.blog-automation.2024',
+  costAllocation: {
+    department: 'marketing',
+    team: 'content',
+    purpose: 'blog-content',
+    client: 'internal'
+  }
+});
+```
+
+#### 3. Environment-Based Configuration
+
+```typescript
+// Different configurations for different environments
+const config = {
+  development: {
+    projectId: 'dev-experiments',
+    budget: { amount: 100, currency: 'USD', period: 'monthly' }
+  },
+  staging: {
+    projectId: 'staging-tests',
+    budget: { amount: 500, currency: 'USD', period: 'monthly' }
+  },
+  production: {
+    projectId: 'prod-customer-features',
+    budget: { amount: 5000, currency: 'USD', period: 'monthly' }
+  }
+};
+
+const optimizer = new AICostOptimizer({
+  apiKey: process.env.OPENAI_API_KEY,
+  provider: 'openai',
+  trackUsage: true,
+  dashboardApiKey: process.env.API_KEY, // AI Cost Optimizer Dashboard API Key
+  ...config[process.env.NODE_ENV || 'development']
+});
+```
+
+## API Reference
+
+### Core Methods
+
+- `optimize(options)` - Optimize and execute AI requests
+- `trackUsage(data)` - Track usage data with project information
+- `getProjectAnalytics(projectId, filters)` - Get project-specific analytics
+- `compareProjects(projectIds, options)` - Compare multiple projects
+- `getBudgetStatus(projectId)` - Check budget utilization
+
+### Configuration Options
+
+- `projectId` - Associate requests with specific projects
+- `costAllocation` - Detailed cost allocation metadata
+- `budgetAlerts` - Set up budget monitoring and alerts
+- `teamConfig` - Configure team access and permissions
+- `dashboardConfig` - Sync with external dashboard
+
+## Examples
+
+See the [examples](./examples) directory for complete implementation examples:
+
+- [Basic Usage](./examples/basic-usage.ts)
+- [Advanced Optimization](./examples/advanced-optimization.ts)
+- [Project Management](./examples/project-management.ts)
+- [Team Collaboration](./examples/team-collaboration.ts)
+
+## Support
+
+For questions and support:
+
+- [Documentation](./docs)
+- [GitHub Issues](https://github.com/your-repo/ai-cost-optimizer/issues)
+- [Discord Community](https://discord.gg/your-community)
+
+## License
+
+MIT License - see [LICENSE](./LICENSE) file for details.

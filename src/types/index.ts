@@ -27,7 +27,7 @@ export interface CostEstimate {
 
 export interface OptimizationSuggestion {
   id: string;
-  type: 'prompt' | 'model' | 'batching' | 'caching';
+  type: 'prompt' | 'model' | 'batching' | 'caching' | 'compression' | 'context_trimming' | 'request_fusion';
   originalPrompt?: string;
   optimizedPrompt?: string;
   estimatedSavings: number;
@@ -35,6 +35,43 @@ export interface OptimizationSuggestion {
   explanation: string;
   implementation?: string;
   tradeoffs?: string;
+  compressionDetails?: CompressionDetails;
+  contextTrimDetails?: ContextTrimDetails;
+  fusionDetails?: RequestFusionDetails;
+}
+
+export interface CompressionDetails {
+  technique: 'json_compression' | 'pattern_replacement' | 'abbreviation' | 'deduplication';
+  originalSize: number;
+  compressedSize: number;
+  compressionRatio: number;
+  reversible: boolean;
+}
+
+export interface ContextTrimDetails {
+  technique: 'summarization' | 'relevance_filtering' | 'sliding_window' | 'importance_scoring';
+  originalMessages: number;
+  trimmedMessages: number;
+  preservedContext: string[];
+}
+
+export interface RequestFusionDetails {
+  fusedRequests: string[];
+  fusionStrategy: 'sequential' | 'parallel' | 'hierarchical';
+  estimatedTimeReduction: number;
+}
+
+export interface OptimizationResult {
+  id: string;
+  suggestions: OptimizationSuggestion[];
+  totalSavings: number;
+  appliedOptimizations: string[];
+  metadata: {
+    processingTime: number;
+    originalTokens: number;
+    optimizedTokens: number;
+    techniques: string[];
+  };
 }
 
 export interface UsageAnalytics {
@@ -121,11 +158,29 @@ export interface OptimizationConfig {
   enablePromptOptimization: boolean;
   enableModelSuggestions: boolean;
   enableCachingSuggestions: boolean;
+  enableCompression?: boolean;
+  enableContextTrimming?: boolean;
+  enableRequestFusion?: boolean;
   bedrockConfig?: BedrockConfig;
+  compressionSettings?: {
+    minCompressionRatio: number;
+    jsonCompressionThreshold: number;
+  };
+  contextTrimmingSettings?: {
+    maxContextLength: number;
+    preserveRecentMessages: number;
+    summarizationModel?: string;
+  };
+  requestFusionSettings?: {
+    maxFusionBatch: number;
+    fusionWaitTime: number;
+  };
   thresholds: {
     highCostPerRequest: number;
     highTokenUsage: number;
     frequencyThreshold: number;
+    batchingThreshold?: number;
+    modelDowngradeConfidence?: number;
   };
 }
 

@@ -28,7 +28,7 @@ export class SuggestionEngine {
       ...config
     };
 
-    this.promptOptimizer = new PromptOptimizer(config.bedrockConfig);
+    this.promptOptimizer = new PromptOptimizer(undefined, config.bedrockConfig);
     this.costAnalyzer = new CostAnalyzer();
   }
 
@@ -68,13 +68,13 @@ export class SuggestionEngine {
 
     for (const request of highCostRequests.slice(0, 5)) {
       // Optimize the prompt
-      const promptSuggestions = await this.promptOptimizer.optimizePrompt(
+      const promptResult = await this.promptOptimizer.optimizePrompt(
         request.prompt,
         request.model,
         request.provider
       );
 
-      suggestions.push(...promptSuggestions);
+      suggestions.push(...promptResult.suggestions);
 
       // Suggest model downgrade if applicable
       const modelSuggestion = await this.promptOptimizer.suggestModelDowngrade(

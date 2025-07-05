@@ -5,6 +5,51 @@ import AICostTracker, {
     TrackerConfig
 } from '../src';
 
+// Example 0: Dashboard Integration with API Key
+async function dashboardIntegrationExample() {
+    console.log('=== Dashboard Integration Example ===\n');
+
+    // Configure the tracker with dashboard integration
+    const config: TrackerConfig = {
+        providers: [
+            {
+                provider: AIProvider.OpenAI,
+                apiKey: process.env.OPENAI_API_KEY!
+            }
+        ],
+        optimization: {
+            enablePromptOptimization: true,
+            enableModelSuggestions: true,
+            enableCachingSuggestions: true
+        },
+        tracking: {
+            enableAutoTracking: true,
+            storageType: 'memory'
+        },
+        // Dashboard integration using API key
+        apiUrl: 'http://localhost:8000/api'
+    };
+
+    // Initialize the tracker - this will use the API_KEY environment variable
+    const tracker = await AICostTracker.create(config);
+
+    console.log('✅ Successfully connected to AI Cost Optimizer Dashboard');
+
+    // Make a tracked request that will sync with the dashboard
+    const response = await tracker.makeRequest({
+        model: 'gpt-3.5-turbo',
+        messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: 'What is the capital of France?' }
+        ],
+        maxTokens: 50,
+        temperature: 0.7
+    });
+
+    console.log('Response:', response.choices[0].message.content);
+    console.log('✅ Usage data automatically synced with dashboard');
+}
+
 // Example 1: Basic setup and cost estimation
 async function basicExample() {
     // Configure the tracker
@@ -230,6 +275,14 @@ async function exportUsageData() {
 // Run examples
 if (require.main === module) {
     (async () => {
+        // Check if API_KEY is set for dashboard integration
+        if (process.env.API_KEY) {
+            await dashboardIntegrationExample();
+            console.log('\n');
+        } else {
+            console.log('ℹ️  Set API_KEY environment variable to test dashboard integration\n');
+        }
+
         console.log('=== Basic Usage Example ===\n');
         await basicExample();
 

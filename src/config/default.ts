@@ -14,6 +14,9 @@ export const defaultConfig: Partial<TrackerConfig> = {
     enablePromptOptimization: true,
     enableModelSuggestions: true,
     enableCachingSuggestions: true,
+    enableCompression: true,
+    enableContextTrimming: true,
+    enableRequestFusion: true,
     thresholds: optimizationThresholds
   },
   tracking: {

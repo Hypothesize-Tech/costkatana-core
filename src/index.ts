@@ -4,6 +4,10 @@ export type {
   UsageMetadata,
   CostEstimate,
   OptimizationSuggestion,
+  OptimizationResult,
+  CompressionDetails,
+  ContextTrimDetails,
+  RequestFusionDetails,
   UsageAnalytics,
   ModelUsage,
   ProviderCost,
@@ -51,6 +55,9 @@ export { UsageTracker } from './analyzers/usage-tracker';
 // Optimizers
 export { PromptOptimizer } from './optimizers/prompt-optimizer';
 export { SuggestionEngine } from './optimizers/suggestion-engine';
+export { PromptCompressor } from './optimizers/prompt-compressor';
+export { ContextTrimmer, ConversationMessage } from './optimizers/context-trimmer';
+export { RequestFusion, FusionRequest } from './optimizers/request-fusion';
 export type { SuggestionEngineConfig } from './optimizers/suggestion-engine';
 
 // Utilities
@@ -105,12 +112,14 @@ import {
   AIProvider,
   UsageMetadata,
   CostEstimate,
-  OptimizationSuggestion
+  OptimizationSuggestion,
+  OptimizationConfig
 } from './types';
 import { createProvider, BaseProvider } from './providers';
 import { CostAnalyzer } from './analyzers/cost-analyzer';
 import { UsageTracker } from './analyzers/usage-tracker';
 import { SuggestionEngine } from './optimizers/suggestion-engine';
+import { PromptOptimizer } from './optimizers/prompt-optimizer';
 import { validateTrackerConfig, validatePrompt, validateUserId } from './utils/validators';
 import { logger } from './utils/logger';
 import { optimizationThresholds } from './config/default';
@@ -127,6 +136,7 @@ export class AICostTracker {
   private costAnalyzer: CostAnalyzer;
   private usageTracker: UsageTracker;
   private suggestionEngine: SuggestionEngine;
+  private promptOptimizer: PromptOptimizer;
   private apiClient: AxiosInstance;
 
   private constructor(config: TrackerConfig, apiClient: AxiosInstance) {
@@ -148,23 +158,26 @@ export class AICostTracker {
       thresholds: optimizationThresholds
     });
 
+    // Initialize the enhanced prompt optimizer
+    this.promptOptimizer = new PromptOptimizer(config.optimization, config.optimization.bedrockConfig);
+
     logger.info('AICostTracker initialized', {
       providers: config.providers.map(p => p.provider)
     });
   }
 
   public static async create(config: TrackerConfig): Promise<AICostTracker> {
-    const token = process.env.USER_TOKEN;
+    const apiKey = process.env.API_KEY;
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
-    if (!token) {
-      throw new Error('USER_TOKEN environment variable not set. Please get your token from the AI Cost Optimizer dashboard.');
+    if (!apiKey) {
+      throw new Error('API_KEY environment variable not set. Please get your API key from the AI Cost Optimizer dashboard.');
     }
 
     const apiClient = axios.create({
       baseURL: apiUrl,
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -173,7 +186,7 @@ export class AICostTracker {
       await apiClient.get('/user/profile');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        throw new Error('Invalid or expired USER_TOKEN. Please get a new token from the AI Cost Optimizer dashboard.');
+        throw new Error('Invalid or expired API_KEY. Please get a new API key from the AI Cost Optimizer dashboard.');
       }
     }
 
@@ -491,6 +504,30 @@ export class AICostTracker {
       });
     }
     */
+  }
+
+  /**
+   * Get the prompt optimizer instance for direct access
+   */
+  getOptimizer(): PromptOptimizer {
+    return this.promptOptimizer;
+  }
+
+  /**
+   * Get the optimization configuration
+   */
+  getOptimizationConfig(): OptimizationConfig {
+    return this.config.optimization;
+  }
+
+  /**
+   * Update optimization configuration
+   */
+  updateOptimizationConfig(config: Partial<OptimizationConfig>): void {
+    this.config.optimization = { ...this.config.optimization, ...config };
+    // Recreate the optimizer with new config
+    this.promptOptimizer = new PromptOptimizer(this.config.optimization, this.config.optimization.bedrockConfig);
+    logger.info('Optimization configuration updated', config);
   }
 }
 

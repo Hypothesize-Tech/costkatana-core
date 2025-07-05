@@ -1,29 +1,69 @@
-import { OptimizationSuggestion, BedrockConfig, AIProvider } from '../types';
+import {
+  OptimizationSuggestion,
+  BedrockConfig,
+  AIProvider,
+  OptimizationConfig,
+  OptimizationResult
+} from '../types';
 import { BedrockProvider } from '../providers/bedrock';
 import { TokenCounter } from '../analyzers/token-counter';
+import { PromptCompressor } from './prompt-compressor';
+import { ContextTrimmer, ConversationMessage } from './context-trimmer';
+import { RequestFusion, FusionRequest } from './request-fusion';
 import { v4 as uuidv4 } from 'uuid';
 import { optimizationThresholds } from '../config/default';
 
 export class PromptOptimizer {
   private bedrockProvider?: BedrockProvider;
   private optimizationModel: string;
+  private promptCompressor: PromptCompressor;
+  private contextTrimmer: ContextTrimmer;
+  private requestFusion: RequestFusion;
+  private config: OptimizationConfig;
 
-  constructor(bedrockConfig?: BedrockConfig) {
+  constructor(config?: OptimizationConfig, bedrockConfig?: BedrockConfig) {
     this.optimizationModel = bedrockConfig?.modelId || 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+
+    // Initialize default config with all features
+    this.config = {
+      enablePromptOptimization: true,
+      enableModelSuggestions: true,
+      enableCachingSuggestions: true,
+      enableCompression: true,
+      enableContextTrimming: true,
+      enableRequestFusion: true,
+      compressionSettings: {
+        minCompressionRatio: 0.7,
+        jsonCompressionThreshold: 100
+      },
+      contextTrimmingSettings: {
+        maxContextLength: 4000,
+        preserveRecentMessages: 3,
+        summarizationModel: 'anthropic.claude-3-haiku-20240307-v1:0'
+      },
+      requestFusionSettings: {
+        maxFusionBatch: 5,
+        fusionWaitTime: 5000
+      },
+      thresholds: optimizationThresholds,
+      ...config
+    };
 
     if (bedrockConfig) {
       this.bedrockProvider = new BedrockProvider({
         provider: AIProvider.AWSBedrock,
         region: bedrockConfig.region,
-        optimization: {
-          enablePromptOptimization: true,
-          enableModelSuggestions: true,
-          enableCachingSuggestions: true,
-          bedrockConfig,
-          thresholds: optimizationThresholds
-        }
+        optimization: this.config
       });
     }
+
+    // Initialize new optimization modules
+    this.promptCompressor = new PromptCompressor();
+    this.contextTrimmer = new ContextTrimmer(bedrockConfig);
+    this.requestFusion = new RequestFusion(
+      this.config.requestFusionSettings?.fusionWaitTime,
+      this.config.requestFusionSettings?.maxFusionBatch
+    );
   }
 
   async optimizePrompt(
@@ -31,20 +71,200 @@ export class PromptOptimizer {
     targetModel: string,
     targetProvider: AIProvider,
     context?: Context
-  ): Promise<OptimizationSuggestion[]> {
+  ): Promise<OptimizationResult> {
+    const startTime = Date.now();
     const suggestions: OptimizationSuggestion[] = [];
+    const appliedOptimizations: string[] = [];
 
-    // Local optimizations (no AI required)
-    suggestions.push(...this.getLocalOptimizations(prompt, targetModel, targetProvider));
+    // Track original tokens
+    const originalTokens = await TokenCounter.countTokens(prompt, targetProvider, targetModel);
 
-    // AI-powered optimizations (if Bedrock is configured)
-    if (this.bedrockProvider) {
-      suggestions.push(
-        ...(await this.getAIOptimizations(prompt, targetModel, targetProvider, context))
+    // 1. Local optimizations (no AI required)
+    if (this.config.enablePromptOptimization) {
+      suggestions.push(...this.getLocalOptimizations(prompt, targetModel, targetProvider));
+    }
+
+    // 2. Compression optimizations
+    if (this.config.enableCompression) {
+      const compressionSuggestions = await this.promptCompressor.compressPrompt(
+        prompt,
+        targetModel,
+        targetProvider
+      );
+      suggestions.push(...compressionSuggestions);
+      if (compressionSuggestions.length > 0) {
+        appliedOptimizations.push('compression');
+      }
+    }
+
+    // 3. Context trimming (if conversation history provided)
+    if (this.config.enableContextTrimming && context?.conversationHistory) {
+      const trimmingSuggestions = await this.contextTrimmer.trimContext(
+        context.conversationHistory,
+        targetModel,
+        targetProvider,
+        this.config.contextTrimmingSettings?.maxContextLength,
+        this.config.contextTrimmingSettings?.preserveRecentMessages
+      );
+      suggestions.push(...trimmingSuggestions);
+      if (trimmingSuggestions.length > 0) {
+        appliedOptimizations.push('context_trimming');
+      }
+    }
+
+    // 4. AI-powered optimizations (if Bedrock is configured)
+    if (this.bedrockProvider && this.config.enablePromptOptimization) {
+      const aiSuggestions = await this.getAIOptimizations(prompt, targetModel, targetProvider, context);
+      suggestions.push(...aiSuggestions);
+      if (aiSuggestions.length > 0) {
+        appliedOptimizations.push('ai_optimization');
+      }
+    }
+
+    // Sort by estimated savings
+    const sortedSuggestions = suggestions.sort((a, b) => b.estimatedSavings - a.estimatedSavings);
+
+    // Calculate total potential savings
+    const bestSuggestion = sortedSuggestions[0];
+    const optimizedTokens = bestSuggestion?.optimizedPrompt
+      ? await TokenCounter.countTokens(bestSuggestion.optimizedPrompt, targetProvider, targetModel)
+      : originalTokens;
+
+    const totalSavings = ((originalTokens - optimizedTokens) / originalTokens) * 100;
+
+    return {
+      id: uuidv4(),
+      suggestions: sortedSuggestions,
+      totalSavings,
+      appliedOptimizations,
+      metadata: {
+        processingTime: Date.now() - startTime,
+        originalTokens,
+        optimizedTokens,
+        techniques: appliedOptimizations
+      }
+    };
+  }
+
+  async optimizeRequests(
+    requests: FusionRequest[]
+  ): Promise<OptimizationResult> {
+    const startTime = Date.now();
+    const suggestions: OptimizationSuggestion[] = [];
+    const appliedOptimizations: string[] = [];
+
+    // Calculate original tokens
+    let originalTokens = 0;
+    for (const request of requests) {
+      originalTokens += await TokenCounter.countTokens(
+        request.prompt,
+        request.provider,
+        request.model
       );
     }
 
-    return suggestions.sort((a, b) => b.confidence - a.confidence);
+    // Request fusion optimizations
+    if (this.config.enableRequestFusion && requests.length > 1) {
+      const fusionSuggestions = await this.requestFusion.analyzeRequestsForFusion(requests);
+      suggestions.push(...fusionSuggestions);
+      if (fusionSuggestions.length > 0) {
+        appliedOptimizations.push('request_fusion');
+      }
+    }
+
+    // Sort by estimated savings
+    const sortedSuggestions = suggestions.sort((a, b) => b.estimatedSavings - a.estimatedSavings);
+
+    // Calculate total potential savings
+    const bestSuggestion = sortedSuggestions[0];
+    const optimizedTokens = bestSuggestion?.optimizedPrompt
+      ? await TokenCounter.countTokens(
+        bestSuggestion.optimizedPrompt,
+        requests[0].provider,
+        requests[0].model
+      )
+      : originalTokens;
+
+    const totalSavings = ((originalTokens - optimizedTokens) / originalTokens) * 100;
+
+    return {
+      id: uuidv4(),
+      suggestions: sortedSuggestions,
+      totalSavings,
+      appliedOptimizations,
+      metadata: {
+        processingTime: Date.now() - startTime,
+        originalTokens,
+        optimizedTokens,
+        techniques: appliedOptimizations
+      }
+    };
+  }
+
+  async optimizeConversation(
+    messages: ConversationMessage[],
+    targetModel: string,
+    targetProvider: AIProvider
+  ): Promise<OptimizationResult> {
+    const startTime = Date.now();
+    const suggestions: OptimizationSuggestion[] = [];
+    const appliedOptimizations: string[] = [];
+
+    // Calculate original context size
+    const originalContext = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+    const originalTokens = await TokenCounter.countTokens(originalContext, targetProvider, targetModel);
+
+    // Context trimming optimizations
+    if (this.config.enableContextTrimming) {
+      const trimmingSuggestions = await this.contextTrimmer.trimContext(
+        messages,
+        targetModel,
+        targetProvider,
+        this.config.contextTrimmingSettings?.maxContextLength,
+        this.config.contextTrimmingSettings?.preserveRecentMessages
+      );
+      suggestions.push(...trimmingSuggestions);
+      if (trimmingSuggestions.length > 0) {
+        appliedOptimizations.push('context_trimming');
+      }
+    }
+
+    // Apply compression to the entire conversation
+    if (this.config.enableCompression) {
+      const compressionSuggestions = await this.promptCompressor.compressPrompt(
+        originalContext,
+        targetModel,
+        targetProvider
+      );
+      suggestions.push(...compressionSuggestions);
+      if (compressionSuggestions.length > 0) {
+        appliedOptimizations.push('compression');
+      }
+    }
+
+    // Sort by estimated savings
+    const sortedSuggestions = suggestions.sort((a, b) => b.estimatedSavings - a.estimatedSavings);
+
+    // Calculate total potential savings
+    const bestSuggestion = sortedSuggestions[0];
+    const optimizedTokens = bestSuggestion?.optimizedPrompt
+      ? await TokenCounter.countTokens(bestSuggestion.optimizedPrompt, targetProvider, targetModel)
+      : originalTokens;
+
+    const totalSavings = ((originalTokens - optimizedTokens) / originalTokens) * 100;
+
+    return {
+      id: uuidv4(),
+      suggestions: sortedSuggestions,
+      totalSavings,
+      appliedOptimizations,
+      metadata: {
+        processingTime: Date.now() - startTime,
+        originalTokens,
+        optimizedTokens,
+        techniques: appliedOptimizations
+      }
+    };
   }
 
   private getLocalOptimizations(
@@ -337,6 +557,7 @@ interface Context {
   previousPrompts?: string[];
   expectedOutput?: string;
   constraints?: string[];
+  conversationHistory?: ConversationMessage[];
 }
 
 interface BedrockOptimization {
