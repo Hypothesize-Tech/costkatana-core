@@ -1,38 +1,81 @@
 # AI Cost Optimizer
 
-A comprehensive toolkit for optimizing AI model costs, tracking usage, and analyzing performance across multiple providers.
+A comprehensive toolkit for optimizing AI model costs, tracking usage, and analyzing performance across multiple providers with centralized dashboard analytics.
 
 ## Features
 
 - **Multi-Provider Support**: OpenAI, Anthropic, Google AI, AWS Bedrock, Cohere, and more
 - **Cost Optimization**: Intelligent prompt compression, context trimming, and request fusion
-- **Usage Tracking**: Detailed analytics and cost monitoring
+- **Usage Tracking**: Detailed analytics and cost monitoring with dashboard integration
 - **Project Management**: Organize usage by projects with budget tracking
-- **Real-time Analytics**: Monitor costs, tokens, and performance metrics
+- **Real-time Analytics**: Monitor costs, tokens, and performance metrics via web dashboard
 - **Suggestion Engine**: AI-powered recommendations for cost reduction
+
+## Prerequisites
+
+**⚠️ Important: Registration Required**
+
+Before using this package, you **must**:
+
+1. **Register at [costkatana.com](https://costkatana.com)**
+2. **Create a project** in your Cost Katana dashboard
+3. **Get your API Key and Project ID** from the dashboard settings
+
+This package automatically syncs all usage data with your Cost Katana dashboard for comprehensive analytics and cost tracking.
 
 ## Installation
 
 ```bash
-npm install ai-cost-optimizer
+npm install ai-cost-tracker
+```
+
+## Environment Setup
+
+Create a `.env` file in your project root:
+
+```bash
+# Required: Get these from your costkatana.com dashboard
+API_KEY=dak_your_dashboard_api_key_here
+PROJECT_ID=your_project_id_here
+
+# Your AI provider API keys
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# ... other provider keys as needed
 ```
 
 ## Quick Start
 
 ```typescript
-import { AICostOptimizer } from 'ai-cost-optimizer';
+import AICostTracker, { AIProvider } from 'ai-cost-tracker';
 
-const optimizer = new AICostOptimizer({
-  apiKey: 'your-api-key',
-  provider: 'openai',
-  trackUsage: true
+// Initialize with your provider configuration
+const tracker = await AICostTracker.create({
+  providers: [
+    {
+      provider: AIProvider.OpenAI,
+      apiKey: process.env.OPENAI_API_KEY
+    }
+  ],
+  optimization: {
+    enablePromptOptimization: true,
+    enableModelSuggestions: true,
+    enableCachingSuggestions: true
+  },
+  tracking: {
+    enableAutoTracking: true
+  }
 });
 
-const result = await optimizer.optimize({
-  prompt: 'Your prompt here',
-  model: 'gpt-4',
-  projectId: 'project-123' // Optional: Associate with a project
+// Make a tracked request (automatically syncs with costkatana.com dashboard)
+const response = await tracker.makeRequest({
+  model: 'gpt-3.5-turbo',
+  messages: [{ role: 'user', content: 'Your prompt here' }],
+  maxTokens: 150
 });
+
+console.log('Response:', response.choices[0].message.content);
+// Usage data is automatically sent to your costkatana.com dashboard
 ```
 
 ## Project Integration
@@ -52,7 +95,7 @@ Projects help you:
 #### 1. Basic Project Configuration
 
 ```typescript
-import { AICostOptimizer } from 'ai-cost-optimizer';
+import { AICostOptimizer } from 'ai-cost-tracker';
 
 const optimizer = new AICostOptimizer({
   apiKey: 'your-api-key',
@@ -228,34 +271,44 @@ const optimizer = new AICostOptimizer({
 });
 ```
 
-### Integration with Backend Dashboard
+### Integration with Cost Katana Dashboard
 
-The npm package automatically syncs with the AI Cost Tracker dashboard when configured:
+The npm package automatically syncs with the Cost Katana dashboard at [costkatana.com](https://costkatana.com):
 
 ```typescript
-const optimizer = new AICostOptimizer({
-  apiKey: 'your-api-key',
-  provider: 'openai',
-  trackUsage: true,
-  dashboardConfig: {
-    endpoint: 'https://your-dashboard.com/api',
-    apiKey: 'dashboard-api-key', // Your dashboard API key from the AI Cost Optimizer dashboard
-    syncInterval: 60000, // Sync every minute
-    batchSize: 100 // Batch requests for efficiency
+// All tracking happens automatically when you use the API
+const tracker = await AICostTracker.create({
+  providers: [
+    {
+      provider: AIProvider.OpenAI,
+      apiKey: process.env.OPENAI_API_KEY
+    }
+  ],
+  tracking: {
+    enableAutoTracking: true // Data syncs automatically to costkatana.com
   }
+});
+
+// Every request is automatically tracked and sent to your dashboard
+const response = await tracker.makeRequest({
+  model: 'gpt-3.5-turbo',
+  messages: [{ role: 'user', content: 'Hello world' }]
 });
 ```
 
 ### Environment Variables
 
-Set up your environment variables:
+Required environment variables from your Cost Katana dashboard:
 
 ```bash
-# Your AI Cost Optimizer Dashboard API Key
+# Get these from costkatana.com dashboard settings
 API_KEY=dak_your_dashboard_api_key_here
+PROJECT_ID=your_project_id_here
 
-# Your AI Provider API Key (OpenAI, Anthropic, etc.)
+# Your AI Provider API Keys
 OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# ... other provider keys as needed
 ```
 
 ### Best Practices for Project Integration

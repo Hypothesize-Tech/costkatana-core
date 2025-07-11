@@ -5,11 +5,12 @@ import AICostTracker, {
     TrackerConfig
 } from '../src';
 
-// Test: ProjectId tracking validation
+// Test: ProjectId tracking validation with Cost Katana
 async function testProjectIdTracking() {
-    console.log('=== Testing ProjectId Tracking ===\n');
+    console.log('=== Testing ProjectId Tracking with Cost Katana ===\n');
+    console.log('📊 This test validates automatic syncing with costkatana.com\n');
 
-    // Configure the tracker with dashboard integration
+    // Configure the tracker with Cost Katana dashboard integration
     const config: TrackerConfig = {
         providers: [
             {
@@ -20,25 +21,30 @@ async function testProjectIdTracking() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0.1,
+                highTokenUsage: 2000,
+                frequencyThreshold: 10
+            }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
-        },
-        // Dashboard integration using API key
-        apiUrl: 'http://localhost:8000/api'
+            enableAutoTracking: true
+        }
+        // Automatically connects to costkatana.com using environment variables
     };
 
     try {
-        // Initialize the tracker
+        // Initialize the tracker - connects to costkatana.com automatically
         const tracker = await AICostTracker.create(config);
-        console.log('✅ Tracker initialized successfully');
+        console.log('✅ Tracker initialized and connected to Cost Katana dashboard');
+        console.log('🔑 Using credentials from environment variables\n');
 
         // Test projectId tracking
-        const testProjectId = '507f1f77bcf86cd799439011'; // Valid MongoDB ObjectId
+        const testProjectId = process.env.PROJECT_ID; // Use actual project ID from environment
 
         console.log(`📊 Testing projectId tracking with projectId: ${testProjectId}`);
+        console.log('📈 All data will be synced to your costkatana.com dashboard\n');
 
         // Test 1: Direct trackUsage with projectId
         await tracker.trackUsage({
@@ -48,14 +54,14 @@ async function testProjectIdTracking() {
             completionTokens: 150,
             totalTokens: 250,
             estimatedCost: 0.0005,
-            prompt: "Test prompt for projectId validation",
-            completion: "Test completion response",
+            prompt: "Test prompt for projectId validation with Cost Katana",
+            completion: "Test completion response synced to costkatana.com",
             responseTime: 1200,
-            projectId: testProjectId,  // This should be passed through
-            tags: ['test', 'projectId-validation']
+            projectId: testProjectId,  // This should be passed through to costkatana.com
+            tags: ['test', 'projectId-validation', 'costkatana']
         });
 
-        console.log('✅ Test 1: Direct trackUsage with projectId - SUCCESS');
+        console.log('✅ Test 1: Direct trackUsage with projectId - SUCCESS (synced to costkatana.com)');
 
         // Test 2: Make tracked request with projectId in metadata
         const response = await tracker.makeRequest({
@@ -92,10 +98,11 @@ async function testProjectIdTracking() {
         console.log('✅ Test 3: trackUsage without projectId - SUCCESS (handled gracefully)');
 
         console.log('\n🎉 All projectId tracking tests completed successfully!');
-        console.log('\nCheck your backend logs to verify that:');
-        console.log('1. projectId is properly passed in the first two tests');
-        console.log('2. projectId is undefined (not an error) in the third test');
-        console.log('3. All usage records are saved correctly to the database');
+        console.log('\n📊 Check your Cost Katana dashboard at https://costkatana.com to verify:');
+        console.log('1. All test usage data appears in your project dashboard');
+        console.log('2. ProjectId is properly associated with tracked requests');
+        console.log('3. Cost and token metrics are accurately recorded');
+        console.log('4. Tags and metadata are preserved in the dashboard analytics');
 
     } catch (error) {
         console.error('❌ ProjectId tracking test failed:', error);
@@ -108,15 +115,24 @@ async function testProjectIdTracking() {
 // Run the test
 if (require.main === module) {
     (async () => {
-        // Check if API_KEY is set for dashboard integration
+        // Check if required environment variables are set for Cost Katana integration
         if (!process.env.API_KEY) {
             console.error('❌ API_KEY environment variable is required for this test');
-            console.log('💡 Set your API_KEY from the AI Cost Optimizer dashboard');
+            console.log('💡 Get your API_KEY from your Cost Katana dashboard at https://costkatana.com');
+            console.log('📋 Steps: 1) Register at costkatana.com 2) Create a project 3) Copy API_KEY from settings');
+            process.exit(1);
+        }
+
+        if (!process.env.PROJECT_ID) {
+            console.error('❌ PROJECT_ID environment variable is required for this test');
+            console.log('💡 Get your PROJECT_ID from your Cost Katana dashboard at https://costkatana.com');
+            console.log('📋 Steps: 1) Go to your project 2) Copy PROJECT_ID from project settings');
             process.exit(1);
         }
 
         if (!process.env.OPENAI_API_KEY) {
             console.error('❌ OPENAI_API_KEY environment variable is required for this test');
+            console.log('💡 Get your OpenAI API key from https://platform.openai.com/api-keys');
             process.exit(1);
         }
 

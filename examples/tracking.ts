@@ -2,8 +2,6 @@
 
 import AICostTracker, {
     AIProvider,
-    CustomStorage,
-    UsageMetadata
 } from '../src';
 
 // Example 1: Basic tracking with file storage
@@ -23,9 +21,7 @@ async function fileStorageExample() {
             }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'file',
-            retentionDays: 30 // Keep data for 30 days
+            enableAutoTracking: true
         }
     });
 
@@ -56,41 +52,8 @@ async function fileStorageExample() {
     console.log(`Total Tokens: ${history.totalTokens}`);
 }
 
-// Example 2: Custom storage implementation
-class MongoDBStorage implements CustomStorage {
-    private collection: any; // Mock MongoDB collection
-
-    constructor() {
-        console.log('Initialized MongoDB storage (mock)');
-        this.collection = [];
-    }
-
-    async save(data: UsageMetadata): Promise<void> {
-        this.collection.push(data);
-        console.log(`Saved usage data to MongoDB: ${data.model} - ${data.totalTokens} tokens`);
-    }
-
-    async load(filter?: any): Promise<UsageMetadata[]> {
-        // In a real implementation, you might filter by dates or tags from the backend
-        let results = [...this.collection];
-        if (filter?.startDate) {
-            results = results.filter(item => new Date(item.timestamp) >= filter.startDate);
-        }
-        if (filter?.endDate) {
-            results = results.filter(item => new Date(item.timestamp) <= filter.endDate);
-        }
-        return results;
-    }
-
-    async clear(): Promise<void> {
-        this.collection = [];
-        console.log('Cleared MongoDB collection');
-    }
-}
-
-async function customStorageExample() {
-    const customStorage = new MongoDBStorage();
-
+// Example 2: Cost Katana Dashboard Integration
+async function costKatanaDashboardExample() {
     const tracker = await AICostTracker.create({
         providers: [
             { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }
@@ -106,15 +69,14 @@ async function customStorageExample() {
             }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'custom',
-            customStorage: customStorage
+            enableAutoTracking: true
         }
     });
 
-    console.log('\nTracking with custom MongoDB storage...\n');
+    console.log('\nTracking with Cost Katana dashboard integration...\n');
+    console.log('📊 All usage data automatically syncs to https://costkatana.com\n');
 
-    // Track some usage
+    // Track some usage - automatically synced to Cost Katana dashboard
     await tracker.trackUsage({
         provider: AIProvider.OpenAI,
         model: 'gpt-4',
@@ -122,12 +84,14 @@ async function customStorageExample() {
         completionTokens: 200,
         totalTokens: 300,
         estimatedCost: 0.021,
-        prompt: "Custom storage test",
+        prompt: "Cost Katana dashboard integration test",
         responseTime: 1500,
-        projectId: "project-123"  // Project-specific tracking
+        projectId: process.env.PROJECT_ID,  // Uses project from environment
+        tags: ['dashboard-test', 'integration']
     });
 
-    console.log('Usage tracked successfully');
+    console.log('✅ Usage tracked and synced to Cost Katana dashboard');
+    console.log('📈 View detailed analytics at https://costkatana.com');
 }
 
 // Example 3: Real-time tracking dashboard
@@ -148,8 +112,7 @@ async function realtimeDashboard() {
             }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
+            enableAutoTracking: true
         }
     });
 
@@ -221,8 +184,7 @@ async function exportAndBackup() {
             }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
+            enableAutoTracking: true
         }
     });
 
@@ -270,8 +232,8 @@ if (require.main === module) {
         console.log('=== File Storage Example ===');
         await fileStorageExample();
 
-        console.log('\n=== Custom Storage Example ===');
-        await customStorageExample();
+        console.log('\n=== Cost Katana Dashboard Integration Example ===');
+        await costKatanaDashboardExample();
 
         console.log('\n=== Export and Backup Example ===');
         await exportAndBackup();

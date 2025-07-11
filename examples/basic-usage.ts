@@ -5,9 +5,10 @@ import AICostTracker, {
     TrackerConfig
 } from '../src';
 
-// Example 0: Dashboard Integration with API Key
+// Example 0: Cost Katana Dashboard Integration
 async function dashboardIntegrationExample() {
-    console.log('=== Dashboard Integration Example ===\n');
+    console.log('=== Cost Katana Dashboard Integration Example ===\n');
+    console.log('📊 This example demonstrates automatic syncing with costkatana.com\n');
 
     // Configure the tracker with dashboard integration
     const config: TrackerConfig = {
@@ -20,22 +21,26 @@ async function dashboardIntegrationExample() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0.1,
+                highTokenUsage: 2000,
+                frequencyThreshold: 10
+            }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
-        },
-        // Dashboard integration using API key
-        apiUrl: 'http://localhost:8000/api'
+            enableAutoTracking: true
+        }
+        // No additional config needed - automatically syncs with costkatana.com
     };
 
-    // Initialize the tracker - this will use the API_KEY environment variable
+    // Initialize the tracker - uses API_KEY and PROJECT_ID from environment
     const tracker = await AICostTracker.create(config);
 
-    console.log('✅ Successfully connected to AI Cost Optimizer Dashboard');
+    console.log('✅ Successfully connected to Cost Katana dashboard at costkatana.com');
+    console.log('🔑 Using API_KEY and PROJECT_ID from environment variables\n');
 
-    // Make a tracked request that will sync with the dashboard
+    // Make a tracked request that will automatically sync with costkatana.com
     const response = await tracker.makeRequest({
         model: 'gpt-3.5-turbo',
         messages: [
@@ -47,7 +52,8 @@ async function dashboardIntegrationExample() {
     });
 
     console.log('Response:', response.choices[0].message.content);
-    console.log('✅ Usage data automatically synced with dashboard');
+    console.log('✅ Usage data automatically synced with your costkatana.com dashboard');
+    console.log('📈 View detailed analytics at https://costkatana.com\n');
 }
 
 // Example 1: Basic setup and cost estimation
@@ -67,11 +73,15 @@ async function basicExample() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0.1,
+                highTokenUsage: 2000,
+                frequencyThreshold: 10
+            }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
+            enableAutoTracking: true
         }
     };
 
@@ -131,11 +141,15 @@ async function compareModels() {
         optimization: {
             enablePromptOptimization: true,
             enableModelSuggestions: true,
-            enableCachingSuggestions: true
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0.1,
+                highTokenUsage: 2000,
+                frequencyThreshold: 10
+            }
         },
         tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
+            enableAutoTracking: true
         }
     });
 
@@ -276,12 +290,23 @@ async function exportUsageData() {
 // Run examples
 if (require.main === module) {
     (async () => {
-        // Check if API_KEY is set for dashboard integration
-        if (process.env.API_KEY) {
+        // Check if required environment variables are set
+        const hasApiKey = process.env.API_KEY;
+        const hasProjectId = process.env.PROJECT_ID;
+
+        if (hasApiKey && hasProjectId) {
             await dashboardIntegrationExample();
             console.log('\n');
         } else {
-            console.log('ℹ️  Set API_KEY environment variable to test dashboard integration\n');
+            console.log('⚠️  Cost Katana Dashboard Integration Required\n');
+            console.log('To use this package, you need to:');
+            console.log('1. Register at https://costkatana.com');
+            console.log('2. Create a project in your dashboard');
+            console.log('3. Get your API_KEY and PROJECT_ID from dashboard settings');
+            console.log('4. Set them in your environment variables:\n');
+            console.log('   API_KEY=dak_your_api_key_here');
+            console.log('   PROJECT_ID=your_project_id_here\n');
+            console.log('💡 Without these credentials, the package cannot track usage or sync data.\n');
         }
 
         console.log('=== Basic Usage Example ===\n');

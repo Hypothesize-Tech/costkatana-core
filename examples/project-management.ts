@@ -2,10 +2,16 @@
  * Project Management Example
  * 
  * This example demonstrates how to use the AI Cost Optimizer with project-based
- * organization, budget tracking, and team collaboration features.
+ * organization, budget tracking, and team collaboration features integrated
+ * with the Cost Katana dashboard at costkatana.com.
+ * 
+ * Prerequisites:
+ * 1. Register at https://costkatana.com
+ * 2. Create a project in your dashboard
+ * 3. Set API_KEY and PROJECT_ID environment variables
  */
 
-import { AICostOptimizer } from '../src/index';
+import AICostOptimizer, { AIProvider } from '../src/index';
 
 // Project configuration examples
 const PROJECTS = {
@@ -50,193 +56,193 @@ const PROJECTS = {
 async function demonstrateProjectManagement() {
     console.log('🚀 AI Cost Optimizer - Project Management Demo\n');
 
-    // Initialize optimizer with project configuration
-    const optimizer = new AICostOptimizer({
-        apiKey: process.env.OPENAI_API_KEY!,
-        provider: 'openai',
-        trackUsage: true,
-        defaultProjectId: PROJECTS.ECOMMERCE.id,
-        budgetAlerts: {
-            thresholds: [50, 75, 90],
-            webhookUrl: 'https://your-app.com/budget-alerts'
+    // Initialize tracker with project configuration and Cost Katana integration
+    const tracker = await AICostOptimizer.create({
+        providers: [
+            {
+                provider: AIProvider.OpenAI,
+                apiKey: process.env.OPENAI_API_KEY!
+            }
+        ],
+        optimization: {
+            enablePromptOptimization: true,
+            enableModelSuggestions: true,
+            enableCachingSuggestions: true,
+            thresholds: {
+                highCostPerRequest: 0.1,
+                highTokenUsage: 2000,
+                frequencyThreshold: 10
+            }
+        },
+        tracking: {
+            enableAutoTracking: true
         }
+        // Automatically syncs with costkatana.com using API_KEY and PROJECT_ID
     });
 
     // Example 1: E-commerce Product Descriptions
     console.log('📦 E-commerce: Generating product descriptions...');
 
     const productDescriptions = await Promise.all([
-        optimizer.optimize({
-            prompt: 'Generate SEO-optimized description for wireless noise-canceling headphones with 30-hour battery life',
+        tracker.makeRequest({
             model: 'gpt-4',
-            projectId: PROJECTS.ECOMMERCE.id,
-            costAllocation: {
-                department: PROJECTS.ECOMMERCE.department,
-                team: PROJECTS.ECOMMERCE.team,
-                purpose: 'product-descriptions',
-                client: 'internal'
-            },
-            tags: ['seo', 'product-content', 'electronics']
+            messages: [{
+                role: 'user',
+                content: 'Generate SEO-optimized description for wireless noise-canceling headphones with 30-hour battery life'
+            }],
+            maxTokens: 200,
+            metadata: {
+                projectId: PROJECTS.ECOMMERCE.id,
+                costAllocation: {
+                    department: PROJECTS.ECOMMERCE.department,
+                    team: PROJECTS.ECOMMERCE.team,
+                    purpose: 'product-descriptions',
+                    client: 'internal'
+                },
+                tags: ['seo', 'product-content', 'electronics']
+            }
         }),
 
-        optimizer.optimize({
-            prompt: 'Create compelling product title and bullet points for organic cotton t-shirt collection',
+        tracker.makeRequest({
             model: 'gpt-3.5-turbo',
-            projectId: PROJECTS.ECOMMERCE.id,
-            costAllocation: {
-                department: PROJECTS.ECOMMERCE.department,
-                team: PROJECTS.ECOMMERCE.team,
-                purpose: 'product-descriptions',
-                client: 'internal'
-            },
-            tags: ['product-content', 'fashion', 'organic']
+            messages: [{
+                role: 'user',
+                content: 'Create compelling product title and bullet points for organic cotton t-shirt collection'
+            }],
+            maxTokens: 150,
+            metadata: {
+                projectId: PROJECTS.ECOMMERCE.id,
+                costAllocation: {
+                    department: PROJECTS.ECOMMERCE.department,
+                    team: PROJECTS.ECOMMERCE.team,
+                    purpose: 'product-descriptions',
+                    client: 'internal'
+                },
+                tags: ['product-content', 'fashion', 'organic']
+            }
         })
     ]);
 
     console.log(`✅ Generated ${productDescriptions.length} product descriptions`);
-    console.log(`💰 Total cost: $${productDescriptions.reduce((sum, result) => sum + result.cost, 0).toFixed(4)}\n`);
+    console.log(`📄 Responses received and tracked to Cost Katana dashboard\n`);
 
     // Example 2: Customer Support Automation
     console.log('🎧 Customer Support: Automated responses...');
 
     const supportResponses = await Promise.all([
-        optimizer.optimize({
-            prompt: 'Customer asks: "How do I return a defective product?" Provide helpful, empathetic response with clear steps.',
+        tracker.makeRequest({
             model: 'gpt-3.5-turbo',
-            projectId: PROJECTS.CUSTOMER_SUPPORT.id,
-            costAllocation: {
-                department: PROJECTS.CUSTOMER_SUPPORT.department,
-                team: PROJECTS.CUSTOMER_SUPPORT.team,
-                purpose: 'customer-support',
-                client: 'end-customer'
-            },
-            tags: ['returns', 'customer-service', 'automated-response']
+            messages: [{
+                role: 'user',
+                content: 'Customer asks: "How do I return a defective product?" Provide helpful, empathetic response with clear steps.'
+            }],
+            maxTokens: 200,
+            metadata: {
+                projectId: PROJECTS.CUSTOMER_SUPPORT.id,
+                costAllocation: {
+                    department: PROJECTS.CUSTOMER_SUPPORT.department,
+                    team: PROJECTS.CUSTOMER_SUPPORT.team,
+                    purpose: 'customer-support',
+                    client: 'end-customer'
+                },
+                tags: ['returns', 'customer-service', 'automated-response']
+            }
         }),
 
-        optimizer.optimize({
-            prompt: 'Customer complaint: "My order is late and I need it urgently." Generate professional, solution-focused response.',
+        tracker.makeRequest({
             model: 'gpt-3.5-turbo',
-            projectId: PROJECTS.CUSTOMER_SUPPORT.id,
-            costAllocation: {
-                department: PROJECTS.CUSTOMER_SUPPORT.department,
-                team: PROJECTS.CUSTOMER_SUPPORT.team,
-                purpose: 'customer-support',
-                client: 'end-customer'
-            },
-            tags: ['shipping', 'complaints', 'automated-response']
+            messages: [{
+                role: 'user',
+                content: 'Customer complaint: "My order is late and I need it urgently." Generate professional, solution-focused response.'
+            }],
+            maxTokens: 200,
+            metadata: {
+                projectId: PROJECTS.CUSTOMER_SUPPORT.id,
+                costAllocation: {
+                    department: PROJECTS.CUSTOMER_SUPPORT.department,
+                    team: PROJECTS.CUSTOMER_SUPPORT.team,
+                    purpose: 'customer-support',
+                    client: 'end-customer'
+                },
+                tags: ['shipping', 'complaints', 'automated-response']
+            }
         })
     ]);
 
     console.log(`✅ Generated ${supportResponses.length} support responses`);
-    console.log(`💰 Total cost: $${supportResponses.reduce((sum, result) => sum + result.cost, 0).toFixed(4)}\n`);
+    console.log(`📄 Responses received and tracked to Cost Katana dashboard\n`);
 
     // Example 3: Marketing Content Generation
     console.log('📝 Marketing: Content generation...');
 
     const marketingContent = await Promise.all([
-        optimizer.optimize({
-            prompt: 'Write engaging blog post introduction about "The Future of AI in E-commerce" (300 words)',
+        tracker.makeRequest({
             model: 'gpt-4',
-            projectId: PROJECTS.MARKETING.id,
-            costAllocation: {
-                department: PROJECTS.MARKETING.department,
-                team: PROJECTS.MARKETING.team,
-                purpose: 'blog-content',
-                client: 'internal'
-            },
-            tags: ['blog', 'ai', 'ecommerce', 'thought-leadership']
+            messages: [{
+                role: 'user',
+                content: 'Write engaging blog post introduction about "The Future of AI in E-commerce" (300 words)'
+            }],
+            maxTokens: 400,
+            metadata: {
+                projectId: PROJECTS.MARKETING.id,
+                costAllocation: {
+                    department: PROJECTS.MARKETING.department,
+                    team: PROJECTS.MARKETING.team,
+                    purpose: 'blog-content',
+                    client: 'internal'
+                },
+                tags: ['blog', 'ai', 'ecommerce', 'thought-leadership']
+            }
         }),
 
-        optimizer.optimize({
-            prompt: 'Create 5 social media posts promoting our new sustainable product line',
+        tracker.makeRequest({
             model: 'gpt-3.5-turbo',
-            projectId: PROJECTS.MARKETING.id,
-            costAllocation: {
-                department: PROJECTS.MARKETING.department,
-                team: PROJECTS.MARKETING.team,
-                purpose: 'social-media',
-                client: 'internal'
-            },
-            tags: ['social-media', 'sustainability', 'product-promotion']
+            messages: [{
+                role: 'user',
+                content: 'Create 5 social media posts promoting our new sustainable product line'
+            }],
+            maxTokens: 300,
+            metadata: {
+                projectId: PROJECTS.MARKETING.id,
+                costAllocation: {
+                    department: PROJECTS.MARKETING.department,
+                    team: PROJECTS.MARKETING.team,
+                    purpose: 'social-media',
+                    client: 'internal'
+                },
+                tags: ['social-media', 'sustainability', 'product-promotion']
+            }
         })
     ]);
 
     console.log(`✅ Generated ${marketingContent.length} marketing pieces`);
-    console.log(`💰 Total cost: $${marketingContent.reduce((sum, result) => sum + result.cost, 0).toFixed(4)}\n`);
+    console.log(`📄 Responses received and tracked to Cost Katana dashboard\n`);
 
     // Example 4: Project Analytics and Comparison
-    console.log('📊 Analytics: Project performance comparison...');
+    console.log('📊 Analytics: Available in Cost Katana Dashboard...');
 
-    try {
-        // Get individual project analytics
-        const ecommerceAnalytics = await optimizer.getProjectAnalytics(PROJECTS.ECOMMERCE.id, {
-            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
-            endDate: new Date().toISOString(),
-            groupBy: 'day'
-        });
-
-        console.log(`📦 E-commerce Project Analytics:`);
-        console.log(`   - Total Cost: $${ecommerceAnalytics.summary.totalCost.toFixed(2)}`);
-        console.log(`   - Total Tokens: ${ecommerceAnalytics.summary.totalTokens.toLocaleString()}`);
-        console.log(`   - Total Requests: ${ecommerceAnalytics.summary.totalRequests}`);
-        console.log(`   - Budget Utilization: ${ecommerceAnalytics.summary.budgetUtilization?.toFixed(1)}%`);
-
-        // Compare all projects
-        const projectComparison = await optimizer.compareProjects([
-            PROJECTS.ECOMMERCE.id,
-            PROJECTS.CUSTOMER_SUPPORT.id,
-            PROJECTS.MARKETING.id
-        ], {
-            metric: 'cost',
-            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-            endDate: new Date().toISOString()
-        });
-
-        console.log(`\n🏆 Project Comparison (Last 30 Days):`);
-        projectComparison.projects.forEach((project, index) => {
-            console.log(`   ${index + 1}. ${project.projectName}`);
-            console.log(`      - Cost: $${project.metrics.cost.toFixed(2)}`);
-            console.log(`      - Requests: ${project.metrics.requests}`);
-            console.log(`      - Avg Cost/Request: $${project.metrics.averageCostPerRequest.toFixed(4)}`);
-            console.log(`      - Budget Usage: ${project.budgetUtilization.toFixed(1)}%`);
-        });
-
-        console.log(`\n📈 Overall Summary:`);
-        console.log(`   - Total Projects: ${projectComparison.summary.totalProjects}`);
-        console.log(`   - Combined Cost: $${projectComparison.summary.totalCost.toFixed(2)}`);
-        console.log(`   - Combined Requests: ${projectComparison.summary.totalRequests}`);
-
-    } catch (error) {
-        console.log('⚠️  Analytics features require dashboard integration');
-        console.log('   Configure dashboardConfig to enable project analytics');
-    }
+    console.log('📈 All project analytics are available in your Cost Katana dashboard:');
+    console.log('   - Visit https://costkatana.com to view detailed analytics');
+    console.log('   - Project-specific cost breakdowns and comparisons');
+    console.log('   - Real-time budget monitoring and alerts');
+    console.log('   - Usage trends and optimization recommendations');
+    console.log('   - Team collaboration and access controls\n');
 
     // Example 5: Budget Monitoring
-    console.log('\n💰 Budget Monitoring...');
+    console.log('\n💰 Budget Monitoring: Available in Cost Katana Dashboard...');
 
-    try {
-        const budgetStatus = await optimizer.getBudgetStatus(PROJECTS.ECOMMERCE.id);
-
-        console.log(`📦 E-commerce Budget Status:`);
-        console.log(`   - Monthly Budget: $${budgetStatus.budget.amount}`);
-        console.log(`   - Current Spending: $${budgetStatus.currentSpending.toFixed(2)}`);
-        console.log(`   - Utilization: ${budgetStatus.utilizationPercentage.toFixed(1)}%`);
-        console.log(`   - Remaining: $${budgetStatus.remainingBudget.toFixed(2)}`);
-
-        if (budgetStatus.utilizationPercentage > 75) {
-            console.log(`⚠️  Budget Alert: High utilization detected!`);
-        }
-
-    } catch (error) {
-        console.log('⚠️  Budget monitoring requires dashboard integration');
-        console.log('   Configure budgetAlerts to enable real-time monitoring');
-    }
+    console.log('💰 Budget monitoring features available at https://costkatana.com:');
+    console.log('   - Set monthly/yearly budgets per project');
+    console.log('   - Real-time budget utilization tracking');
+    console.log('   - Automated alerts at custom thresholds');
+    console.log('   - Budget forecasting and recommendations');
+    console.log('   - Cost allocation across teams and departments\n');
 
     // Example 6: Usage Tracking with Rich Metadata
     console.log('\n📋 Usage Tracking: Recording detailed usage data...');
 
     const usageEntries = await Promise.all([
-        optimizer.trackUsage({
+        tracker.trackUsage({
             prompt: 'Generate product recommendation algorithm explanation',
             completion: 'Our recommendation system uses collaborative filtering...',
             model: 'gpt-4',
@@ -259,7 +265,7 @@ async function demonstrateProjectManagement() {
             tags: ['documentation', 'algorithms', 'recommendations']
         }),
 
-        optimizer.trackUsage({
+        tracker.trackUsage({
             prompt: 'Analyze customer feedback sentiment',
             completion: 'The overall sentiment is positive with 85% satisfaction...',
             model: 'gpt-3.5-turbo',
@@ -285,37 +291,15 @@ async function demonstrateProjectManagement() {
     console.log(`✅ Tracked ${usageEntries.length} usage entries with detailed metadata\n`);
 
     // Example 7: Team Collaboration Features
-    console.log('👥 Team Collaboration: Role-based access...');
+    console.log('👥 Team Collaboration: Available in Cost Katana Dashboard...');
 
-    // Developer access - limited to specific projects
-    const developerOptimizer = new AICostOptimizer({
-        apiKey: process.env.OPENAI_API_KEY!,
-        provider: 'openai',
-        trackUsage: true,
-        teamConfig: {
-            userId: 'dev-001',
-            teamId: 'engineering',
-            role: 'developer',
-            accessibleProjects: [PROJECTS.ECOMMERCE.id, PROJECTS.CUSTOMER_SUPPORT.id]
-        }
-    });
-
-    // Admin access - full access to all projects
-    const adminOptimizer = new AICostOptimizer({
-        apiKey: process.env.OPENAI_API_KEY!,
-        provider: 'openai',
-        trackUsage: true,
-        teamConfig: {
-            userId: 'admin-001',
-            teamId: 'leadership',
-            role: 'admin',
-            accessibleProjects: Object.values(PROJECTS).map(p => p.id)
-        }
-    });
-
-    console.log('✅ Configured role-based access for team members');
-    console.log('   - Developer: Limited project access');
-    console.log('   - Admin: Full project access\n');
+    console.log('👥 Team collaboration features available at https://costkatana.com:');
+    console.log('   - Role-based access controls (Admin, Developer, Viewer)');
+    console.log('   - Project-specific permissions and access limits');
+    console.log('   - Team member invitation and management');
+    console.log('   - Usage tracking by individual team members');
+    console.log('   - Shared projects and cost allocation');
+    console.log('   - Audit logs and activity tracking\n');
 
     console.log('🎉 Project Management Demo Complete!');
     console.log('\nKey Features Demonstrated:');

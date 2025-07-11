@@ -128,7 +128,7 @@ import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 
 
-const DEFAULT_API_URL = 'http://localhost:8000/api';
+const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
 
 export class AICostTracker {
   private config: TrackerConfig;
