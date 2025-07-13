@@ -96,15 +96,20 @@ export {
 } from './config/default';
 
 export {
-  PRICING_DATA,
-  REGIONAL_PRICING_ADJUSTMENTS,
-  VOLUME_DISCOUNTS,
-  FREE_TIERS,
-  RATE_LIMITS,
-  getPricingForModel,
-  getRegionalPricing,
-  calculateVolumeDiscount
+  PRICING_CONFIG,
+  PRICING_METADATA,
+  getAllProviders,
+  getProviderModels,
+  getModelPricing,
+  getLatestModels,
+  getModelsByCategory,
+  findCheapestModel,
+  calculateCost as calculatePricingCost,
+  estimateCost as estimatePricingCost,
+  compareProviders
 } from './config/pricing-data';
+
+export type { ModelPricingConfig } from './config/pricing-data';
 
 // High-level API class
 import {
