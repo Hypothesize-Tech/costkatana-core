@@ -1,4 +1,4 @@
-# AI Cost Optimizer
+# Cost Katana
 
 A comprehensive toolkit for optimizing AI model costs, tracking usage, and analyzing performance across multiple providers with centralized dashboard analytics.
 
@@ -374,7 +374,7 @@ const optimizer = new AICostOptimizer({
   apiKey: process.env.OPENAI_API_KEY,
   provider: 'openai',
   trackUsage: true,
-  dashboardApiKey: process.env.API_KEY, // AI Cost Optimizer Dashboard API Key
+  dashboardApiKey: process.env.API_KEY, // Cost Katana Dashboard API Key
   ...config[process.env.NODE_ENV || 'development']
 });
 ```

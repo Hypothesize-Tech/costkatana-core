@@ -177,10 +177,10 @@ export class AICostTracker {
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
     if (!apiKey) {
-      throw new Error('API_KEY environment variable not set. Please get your API key from the AI Cost Optimizer dashboard.');
+      throw new Error('API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.');
     }
     if (!projectId) {
-      throw new Error('PROJECT_ID environment variable not set. Please get your Project ID from the AI Cost Optimizer dashboard.');
+      throw new Error('PROJECT_ID environment variable not set. Please get your Project ID from the Cost Katana dashboard.');
     }
 
     const apiClient = axios.create({
@@ -196,7 +196,7 @@ export class AICostTracker {
       await apiClient.get('/user/profile');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        throw new Error('Invalid or expired API_KEY. Please get a new API key from the AI Cost Optimizer dashboard.');
+        throw new Error('Invalid or expired API_KEY. Please get a new API key from the Cost Katana dashboard.');
       }
     }
 
@@ -370,7 +370,7 @@ export class AICostTracker {
         totalTokens: response.data?.data?.totalTokens
       });
     } catch (error) {
-      logger.error('Failed to send usage data to AI Cost Optimizer backend', error as Error);
+      logger.error('Failed to send usage data to Cost Katana backend', error as Error);
       // Don't throw here to allow local tracking to continue
     }
 

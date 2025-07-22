@@ -1,7 +1,7 @@
 /**
  * Project Management Example
  * 
- * This example demonstrates how to use the AI Cost Optimizer with project-based
+ * This example demonstrates how to use the Cost Katana with project-based
  * organization, budget tracking, and team collaboration features integrated
  * with the Cost Katana dashboard at costkatana.com.
  * 
@@ -54,7 +54,7 @@ const PROJECTS = {
 };
 
 async function demonstrateProjectManagement() {
-    console.log('🚀 AI Cost Optimizer - Project Management Demo\n');
+    console.log('🚀 Cost Katana - Project Management Demo\n');
 
     // Initialize tracker with project configuration and Cost Katana integration
     const tracker = await AICostOptimizer.create({
