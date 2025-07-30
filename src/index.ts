@@ -23,6 +23,36 @@ export type {
   AIResponse
 } from './types';
 
+// Gateway exports
+export {
+  GatewayClient,
+  createGatewayClient,
+  createGatewayClientFromEnv
+} from './gateway';
+export type {
+  GatewayConfig,
+  GatewayRequestOptions,
+  GatewayResponse,
+  GatewayStats,
+  CacheStats,
+  WorkflowSummary,
+  WorkflowDetails,
+  RetryConfig,
+  CacheConfig,
+  WorkflowConfig,
+  KeyVaultConfig,
+  FirewallConfig,
+  OpenAIRequest,
+  AnthropicRequest,
+  GoogleAIRequest,
+  CohereRequest,
+  ProxyKeyInfo,
+  ProxyKeyUsageOptions,
+  ThreatDetectionResult,
+  FirewallAnalytics,
+  FirewallOptions
+} from './types/gateway';
+
 // Provider types
 export type {
   ProviderModel,
@@ -131,6 +161,8 @@ import { optimizationThresholds } from './config/default';
 import { getModelById } from './types/models';
 import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
+import { GatewayClient } from './gateway/client';
+import { FirewallAnalytics, FirewallOptions, GatewayConfig, GatewayRequestOptions, GatewayResponse, ProxyKeyInfo, ProxyKeyUsageOptions } from './types/gateway';
 
 
 const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
@@ -143,6 +175,7 @@ export class AICostTracker {
   private suggestionEngine: SuggestionEngine;
   private promptOptimizer: PromptOptimizer;
   private apiClient: AxiosInstance;
+  private gatewayClient?: GatewayClient;
 
   private constructor(config: TrackerConfig, apiClient: AxiosInstance) {
     validateTrackerConfig(config);
@@ -550,6 +583,417 @@ export class AICostTracker {
     // Recreate the optimizer with new config
     this.promptOptimizer = new PromptOptimizer(this.config.optimization, this.config.optimization.bedrockConfig);
     logger.info('Optimization configuration updated', config);
+  }
+
+  /**
+   * Initialize gateway client for intelligent proxy functionality
+   */
+  initializeGateway(gatewayConfig: Partial<GatewayConfig> = {}): GatewayClient {
+    const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('COSTKATANA_API_KEY or API_KEY environment variable not set for gateway functionality.');
+    }
+
+    const defaultConfig: GatewayConfig = {
+      baseUrl: 'https://cost-katana-backend.store/api/gateway',
+      apiKey,
+      enableCache: true,
+      enableRetries: true,
+      retryConfig: {
+        count: 3,
+        factor: 2,
+        minTimeout: 1000,
+        maxTimeout: 10000
+      },
+      cacheConfig: {
+        ttl: 604800 // 7 days
+      }
+    };
+
+    const config = { ...defaultConfig, ...gatewayConfig };
+    this.gatewayClient = new GatewayClient(config);
+    
+    logger.info('Gateway client initialized', {
+      baseUrl: config.baseUrl,
+      enableCache: config.enableCache,
+      enableRetries: config.enableRetries
+    });
+
+    return this.gatewayClient;
+  }
+
+  /**
+   * Get the gateway client instance
+   */
+  getGateway(): GatewayClient {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient;
+  }
+
+  /**
+   * Make a request through the gateway with automatic usage tracking
+   */
+  async gatewayRequest(
+    endpoint: string,
+    data: any,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+
+    const startTime = Date.now();
+    
+    try {
+      // Add project ID if not specified
+      const projectId = process.env.PROJECT_ID || this.config.projectId;
+      if (projectId && !options.budgetId) {
+        options.budgetId = projectId;
+      }
+
+      // Make the gateway request
+      const response = await this.gatewayClient.makeRequest(endpoint, data, options);
+      
+      // Auto-track usage if enabled
+      if (this.config.tracking.enableAutoTracking) {
+        await this.trackGatewayUsage(data, response, startTime, options);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error('Gateway request failed', error as Error, {
+        endpoint,
+        processingTime: Date.now() - startTime
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Make an OpenAI-compatible request through the gateway
+   */
+  async gatewayOpenAI(
+    request: any,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+
+    const startTime = Date.now();
+    
+    try {
+      const response = await this.gatewayClient.openai(request, options);
+      
+      if (this.config.tracking.enableAutoTracking) {
+        await this.trackGatewayUsage(request, response, startTime, options);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error('Gateway OpenAI request failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make an Anthropic-compatible request through the gateway
+   */
+  async gatewayAnthropic(
+    request: any,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+
+    const startTime = Date.now();
+    
+    try {
+      const response = await this.gatewayClient.anthropic(request, options);
+      
+      if (this.config.tracking.enableAutoTracking) {
+        await this.trackGatewayUsage(request, response, startTime, options);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error('Gateway Anthropic request failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Track usage from gateway requests
+   */
+  private async trackGatewayUsage(
+    request: any,
+    response: GatewayResponse,
+    startTime: number,
+    options: GatewayRequestOptions
+  ): Promise<void> {
+    try {
+      // Extract usage information from the response
+      const responseTime = Date.now() - startTime;
+      
+      // Estimate tokens and cost (this would be enhanced with actual response parsing)
+      const promptText = this.extractPromptFromRequest(request);
+      const completionText = this.extractCompletionFromResponse(response.data);
+      
+      const promptTokens = Math.ceil(promptText.length / 4); // Rough estimation
+      const completionTokens = Math.ceil(completionText.length / 4);
+      
+      const usageMetadata: UsageMetadata = {
+        provider: this.inferProviderFromOptions(options),
+        model: request.model || 'unknown',
+        promptTokens,
+        completionTokens,
+        totalTokens: promptTokens + completionTokens,
+        estimatedCost: 0.001, // Would be calculated based on actual pricing
+        prompt: promptText,
+        completion: completionText,
+        responseTime,
+        tags: options.properties ? Object.keys(options.properties) : [],
+        sessionId: options.sessionId,
+        projectId: options.budgetId || this.config.projectId
+      };
+
+      await this.trackUsage(usageMetadata);
+      
+    } catch (error) {
+      logger.error('Failed to track gateway usage', error as Error);
+      // Don't throw here to avoid breaking the main request
+    }
+  }
+
+  /**
+   * Extract prompt text from various request formats
+   */
+  private extractPromptFromRequest(request: any): string {
+    if (request.messages && Array.isArray(request.messages)) {
+      return request.messages.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n');
+    }
+    if (request.prompt) {
+      return request.prompt;
+    }
+    if (request.contents && Array.isArray(request.contents)) {
+      return request.contents.map((content: any) => 
+        content.parts?.map((part: any) => part.text).join(' ') || ''
+      ).join('\n');
+    }
+    return JSON.stringify(request);
+  }
+
+  /**
+   * Extract completion text from response
+   */
+  private extractCompletionFromResponse(response: any): string {
+    if (response.choices && Array.isArray(response.choices)) {
+      return response.choices.map((choice: any) => 
+        choice.message?.content || choice.text || ''
+      ).join('\n');
+    }
+    if (response.content && Array.isArray(response.content)) {
+      return response.content.map((item: any) => item.text || '').join('\n');
+    }
+    if (response.generations && Array.isArray(response.generations)) {
+      return response.generations.map((gen: any) => gen.text || '').join('\n');
+    }
+    if (response.candidates && Array.isArray(response.candidates)) {
+      return response.candidates.map((candidate: any) => 
+        candidate.content?.parts?.map((part: any) => part.text).join(' ') || ''
+      ).join('\n');
+    }
+    return '';
+  }
+
+  /**
+   * Infer AI provider from request options
+   */
+  private inferProviderFromOptions(options: GatewayRequestOptions): AIProvider {
+    if (options.targetUrl) {
+      if (options.targetUrl.includes('openai.com')) return AIProvider.OpenAI;
+      if (options.targetUrl.includes('anthropic.com')) return AIProvider.Anthropic;
+      if (options.targetUrl.includes('googleapis.com')) return AIProvider.Google;
+      if (options.targetUrl.includes('cohere.ai')) return AIProvider.Cohere;
+      if (options.targetUrl.includes('deepseek.com')) return AIProvider.DeepSeek;
+      if (options.targetUrl.includes('groq.com')) return AIProvider.Groq;
+    }
+    return AIProvider.OpenAI; // Default fallback
+  }
+
+  // ============================================
+  // PROXY KEY METHODS
+  // ============================================
+
+  /**
+   * Check if the current gateway is using a proxy key
+   */
+  isUsingProxyKey(): boolean {
+    if (!this.gatewayClient) {
+      return false;
+    }
+    return this.gatewayClient.isUsingProxyKey();
+  }
+
+  /**
+   * Get proxy key information
+   */
+  async getProxyKeyInfo(): Promise<ProxyKeyInfo | null> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.getProxyKeyInfo();
+  }
+
+  /**
+   * Make a request with proxy key usage tracking
+   */
+  async makeProxyKeyRequest<T = any>(
+    targetUrl: string,
+    requestData: any,
+    options: ProxyKeyUsageOptions = {}
+  ): Promise<GatewayResponse<T>> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.makeProxyKeyRequest(targetUrl, requestData, options);
+  }
+
+  /**
+   * Get proxy key usage statistics
+   */
+  async getProxyKeyUsage(): Promise<{
+    totalRequests: number;
+    totalCost: number;
+    dailyCost: number;
+    monthlyCost: number;
+  } | null> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.getProxyKeyUsage();
+  }
+
+  /**
+   * Check if proxy key is within budget limits
+   */
+  async checkProxyKeyBudget(): Promise<{
+    withinBudget: boolean;
+    budgetStatus: 'good' | 'warning' | 'over';
+    message: string;
+  } | null> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.checkProxyKeyBudget();
+  }
+
+  /**
+   * Validate proxy key permissions for a specific operation
+   */
+  async validateProxyKeyPermissions(requiredPermission: 'read' | 'write' | 'admin'): Promise<boolean> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.validateProxyKeyPermissions(requiredPermission);
+  }
+
+  // ============================================
+  // FIREWALL METHODS
+  // ============================================
+
+  /**
+   * Get firewall analytics
+   */
+  async getFirewallAnalytics(
+    userId?: string,
+    dateRange?: { start: Date; end: Date }
+  ): Promise<FirewallAnalytics> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.getFirewallAnalytics(userId, dateRange);
+  }
+
+  /**
+   * Make a request with firewall protection
+   */
+  async makeFirewallProtectedRequest<T = any>(
+    endpoint: string,
+    data: any,
+    firewallOptions: FirewallOptions,
+    requestOptions: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse<T>> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+    return this.gatewayClient.makeFirewallProtectedRequest(endpoint, data, firewallOptions, requestOptions);
+  }
+
+  /**
+   * Make an OpenAI request with firewall protection
+   */
+  async gatewayOpenAIWithFirewall(
+    request: any,
+    firewallOptions: FirewallOptions,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+
+    const startTime = Date.now();
+    
+    try {
+      const response = await this.gatewayClient.openai(request, {
+        ...options,
+        firewall: firewallOptions
+      });
+      
+      if (this.config.tracking.enableAutoTracking) {
+        await this.trackGatewayUsage(request, response, startTime, options);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error('Gateway OpenAI request with firewall failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make an Anthropic request with firewall protection
+   */
+  async gatewayAnthropicWithFirewall(
+    request: any,
+    firewallOptions: FirewallOptions,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    if (!this.gatewayClient) {
+      throw new Error('Gateway client not initialized. Call initializeGateway() first.');
+    }
+
+    const startTime = Date.now();
+    
+    try {
+      const response = await this.gatewayClient.anthropic(request, {
+        ...options,
+        firewall: firewallOptions
+      });
+      
+      if (this.config.tracking.enableAutoTracking) {
+        await this.trackGatewayUsage(request, response, startTime, options);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error('Gateway Anthropic request with firewall failed', error as Error);
+      throw error;
+    }
   }
 }
 

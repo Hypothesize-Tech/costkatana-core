@@ -1,0 +1,672 @@
+/**
+ * CostKATANA AI Gateway Client
+ * Provides intelligent proxy functionality with caching, retries, and cost optimization
+ */
+
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { logger } from '../utils/logger';
+import {
+  GatewayConfig,
+  GatewayRequestOptions,
+  GatewayResponse,
+  GatewayStats,
+  CacheStats,
+  WorkflowSummary,
+  WorkflowDetails,
+  OpenAIRequest,
+  AnthropicRequest,
+  GoogleAIRequest,
+  CohereRequest,
+  ProxyKeyInfo,
+  FirewallOptions,
+  ProxyKeyUsageOptions,
+  FirewallAnalytics
+} from '../types/gateway';
+
+export class GatewayClient {
+  private config: GatewayConfig;
+  private client: AxiosInstance;
+
+  constructor(config: GatewayConfig) {
+    this.config = config;
+    
+    // Create axios client with gateway configuration
+    this.client = axios.create({
+      baseURL: config.baseUrl,
+      timeout: 120000, // 2 minutes
+      headers: {
+        'Content-Type': 'application/json',
+        'CostKatana-Auth': `Bearer ${config.apiKey}`
+      }
+    });
+
+    // Add request interceptor to add default headers
+    this.client.interceptors.request.use((requestConfig) => {
+      // Add default properties if configured
+      if (this.config.defaultProperties) {
+        Object.entries(this.config.defaultProperties).forEach(([key, value]) => {
+          requestConfig.headers[`CostKatana-Property-${key}`] = value;
+        });
+      }
+
+      // Add default cache settings
+      if (this.config.enableCache) {
+        requestConfig.headers['CostKatana-Cache-Enabled'] = 'true';
+        
+        if (this.config.cacheConfig?.ttl) {
+          requestConfig.headers['Cache-Control'] = `max-age=${this.config.cacheConfig.ttl}`;
+        }
+        
+        if (this.config.cacheConfig?.userScope) {
+          requestConfig.headers['CostKatana-Cache-User-Scope'] = this.config.cacheConfig.userScope;
+        }
+        
+        if (this.config.cacheConfig?.bucketMaxSize) {
+          requestConfig.headers['CostKatana-Cache-Bucket-Max-Size'] = this.config.cacheConfig.bucketMaxSize.toString();
+        }
+      }
+
+      // Add default retry settings
+      if (this.config.enableRetries) {
+        requestConfig.headers['CostKatana-Retry-Enabled'] = 'true';
+        
+        if (this.config.retryConfig?.count !== undefined) {
+          requestConfig.headers['CostKatana-Retry-Count'] = this.config.retryConfig.count.toString();
+        }
+        
+        if (this.config.retryConfig?.factor !== undefined) {
+          requestConfig.headers['CostKatana-Retry-Factor'] = this.config.retryConfig.factor.toString();
+        }
+        
+        if (this.config.retryConfig?.minTimeout !== undefined) {
+          requestConfig.headers['CostKatana-Retry-Min-Timeout'] = this.config.retryConfig.minTimeout.toString();
+        }
+        
+        if (this.config.retryConfig?.maxTimeout !== undefined) {
+          requestConfig.headers['CostKatana-Retry-Max-Timeout'] = this.config.retryConfig.maxTimeout.toString();
+        }
+      }
+
+      // Add default firewall settings
+      if (this.config.firewall?.enabled) {
+        requestConfig.headers['CostKatana-Firewall-Enabled'] = 'true';
+        
+        if (this.config.firewall.advanced) {
+          requestConfig.headers['CostKatana-Firewall-Advanced'] = 'true';
+        }
+        
+        if (this.config.firewall.promptThreshold !== undefined) {
+          requestConfig.headers['CostKatana-Firewall-Prompt-Threshold'] = this.config.firewall.promptThreshold.toString();
+        }
+        
+        if (this.config.firewall.llamaThreshold !== undefined) {
+          requestConfig.headers['CostKatana-Firewall-Llama-Threshold'] = this.config.firewall.llamaThreshold.toString();
+        }
+      }
+
+      return requestConfig;
+    });
+
+    logger.info('Gateway client initialized', {
+      baseUrl: config.baseUrl,
+      enableCache: config.enableCache,
+      enableRetries: config.enableRetries
+    });
+  }
+
+  /**
+   * Make a request through the gateway with OpenAI-compatible format
+   */
+  async openai(
+    request: OpenAIRequest,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const targetUrl = options.targetUrl || 'https://api.openai.com';
+    const endpoint = '/v1/chat/completions';
+    
+    return this.makeRequest(endpoint, request, { ...options, targetUrl });
+  }
+
+  /**
+   * Make a request through the gateway with Anthropic-compatible format
+   */
+  async anthropic(
+    request: AnthropicRequest,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const targetUrl = options.targetUrl || 'https://api.anthropic.com';
+    const endpoint = '/v1/messages';
+    
+    return this.makeRequest(endpoint, request, { ...options, targetUrl });
+  }
+
+  /**
+   * Make a request through the gateway with Google AI-compatible format
+   */
+  async googleAI(
+    model: string,
+    request: GoogleAIRequest,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const targetUrl = options.targetUrl || 'https://generativelanguage.googleapis.com';
+    const endpoint = `/v1/models/${model}:generateContent`;
+    
+    return this.makeRequest(endpoint, request, { ...options, targetUrl });
+  }
+
+  /**
+   * Make a request through the gateway with Cohere-compatible format
+   */
+  async cohere(
+    request: CohereRequest,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const targetUrl = options.targetUrl || 'https://api.cohere.ai';
+    const endpoint = '/v1/generate';
+    
+    return this.makeRequest(endpoint, request, { ...options, targetUrl });
+  }
+
+  /**
+   * Make a generic request through the gateway
+   */
+  async makeRequest(
+    endpoint: string,
+    data: any,
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const startTime = Date.now();
+    
+    try {
+      // Build headers from options
+      const headers = this.buildHeaders(options);
+      
+      // Make the request through the gateway
+      const response: AxiosResponse = await this.client.post(endpoint, data, { headers });
+      
+      const processingTime = Date.now() - startTime;
+      
+      // Extract gateway metadata from response headers
+      const gatewayResponse: GatewayResponse = {
+        data: response.data,
+        headers: response.headers as Record<string, string>,
+        status: response.status,
+        metadata: {
+          cacheStatus: response.headers['costkatana-cache-status'] as 'HIT' | 'MISS',
+          processingTime: parseInt(response.headers['costkatana-processing-time']) || processingTime,
+          retryAttempts: parseInt(response.headers['costkatana-retry-attempts']) || 0,
+          budgetRemaining: parseFloat(response.headers['costkatana-budget-remaining']),
+          requestId: response.headers['costkatana-id']
+        }
+      };
+
+      logger.info('Gateway request completed', {
+        endpoint,
+        status: response.status,
+        cacheStatus: gatewayResponse.metadata.cacheStatus,
+        processingTime: gatewayResponse.metadata.processingTime,
+        retryAttempts: gatewayResponse.metadata.retryAttempts
+      });
+
+      return gatewayResponse;
+      
+    } catch (error) {
+      logger.error('Gateway request failed', error as Error, {
+        endpoint,
+        processingTime: Date.now() - startTime
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get gateway statistics
+   */
+  async getStats(): Promise<GatewayStats> {
+    try {
+      const response = await this.client.get('/stats');
+      return response.data.data;
+    } catch (error) {
+      logger.error('Failed to get gateway stats', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  async getCacheStats(): Promise<CacheStats> {
+    try {
+      const response = await this.client.get('/cache/stats');
+      return response.data.data;
+    } catch (error) {
+      logger.error('Failed to get cache stats', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear cache entries
+   */
+  async clearCache(options: { userScope?: string; expired?: boolean } = {}): Promise<void> {
+    try {
+      const params = new URLSearchParams();
+      if (options.userScope) params.append('userScope', options.userScope);
+      if (options.expired) params.append('expired', 'true');
+      
+      await this.client.delete(`/cache?${params.toString()}`);
+      logger.info('Cache cleared successfully', options);
+    } catch (error) {
+      logger.error('Failed to clear cache', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get workflow summaries
+   */
+  async getWorkflows(options: {
+    startDate?: Date;
+    endDate?: Date;
+    workflowName?: string;
+    limit?: number;
+  } = {}): Promise<WorkflowSummary[]> {
+    try {
+      const params = new URLSearchParams();
+      if (options.startDate) params.append('startDate', options.startDate.toISOString());
+      if (options.endDate) params.append('endDate', options.endDate.toISOString());
+      if (options.workflowName) params.append('workflowName', options.workflowName);
+      if (options.limit) params.append('limit', options.limit.toString());
+      
+      const response = await this.client.get(`/workflows/summary?${params.toString()}`);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Failed to get workflows', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get detailed workflow information
+   */
+  async getWorkflowDetails(workflowId: string): Promise<WorkflowDetails> {
+    try {
+      const response = await this.client.get(`/workflows/${workflowId}`);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Failed to get workflow details', error as Error, { workflowId });
+      throw error;
+    }
+  }
+
+  /**
+   * Export workflow data as CSV
+   */
+  async exportWorkflows(options: {
+    startDate?: Date;
+    endDate?: Date;
+    workflowName?: string;
+  } = {}): Promise<string> {
+    try {
+      const workflows = await this.getWorkflows(options);
+      return this.workflowsToCSV(workflows);
+    } catch (error) {
+      logger.error('Failed to export workflows', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check gateway health
+   */
+  async healthCheck(): Promise<{ status: string; timestamp: Date }> {
+    try {
+      const response = await this.client.get('/health');
+      return response.data;
+    } catch (error) {
+      logger.error('Gateway health check failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update gateway configuration
+   */
+  updateConfig(config: Partial<GatewayConfig>): void {
+    this.config = { ...this.config, ...config };
+    
+    // Update client headers if API key changed
+    if (config.apiKey) {
+      this.client.defaults.headers['CostKatana-Auth'] = `Bearer ${config.apiKey}`;
+    }
+    
+    logger.info('Gateway configuration updated', config);
+  }
+
+  /**
+   * Build headers from request options
+   */
+  private buildHeaders(options: GatewayRequestOptions): Record<string, string> {
+    const headers: Record<string, string> = {};
+    
+    // Target URL
+    if (options.targetUrl || this.config.defaultTargetUrl) {
+      headers['CostKatana-Target-Url'] = options.targetUrl || this.config.defaultTargetUrl!;
+    }
+    
+    // Cache configuration
+    if (options.cache !== undefined) {
+      if (typeof options.cache === 'boolean') {
+        headers['CostKatana-Cache-Enabled'] = options.cache.toString();
+      } else {
+        headers['CostKatana-Cache-Enabled'] = 'true';
+        if (options.cache.ttl) {
+          headers['Cache-Control'] = `max-age=${options.cache.ttl}`;
+        }
+        if (options.cache.userScope) {
+          headers['CostKatana-Cache-User-Scope'] = options.cache.userScope;
+        }
+        if (options.cache.bucketMaxSize) {
+          headers['CostKatana-Cache-Bucket-Max-Size'] = options.cache.bucketMaxSize.toString();
+        }
+      }
+    }
+    
+    // Retry configuration
+    if (options.retry !== undefined) {
+      if (typeof options.retry === 'boolean') {
+        headers['CostKatana-Retry-Enabled'] = options.retry.toString();
+      } else {
+        headers['CostKatana-Retry-Enabled'] = 'true';
+        if (options.retry.count !== undefined) {
+          headers['CostKatana-Retry-Count'] = options.retry.count.toString();
+        }
+        if (options.retry.factor !== undefined) {
+          headers['CostKatana-Retry-Factor'] = options.retry.factor.toString();
+        }
+        if (options.retry.minTimeout !== undefined) {
+          headers['CostKatana-Retry-Min-Timeout'] = options.retry.minTimeout.toString();
+        }
+        if (options.retry.maxTimeout !== undefined) {
+          headers['CostKatana-Retry-Max-Timeout'] = options.retry.maxTimeout.toString();
+        }
+      }
+    }
+    
+    // Workflow configuration
+    if (options.workflow) {
+      headers['CostKatana-Workflow-Id'] = options.workflow.workflowId;
+      headers['CostKatana-Workflow-Name'] = options.workflow.workflowName;
+      if (options.workflow.workflowStep) {
+        headers['CostKatana-Workflow-Step'] = options.workflow.workflowStep;
+      }
+    }
+    
+    // Custom properties
+    if (options.properties) {
+      Object.entries(options.properties).forEach(([key, value]) => {
+        headers[`CostKatana-Property-${key}`] = value;
+      });
+    }
+    
+    // Other options
+    if (options.budgetId) headers['CostKatana-Budget-Id'] = options.budgetId;
+    if (options.modelOverride) headers['CostKatana-Model-Override'] = options.modelOverride;
+    if (options.omitRequest) headers['CostKatana-Omit-Request'] = 'true';
+    if (options.omitResponse) headers['CostKatana-Omit-Response'] = 'true';
+    if (options.security) headers['CostKatana-LLM-Security-Enabled'] = 'true';
+    
+    // Firewall configuration
+    if (options.firewall !== undefined) {
+      if (typeof options.firewall === 'boolean') {
+        headers['CostKatana-Firewall-Enabled'] = options.firewall.toString();
+      } else {
+        headers['CostKatana-Firewall-Enabled'] = 'true';
+        if (options.firewall.advanced) {
+          headers['CostKatana-Firewall-Advanced'] = 'true';
+        }
+        if (options.firewall.promptThreshold !== undefined) {
+          headers['CostKatana-Firewall-Prompt-Threshold'] = options.firewall.promptThreshold.toString();
+        }
+        if (options.firewall.llamaThreshold !== undefined) {
+          headers['CostKatana-Firewall-Llama-Threshold'] = options.firewall.llamaThreshold.toString();
+        }
+      }
+    }
+    
+    if (options.rateLimitPolicy) headers['CostKatana-RateLimit-Policy'] = options.rateLimitPolicy;
+    if (options.sessionId) headers['CostKatana-Session-Id'] = options.sessionId;
+    if (options.traceId) headers['CostKatana-Property-Trace-Id'] = options.traceId;
+    if (options.userId) headers['CostKatana-User-Id'] = options.userId;
+    
+    return headers;
+  }
+
+  /**
+   * Convert workflow summaries to CSV format
+   */
+  private workflowsToCSV(workflows: WorkflowSummary[]): string {
+    const headers = [
+      'Workflow ID',
+      'Workflow Name',
+      'Start Time',
+      'End Time',
+      'Duration (ms)',
+      'Total Cost ($)',
+      'Total Tokens',
+      'Request Count',
+      'Average Cost per Request ($)',
+      'Steps'
+    ];
+
+    const rows = workflows.map(workflow => [
+      workflow.workflowId,
+      workflow.workflowName,
+      new Date(workflow.startTime).toISOString(),
+      new Date(workflow.endTime).toISOString(),
+      workflow.duration.toString(),
+      workflow.totalCost.toFixed(6),
+      workflow.totalTokens.toString(),
+      workflow.requestCount.toString(),
+      workflow.averageCost.toFixed(6),
+      workflow.steps.map(step => `${step.step} (${step.cost.toFixed(6)}$)`).join('; ')
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    return csvContent;
+  }
+
+  /**
+   * Check if the current API key is a proxy key
+   */
+  public isUsingProxyKey(): boolean {
+    return this.config.apiKey.startsWith('ck-proxy-');
+  }
+
+  /**
+   * Get proxy key information (if using a proxy key)
+   */
+  public async getProxyKeyInfo(): Promise<ProxyKeyInfo | null> {
+    if (!this.isUsingProxyKey()) {
+      return null;
+    }
+
+    try {
+      const response = await this.client.get('/key-vault/proxy-keys', {
+        params: { keyId: this.config.apiKey }
+      });
+      
+      const proxyKeys = response.data.data;
+      return proxyKeys.find((key: any) => key.keyId === this.config.apiKey) || null;
+    } catch (error) {
+      logger.error('Failed to get proxy key info:', error as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Make a request with proxy key usage tracking
+   */
+  public async makeProxyKeyRequest<T = any>(
+    targetUrl: string,
+    requestData: any,
+    options: ProxyKeyUsageOptions = {}
+  ): Promise<GatewayResponse<T>> {
+    if (!this.isUsingProxyKey()) {
+      throw new Error('This method requires a proxy key. Current API key is not a proxy key.');
+    }
+
+    const requestOptions: GatewayRequestOptions = {
+      targetUrl,
+      properties: options.properties,
+      modelOverride: options.modelOverride,
+      omitRequest: options.omitRequest,
+      omitResponse: options.omitResponse,
+      budgetId: options.projectId
+    };
+
+    return this.makeRequest(requestData, requestOptions);
+  }
+
+  /**
+   * Get proxy key usage statistics
+   */
+  public async getProxyKeyUsage(): Promise<{
+    totalRequests: number;
+    totalCost: number;
+    dailyCost: number;
+    monthlyCost: number;
+  } | null> {
+    if (!this.isUsingProxyKey()) {
+      return null;
+    }
+
+    try {
+      const proxyKeyInfo = await this.getProxyKeyInfo();
+      return proxyKeyInfo ? proxyKeyInfo.usageStats : null;
+    } catch (error) {
+      logger.error('Failed to get proxy key usage:', error as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if proxy key is within budget limits
+   */
+  public async checkProxyKeyBudget(): Promise<{
+    withinBudget: boolean;
+    budgetStatus: 'good' | 'warning' | 'over';
+    message: string;
+  } | null> {
+    if (!this.isUsingProxyKey()) {
+      return null;
+    }
+
+    try {
+      const proxyKeyInfo = await this.getProxyKeyInfo();
+      if (!proxyKeyInfo) {
+        return null;
+      }
+
+      const { usageStats, budgetLimit, dailyBudgetLimit, monthlyBudgetLimit } = proxyKeyInfo;
+
+      // Check if over budget
+      if (budgetLimit && usageStats.totalCost >= budgetLimit) {
+        return { withinBudget: false, budgetStatus: 'over', message: 'Over total budget limit' };
+      }
+      if (dailyBudgetLimit && usageStats.dailyCost >= dailyBudgetLimit) {
+        return { withinBudget: false, budgetStatus: 'over', message: 'Over daily budget limit' };
+      }
+      if (monthlyBudgetLimit && usageStats.monthlyCost >= monthlyBudgetLimit) {
+        return { withinBudget: false, budgetStatus: 'over', message: 'Over monthly budget limit' };
+      }
+
+      // Check if approaching limits (80% threshold)
+      if (budgetLimit && usageStats.totalCost >= budgetLimit * 0.8) {
+        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching total budget limit' };
+      }
+      if (dailyBudgetLimit && usageStats.dailyCost >= dailyBudgetLimit * 0.8) {
+        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching daily budget limit' };
+      }
+      if (monthlyBudgetLimit && usageStats.monthlyCost >= monthlyBudgetLimit * 0.8) {
+        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching monthly budget limit' };
+      }
+
+      return { withinBudget: true, budgetStatus: 'good', message: 'Within budget limits' };
+    } catch (error) {
+      logger.error('Failed to check proxy key budget:', error as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Validate proxy key permissions for a specific operation
+   */
+  public async validateProxyKeyPermissions(requiredPermission: 'read' | 'write' | 'admin'): Promise<boolean> {
+    if (!this.isUsingProxyKey()) {
+      return true; // Dashboard API keys have full permissions
+    }
+
+    try {
+      const proxyKeyInfo = await this.getProxyKeyInfo();
+      if (!proxyKeyInfo) {
+        return false;
+      }
+
+      // Check if proxy key has required permission
+      return proxyKeyInfo.permissions.includes(requiredPermission) || proxyKeyInfo.permissions.includes('admin');
+    } catch (error) {
+      logger.error('Failed to validate proxy key permissions:', error as Error);
+      return false;
+    }
+  }
+
+  /**
+   * Get firewall analytics
+   */
+  public async getFirewallAnalytics(
+    userId?: string,
+    dateRange?: { start: Date; end: Date }
+  ): Promise<FirewallAnalytics> {
+    try {
+      const params: Record<string, string> = {};
+      
+      if (userId) {
+        params.userId = userId;
+      }
+      
+      if (dateRange) {
+        params.startDate = dateRange.start.toISOString();
+        params.endDate = dateRange.end.toISOString();
+      }
+
+      const response = await this.client.get('/firewall/analytics', { params });
+      
+      return response.data.data;
+    } catch (error) {
+      logger.error('Failed to get firewall analytics:', error as Error);
+      throw new Error('Failed to get firewall analytics');
+    }
+  }
+
+  /**
+   * Make a request with firewall protection
+   */
+  public async makeFirewallProtectedRequest<T = any>(
+    endpoint: string,
+    data: any,
+    firewallOptions: FirewallOptions,
+    requestOptions: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse<T>> {
+    const options: GatewayRequestOptions = {
+      ...requestOptions,
+      firewall: firewallOptions
+    };
+
+    return this.makeRequest(endpoint, data, options);
+  }
+}
