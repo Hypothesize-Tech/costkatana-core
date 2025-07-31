@@ -6,8 +6,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'ai21.jamba-1-5-large-v1:0',
     modelName: 'Jamba 1.5 Large (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.00,
-    outputPrice: 8.00,
+    inputPrice: 2.0,
+    outputPrice: 8.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 256000,
     capabilities: ['text', 'long-context'],
@@ -19,8 +19,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'ai21.jamba-1-5-mini-v1:0',
     modelName: 'Jamba 1.5 Mini (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.20,
-    outputPrice: 0.40,
+    inputPrice: 0.2,
+    outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 256000,
     capabilities: ['text', 'long-context', 'efficient'],
@@ -32,8 +32,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'ai21.j2-mid-v1',
     modelName: 'Jurassic-2 Mid (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 12.50,
-    outputPrice: 12.50,
+    inputPrice: 12.5,
+    outputPrice: 12.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text'],
@@ -45,8 +45,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'ai21.j2-ultra-v1',
     modelName: 'Jurassic-2 Ultra (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 18.80,
-    outputPrice: 18.80,
+    inputPrice: 18.8,
+    outputPrice: 18.8,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text'],
@@ -58,8 +58,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'ai21.jamba-instruct-v1:0',
     modelName: 'Jamba-Instruct (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.50,
-    outputPrice: 0.70,
+    inputPrice: 0.5,
+    outputPrice: 0.7,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 256000,
     capabilities: ['text', 'instruct'],
@@ -101,22 +101,23 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'amazon.nova-pro-v1:0',
     modelName: 'Amazon Nova Pro (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.80,
-    outputPrice: 3.20,
+    inputPrice: 0.8,
+    outputPrice: 3.2,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 300000,
-    cachedInputPrice: 0.20, // Cache read price
+    cachedInputPrice: 0.2, // Cache read price
     capabilities: ['text', 'multimodal', 'reasoning'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Amazon Nova Pro via AWS Bedrock. Cache read: $0.20, Batch: $0.40/$1.60, Latency optimized: $1.00/$4.00'
+    notes:
+      'Amazon Nova Pro via AWS Bedrock. Cache read: $0.20, Batch: $0.40/$1.60, Latency optimized: $1.00/$4.00'
   },
   {
     modelId: 'amazon.nova-premier-v1:0',
     modelName: 'Amazon Nova Premier (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.50,
-    outputPrice: 12.50,
+    inputPrice: 2.5,
+    outputPrice: 12.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 300000,
     cachedInputPrice: 0.625, // Cache read price
@@ -136,7 +137,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     capabilities: ['image-generation'],
     category: 'image',
     isLatest: true,
-    notes: 'Amazon Nova Canvas via AWS Bedrock. Standard: $0.04-$0.06, Premium: $0.06-$0.08 per image'
+    notes:
+      'Amazon Nova Canvas via AWS Bedrock. Standard: $0.04-$0.06, Premium: $0.06-$0.08 per image'
   },
   {
     modelId: 'amazon.nova-reel-v1:0',
@@ -155,8 +157,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'amazon.nova-sonic-v1:0',
     modelName: 'Amazon Nova Sonic (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.40, // Speech input
-    outputPrice: 13.60, // Speech output
+    inputPrice: 3.4, // Speech input
+    outputPrice: 13.6, // Speech output
     unit: PricingUnit.Per1MTokens,
     contextWindow: 300000,
     capabilities: ['speech', 'multimodal', 'native-audio'],
@@ -177,7 +179,7 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text'],
     category: 'text',
     isLatest: true,
-    notes: 'Amazon\'s own text generation model via Bedrock'
+    notes: "Amazon's own text generation model via Bedrock"
   },
   {
     modelId: 'amazon.titan-text-lite-v1',
@@ -211,12 +213,19 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'anthropic.claude-opus-4-20250514-v1:0',
     modelName: 'Claude Opus 4 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 15.00,
-    outputPrice: 75.00,
+    inputPrice: 15.0,
+    outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    cachedInputPrice: 1.50, // Cache read price
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    cachedInputPrice: 1.5, // Cache read price
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'multimodal',
     isLatest: true,
     notes: 'Claude Opus 4 via AWS Bedrock. Cache write: $18.75, Cache read: $1.50'
@@ -225,12 +234,19 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
     modelName: 'Claude Sonnet 4 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.00,
-    outputPrice: 15.00,
+    inputPrice: 3.0,
+    outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    cachedInputPrice: 0.30, // Cache read price
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    cachedInputPrice: 0.3, // Cache read price
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'multimodal',
     isLatest: true,
     notes: 'Claude Sonnet 4 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30'
@@ -239,12 +255,19 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
     modelName: 'Claude Sonnet 3.7 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.00,
-    outputPrice: 15.00,
+    inputPrice: 3.0,
+    outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    cachedInputPrice: 0.30, // Cache read price
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    cachedInputPrice: 0.3, // Cache read price
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'multimodal',
     isLatest: true,
     notes: 'Claude Sonnet 3.7 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30'
@@ -253,22 +276,23 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
     modelName: 'Claude Sonnet 3.5 v2 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.00,
-    outputPrice: 15.00,
+    inputPrice: 3.0,
+    outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    cachedInputPrice: 0.30, // Cache read price
+    cachedInputPrice: 0.3, // Cache read price
     capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'multilingual'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Claude Sonnet 3.5 v2 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30, Batch: $1.50/$7.50'
+    notes:
+      'Claude Sonnet 3.5 v2 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30, Batch: $1.50/$7.50'
   },
   {
     modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
     modelName: 'Claude Sonnet 3.5 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.00,
-    outputPrice: 15.00,
+    inputPrice: 3.0,
+    outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
     capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'multilingual'],
@@ -280,22 +304,23 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
     modelName: 'Claude Haiku 3.5 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.80,
-    outputPrice: 4.00,
+    inputPrice: 0.8,
+    outputPrice: 4.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
     cachedInputPrice: 0.08, // Cache read price
     capabilities: ['text', 'vision', 'multimodal', 'multilingual'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Claude Haiku 3.5 via AWS Bedrock. Cache write: $1.00, Cache read: $0.08, Latency optimized: $1.00/$5.00'
+    notes:
+      'Claude Haiku 3.5 via AWS Bedrock. Cache write: $1.00, Cache read: $0.08, Latency optimized: $1.00/$5.00'
   },
   {
     modelId: 'anthropic.claude-3-opus-20240229-v1:0',
     modelName: 'Claude Opus 3 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 15.00,
-    outputPrice: 75.00,
+    inputPrice: 15.0,
+    outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
     capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'multilingual'],
@@ -322,8 +347,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.command-text-v14',
     modelName: 'Cohere Command (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 1.00,
-    outputPrice: 2.00,
+    inputPrice: 1.0,
+    outputPrice: 2.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 4096,
     capabilities: ['text', 'analysis'],
@@ -335,8 +360,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.command-light-text-v14',
     modelName: 'Cohere Command Light (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.30,
-    outputPrice: 0.60,
+    inputPrice: 0.3,
+    outputPrice: 0.6,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 4096,
     capabilities: ['text'],
@@ -348,8 +373,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.command-r-plus-v1:0',
     modelName: 'Cohere Command R+ (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.00,
-    outputPrice: 15.00,
+    inputPrice: 3.0,
+    outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'enterprise', 'rag', 'tools', 'multilingual'],
@@ -361,8 +386,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.command-r-v1:0',
     modelName: 'Cohere Command R (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.50,
-    outputPrice: 1.50,
+    inputPrice: 0.5,
+    outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'rag', 'tools', 'long-context'],
@@ -374,8 +399,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.embed-english-v3',
     modelName: 'Cohere Embed English v3 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.10,
-    outputPrice: 0.10,
+    inputPrice: 0.1,
+    outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 512,
     capabilities: ['embedding'],
@@ -387,8 +412,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.embed-multilingual-v3',
     modelName: 'Cohere Embed Multilingual v3 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.10,
-    outputPrice: 0.10,
+    inputPrice: 0.1,
+    outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 512,
     capabilities: ['embedding', 'multilingual'],
@@ -400,8 +425,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.rerank-3-5-v1:0',
     modelName: 'Cohere Rerank 3.5 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.00,
-    outputPrice: 2.00,
+    inputPrice: 2.0,
+    outputPrice: 2.0,
     unit: PricingUnit.Per1KTokens, // Per 1K searches
     contextWindow: 0,
     capabilities: ['rerank', 'semantic-search', 'retrieval'],
@@ -416,7 +441,7 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelName: 'DeepSeek-R1 (Bedrock)',
     provider: 'AWS Bedrock',
     inputPrice: 1.35,
-    outputPrice: 5.40,
+    outputPrice: 5.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 64000,
     capabilities: ['text', 'reasoning', 'cot'],
@@ -430,8 +455,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'luma.ray2-v1:0',
     modelName: 'Luma Ray2 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 1.50, // 720p per second
-    outputPrice: 1.50,
+    inputPrice: 1.5, // 720p per second
+    outputPrice: 1.5,
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
     capabilities: ['video-generation'],
@@ -484,8 +509,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'meta.llama3-2-1b-instruct-v1:0',
     modelName: 'Llama 3.2 1B Instruct (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.10,
-    outputPrice: 0.10,
+    inputPrice: 0.1,
+    outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'instruct', 'small'],
@@ -556,27 +581,29 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'instruct'],
     category: 'text',
     isLatest: false,
-    notes: 'Meta Llama 3.1 70B Instruct via AWS Bedrock. Batch: $0.36/$0.36, Latency optimized: $0.90/$0.90'
+    notes:
+      'Meta Llama 3.1 70B Instruct via AWS Bedrock. Batch: $0.36/$0.36, Latency optimized: $0.90/$0.90'
   },
   {
     modelId: 'meta.llama3-1-405b-instruct-v1:0',
     modelName: 'Llama 3.1 405B Instruct (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.40,
-    outputPrice: 2.40,
+    inputPrice: 2.4,
+    outputPrice: 2.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'instruct', 'large'],
     category: 'text',
     isLatest: false,
-    notes: 'Meta Llama 3.1 405B Instruct via AWS Bedrock. Batch: $1.20/$1.20, Latency optimized: $3.00/$3.00'
+    notes:
+      'Meta Llama 3.1 405B Instruct via AWS Bedrock. Batch: $1.20/$1.20, Latency optimized: $3.00/$3.00'
   },
   {
     modelId: 'meta.llama3-8b-instruct-v1:0',
     modelName: 'Llama 3 8B Instruct (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.30,
-    outputPrice: 0.60,
+    inputPrice: 0.3,
+    outputPrice: 0.6,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text', 'instruct'],
@@ -589,7 +616,7 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelName: 'Llama 3 70B Instruct (Bedrock)',
     provider: 'AWS Bedrock',
     inputPrice: 2.65,
-    outputPrice: 3.50,
+    outputPrice: 3.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text', 'instruct'],
@@ -602,7 +629,7 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelName: 'Llama 2 13B Chat (Bedrock)',
     provider: 'AWS Bedrock',
     inputPrice: 0.75,
-    outputPrice: 1.00,
+    outputPrice: 1.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 4096,
     capabilities: ['text', 'chat'],
@@ -629,8 +656,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'mistral.pixtral-large-2502-v1:0',
     modelName: 'Pixtral Large (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.00,
-    outputPrice: 6.00,
+    inputPrice: 2.0,
+    outputPrice: 6.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['vision', 'multimodal', 'reasoning'],
@@ -698,8 +725,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'writer.palmyra-x4-v1:0',
     modelName: 'Palmyra X4 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 2.50,
-    outputPrice: 10.00,
+    inputPrice: 2.5,
+    outputPrice: 10.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 32000,
     capabilities: ['text', 'enterprise'],
@@ -711,8 +738,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'writer.palmyra-x5-v1:0',
     modelName: 'Palmyra X5 (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.60,
-    outputPrice: 6.00,
+    inputPrice: 0.6,
+    outputPrice: 6.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 32000,
     capabilities: ['text', 'enterprise'],
@@ -720,4 +747,4 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     isLatest: true,
     notes: 'Writer Palmyra X5 via AWS Bedrock'
   }
-]; 
+];

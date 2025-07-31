@@ -7,21 +7,22 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelName: 'Gemini 2.5 Pro',
     provider: 'Google AI',
     inputPrice: 1.25, // <= 200k tokens
-    outputPrice: 10.00, // <= 200k tokens
+    outputPrice: 10.0, // <= 200k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 2000000,
     capabilities: ['text', 'multimodal', 'reasoning', 'coding'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'State-of-the-art multipurpose model, excels at coding and complex reasoning. $2.50/$15.00 for prompts > 200k tokens'
+    notes:
+      'State-of-the-art multipurpose model, excels at coding and complex reasoning. $2.50/$15.00 for prompts > 200k tokens'
   },
   // Gemini 2.5 Flash
   {
     modelId: 'gemini-2.5-flash',
     modelName: 'Gemini 2.5 Flash',
     provider: 'Google AI',
-    inputPrice: 0.30, // text/image/video
-    outputPrice: 2.50,
+    inputPrice: 0.3, // text/image/video
+    outputPrice: 2.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking'],
@@ -34,8 +35,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-2.5-flash-lite-preview',
     modelName: 'Gemini 2.5 Flash-Lite Preview',
     provider: 'Google AI',
-    inputPrice: 0.10, // text/image/video
-    outputPrice: 0.40,
+    inputPrice: 0.1, // text/image/video
+    outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking'],
@@ -48,22 +49,23 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-2.5-flash-native-audio',
     modelName: 'Gemini 2.5 Flash Native Audio',
     provider: 'Google AI',
-    inputPrice: 0.50, // text
-    outputPrice: 2.00, // text
+    inputPrice: 0.5, // text
+    outputPrice: 2.0, // text
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['audio', 'multimodal', 'native-audio'],
     category: 'audio',
     isLatest: true,
-    notes: 'Native audio model optimized for higher quality audio outputs. Audio/video input: $3.00, Audio output: $12.00'
+    notes:
+      'Native audio model optimized for higher quality audio outputs. Audio/video input: $3.00, Audio output: $12.00'
   },
   // Gemini 2.5 Flash Preview TTS
   {
     modelId: 'gemini-2.5-flash-preview-tts',
     modelName: 'Gemini 2.5 Flash Preview TTS',
     provider: 'Google AI',
-    inputPrice: 0.50,
-    outputPrice: 10.00, // audio output
+    inputPrice: 0.5,
+    outputPrice: 10.0, // audio output
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text-to-speech', 'audio', 'tts'],
@@ -76,8 +78,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-2.5-pro-preview-tts',
     modelName: 'Gemini 2.5 Pro Preview TTS',
     provider: 'Google AI',
-    inputPrice: 1.00,
-    outputPrice: 20.00, // audio output
+    inputPrice: 1.0,
+    outputPrice: 20.0, // audio output
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text-to-speech', 'audio', 'tts'],
@@ -90,8 +92,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-2.0-flash',
     modelName: 'Gemini 2.0 Flash',
     provider: 'Google AI',
-    inputPrice: 0.10, // text/image/video
-    outputPrice: 0.40,
+    inputPrice: 0.1, // text/image/video
+    outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text', 'image', 'video', 'multimodal', 'agents'],
@@ -105,7 +107,7 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelName: 'Gemini 2.0 Flash-Lite',
     provider: 'Google AI',
     inputPrice: 0.075,
-    outputPrice: 0.30,
+    outputPrice: 0.3,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text', 'multimodal'],
@@ -119,13 +121,14 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelName: 'Gemini 1.5 Flash',
     provider: 'Google AI',
     inputPrice: 0.075, // <= 128k tokens
-    outputPrice: 0.30, // <= 128k tokens
+    outputPrice: 0.3, // <= 128k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
     capabilities: ['text', 'image', 'video', 'multimodal'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Fastest multimodal model for diverse, repetitive tasks. $0.15/$0.60 for prompts > 128k tokens'
+    notes:
+      'Fastest multimodal model for diverse, repetitive tasks. $0.15/$0.60 for prompts > 128k tokens'
   },
   // Gemini 1.5 Flash-8B
   {
@@ -147,21 +150,22 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelName: 'Gemini 1.5 Pro',
     provider: 'Google AI',
     inputPrice: 1.25, // <= 128k tokens
-    outputPrice: 5.00, // <= 128k tokens
+    outputPrice: 5.0, // <= 128k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 2000000,
     capabilities: ['text', 'code', 'reasoning', 'multimodal'],
     category: 'text',
     isLatest: false,
-    notes: 'Highest intelligence Gemini 1.5 series model with 2M context. $2.50/$10.00 for prompts > 128k tokens'
+    notes:
+      'Highest intelligence Gemini 1.5 series model with 2M context. $2.50/$10.00 for prompts > 128k tokens'
   },
   // Text Embedding 004
   {
     modelId: 'text-embedding-004',
     modelName: 'Text Embedding 004',
     provider: 'Google AI',
-    inputPrice: 0.00, // Free tier only
-    outputPrice: 0.00, // Free tier only
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
     unit: PricingUnit.Per1MTokens,
     contextWindow: 2048,
     capabilities: ['embedding'],
@@ -174,8 +178,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemma-3',
     modelName: 'Gemma 3',
     provider: 'Google AI',
-    inputPrice: 0.00, // Free tier only
-    outputPrice: 0.00, // Free tier only
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text', 'open-source'],
@@ -188,8 +192,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemma-3n',
     modelName: 'Gemma 3n',
     provider: 'Google AI',
-    inputPrice: 0.00, // Free tier only
-    outputPrice: 0.00, // Free tier only
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
     capabilities: ['text', 'open-source', 'mobile-optimized'],
@@ -244,8 +248,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-1.0-pro',
     modelName: 'Gemini 1.0 Pro',
     provider: 'Google AI',
-    inputPrice: 0.50,
-    outputPrice: 1.50,
+    inputPrice: 0.5,
+    outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 32000,
     capabilities: ['text', 'analysis'],
@@ -253,4 +257,4 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     isLatest: false,
     notes: 'Earlier generation Gemini model'
   }
-]; 
+];

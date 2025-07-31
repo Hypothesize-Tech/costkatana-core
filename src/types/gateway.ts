@@ -5,8 +5,15 @@
 export interface GatewayConfig {
   /** Gateway base URL */
   baseUrl: string;
-  /** API key for authentication (dashboard API key or proxy key) */
+  /** API key for authentication (dashboard API key, proxy key, or JWT token) */
   apiKey: string;
+  /** 
+   * Authentication method - determines which header to use
+   * 'gateway' uses CostKatana-Auth header (default for gateway requests)
+   * 'standard' uses Authorization header (for direct API calls)
+   * @default 'gateway'
+   */
+  authMethod?: 'gateway' | 'standard';
   /** Default target URL for requests */
   defaultTargetUrl?: string;
   /** Enable caching by default */
@@ -127,6 +134,10 @@ export interface GatewayRequestOptions {
   workflow?: WorkflowConfig;
   /** Budget/project ID for cost allocation */
   budgetId?: string;
+  /** Project ID for request tracking (sent via CostKatana-Project-Id header) */
+  projectId?: string;
+  /** Authentication method override (sent via CostKatana-Auth-Method header) */
+  authMethodOverride?: 'gateway' | 'standard';
   /** Override model for this request */
   modelOverride?: string;
   /** Omit request content from logs (privacy) */

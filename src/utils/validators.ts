@@ -100,7 +100,6 @@ export function validateTrackerConfig(config: TrackerConfig): void {
     }
   }
 
-
   // Validate alert config
   if (config.alerts) {
     if (config.alerts.costThreshold && config.alerts.costThreshold < 0) {

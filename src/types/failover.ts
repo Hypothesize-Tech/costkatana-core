@@ -1,5 +1,5 @@
 /**
- * High-Availability Gateway & Failover Types for @ai-cost-optimizer-core
+ * High-Availability Gateway & Failover Types for ai-cost-tracker
  */
 
 export interface FailoverTarget {

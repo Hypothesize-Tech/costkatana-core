@@ -30,6 +30,7 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
   const config: GatewayConfig = {
     baseUrl,
     apiKey,
+    authMethod: 'gateway',
     enableCache: true,
     enableRetries: true,
     retryConfig: {
@@ -45,4 +46,24 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
   };
 
   return new GatewayClient(config);
+}
+
+/**
+ * Create a gateway client with standard Authorization header (for direct API calls)
+ */
+export function createStandardGatewayClient(config: Omit<GatewayConfig, 'authMethod'>): GatewayClient {
+  return createGatewayClient({
+    ...config,
+    authMethod: 'standard'
+  });
+}
+
+/**
+ * Create a gateway client with CostKatana-Auth header (for gateway requests)
+ */
+export function createCostKatanaGatewayClient(config: Omit<GatewayConfig, 'authMethod'>): GatewayClient {
+  return createGatewayClient({
+    ...config,
+    authMethod: 'gateway'
+  });
 }

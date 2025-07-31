@@ -104,10 +104,7 @@ export class UsageTracker {
     const totalRequests = modelHistory.length;
     const totalCost = modelHistory.reduce((sum, item) => sum + item.estimatedCost, 0);
     const totalTokens = modelHistory.reduce((sum, item) => sum + item.totalTokens, 0);
-    const totalResponseTime = modelHistory.reduce(
-      (sum, item) => sum + (item.responseTime || 0),
-      0
-    );
+    const totalResponseTime = modelHistory.reduce((sum, item) => sum + (item.responseTime || 0), 0);
 
     return {
       totalRequests,

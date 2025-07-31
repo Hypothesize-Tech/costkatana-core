@@ -35,14 +35,14 @@ import { AWS_BEDROCK_PRICING } from './pricing/aws-bedrock';
 
 // Fresh pricing data organized by provider - July 2025
 export const PRICING_CONFIG: Record<string, ModelPricingConfig[]> = {
-  'OpenAI': OPENAI_PRICING,
-  'xAI': XAI_PRICING,
-  'Anthropic': ANTHROPIC_PRICING,
+  OpenAI: OPENAI_PRICING,
+  xAI: XAI_PRICING,
+  Anthropic: ANTHROPIC_PRICING,
   'Google AI': GOOGLE_PRICING,
-  'DeepSeek': DEEPSEEK_PRICING,
+  DeepSeek: DEEPSEEK_PRICING,
   'Mistral AI': MISTRAL_PRICING,
-  'Cohere': COHERE_PRICING,
-  'Groq': GROQ_PRICING,
+  Cohere: COHERE_PRICING,
+  Groq: GROQ_PRICING,
   'AWS Bedrock': AWS_BEDROCK_PRICING
 };
 
@@ -57,9 +57,9 @@ export function getProviderModels(provider: string): ModelPricingConfig[] {
 
 export function getModelPricing(provider: string, modelId: string): ModelPricingConfig | null {
   const providerModels = PRICING_CONFIG[provider] || [];
-  return providerModels.find(model =>
-    model.modelId.toLowerCase() === modelId.toLowerCase()
-  ) || null;
+  return (
+    providerModels.find(model => model.modelId.toLowerCase() === modelId.toLowerCase()) || null
+  );
 }
 
 export function getLatestModels(): ModelPricingConfig[] {
@@ -80,9 +80,9 @@ export function getModelsByCategory(category: string): ModelPricingConfig[] {
   const allModels: ModelPricingConfig[] = [];
 
   Object.values(PRICING_CONFIG).forEach(providerModels => {
-    allModels.push(...providerModels.filter(model =>
-      model.category?.toLowerCase() === category.toLowerCase()
-    ));
+    allModels.push(
+      ...providerModels.filter(model => model.category?.toLowerCase() === category.toLowerCase())
+    );
   });
 
   return allModels.sort((a, b) => {
@@ -92,10 +92,7 @@ export function getModelsByCategory(category: string): ModelPricingConfig[] {
   });
 }
 
-export function findCheapestModel(
-  provider?: string,
-  category?: string
-): ModelPricingConfig | null {
+export function findCheapestModel(provider?: string, category?: string): ModelPricingConfig | null {
   let candidates: ModelPricingConfig[] = [];
 
   if (provider) {
@@ -107,8 +104,8 @@ export function findCheapestModel(
   }
 
   if (category) {
-    candidates = candidates.filter(model =>
-      model.category?.toLowerCase() === category.toLowerCase()
+    candidates = candidates.filter(
+      model => model.category?.toLowerCase() === category.toLowerCase()
     );
   }
 
@@ -186,18 +183,20 @@ export function compareProviders(
     });
   }
 
-  return modelsToCompare.map(pricing => {
-    const inputCost = (inputTokens / 1_000_000) * pricing.inputPrice;
-    const outputCost = (outputTokens / 1_000_000) * pricing.outputPrice;
+  return modelsToCompare
+    .map(pricing => {
+      const inputCost = (inputTokens / 1_000_000) * pricing.inputPrice;
+      const outputCost = (outputTokens / 1_000_000) * pricing.outputPrice;
 
-    return {
-      provider: pricing.provider,
-      model: pricing.modelName,
-      cost: inputCost + outputCost,
-      costBreakdown: { inputCost, outputCost },
-      isLatest: pricing.isLatest || false
-    };
-  }).sort((a, b) => a.cost - b.cost);
+      return {
+        provider: pricing.provider,
+        model: pricing.modelName,
+        cost: inputCost + outputCost,
+        costBreakdown: { inputCost, outputCost },
+        isLatest: pricing.isLatest || false
+      };
+    })
+    .sort((a, b) => a.cost - b.cost);
 }
 
 // Configuration metadata

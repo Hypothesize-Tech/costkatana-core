@@ -14,4 +14,4 @@ export const GROQ_PRICING: ModelPricingConfig[] = [
     isLatest: true,
     notes: 'Ultra-fast Mixtral model on Groq'
   }
-]; 
+];

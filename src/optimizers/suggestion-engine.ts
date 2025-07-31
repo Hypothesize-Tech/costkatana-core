@@ -300,28 +300,28 @@ export class SuggestionEngine {
   ## Top Optimization Opportunities
   
   ${suggestions
-        .slice(0, 5)
-        .map(
-          (s, i) => `
+    .slice(0, 5)
+    .map(
+      (s, i) => `
   ### ${i + 1}. ${s.type.charAt(0).toUpperCase() + s.type.slice(1)} Optimization
   - **Potential Savings**: ${s.estimatedSavings.toFixed(1)}%
   - **Confidence**: ${(s.confidence * 100).toFixed(0)}%
   - **Recommendation**: ${s.explanation}
   - **How to Implement**: ${s.implementation}
   `
-        )
-        .join('\n')}
+    )
+    .join('\n')}
   
   ## Model Usage Breakdown
   ${analytics.mostUsedModels
-        .slice(0, 5)
-        .map(m => `- **${m.model}**: ${m.requestCount} requests, $${m.totalCost.toFixed(2)} total cost`)
-        .join('\n')}
+    .slice(0, 5)
+    .map(m => `- **${m.model}**: ${m.requestCount} requests, $${m.totalCost.toFixed(2)} total cost`)
+    .join('\n')}
   
   ## Cost by Provider
   ${analytics.costByProvider
-        .map(p => `- **${p.provider}**: $${p.totalCost.toFixed(2)} (${p.percentage.toFixed(1)}%)`)
-        .join('\n')}
+    .map(p => `- **${p.provider}**: $${p.totalCost.toFixed(2)} (${p.percentage.toFixed(1)}%)`)
+    .join('\n')}
   
   ## Next Steps
   1. Implement high-confidence optimizations first

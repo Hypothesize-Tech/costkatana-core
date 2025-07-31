@@ -114,7 +114,12 @@ export class PromptOptimizer {
 
     // 4. AI-powered optimizations (if Bedrock is configured)
     if (this.bedrockProvider && this.config.enablePromptOptimization) {
-      const aiSuggestions = await this.getAIOptimizations(prompt, targetModel, targetProvider, context);
+      const aiSuggestions = await this.getAIOptimizations(
+        prompt,
+        targetModel,
+        targetProvider,
+        context
+      );
       suggestions.push(...aiSuggestions);
       if (aiSuggestions.length > 0) {
         appliedOptimizations.push('ai_optimization');
@@ -146,9 +151,7 @@ export class PromptOptimizer {
     };
   }
 
-  async optimizeRequests(
-    requests: FusionRequest[]
-  ): Promise<OptimizationResult> {
+  async optimizeRequests(requests: FusionRequest[]): Promise<OptimizationResult> {
     const startTime = Date.now();
     const suggestions: OptimizationSuggestion[] = [];
     const appliedOptimizations: string[] = [];
@@ -179,10 +182,10 @@ export class PromptOptimizer {
     const bestSuggestion = sortedSuggestions[0];
     const optimizedTokens = bestSuggestion?.optimizedPrompt
       ? await TokenCounter.countTokens(
-        bestSuggestion.optimizedPrompt,
-        requests[0].provider,
-        requests[0].model
-      )
+          bestSuggestion.optimizedPrompt,
+          requests[0].provider,
+          requests[0].model
+        )
       : originalTokens;
 
     const totalSavings = ((originalTokens - optimizedTokens) / originalTokens) * 100;
@@ -212,7 +215,11 @@ export class PromptOptimizer {
 
     // Calculate original context size
     const originalContext = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    const originalTokens = await TokenCounter.countTokens(originalContext, targetProvider, targetModel);
+    const originalTokens = await TokenCounter.countTokens(
+      originalContext,
+      targetProvider,
+      targetModel
+    );
 
     // Context trimming optimizations
     if (this.config.enableContextTrimming) {

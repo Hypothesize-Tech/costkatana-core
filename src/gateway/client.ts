@@ -30,13 +30,18 @@ export class GatewayClient {
   constructor(config: GatewayConfig) {
     this.config = config;
     
+    // Determine which authentication header to use
+    const authMethod = config.authMethod || 'gateway';
+    const authHeader = authMethod === 'gateway' ? 'CostKatana-Auth' : 'Authorization';
+    
     // Create axios client with gateway configuration
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: 120000, // 2 minutes
       headers: {
         'Content-Type': 'application/json',
-        'CostKatana-Auth': `Bearer ${config.apiKey}`
+        // Use appropriate auth header based on config
+        [authHeader]: `Bearer ${config.apiKey}`
       }
     });
 
@@ -354,6 +359,16 @@ export class GatewayClient {
     // Target URL
     if (options.targetUrl || this.config.defaultTargetUrl) {
       headers['CostKatana-Target-Url'] = options.targetUrl || this.config.defaultTargetUrl!;
+    }
+    
+    // Project ID
+    if (options.projectId) {
+      headers['CostKatana-Project-Id'] = options.projectId;
+    }
+    
+    // Authentication method override
+    if (options.authMethodOverride) {
+      headers['CostKatana-Auth-Method'] = options.authMethodOverride;
     }
     
     // Cache configuration

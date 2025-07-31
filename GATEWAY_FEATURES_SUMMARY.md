@@ -2,7 +2,7 @@
 
 ## 🎉 Complete Gateway Implementation
 
-All CostKATANA AI Gateway features have been successfully implemented in the `@ai-cost-optimizer-core` npm package (version 1.1.0).
+All CostKATANA AI Gateway features have been successfully implemented in the `ai-cost-tracker` npm package (version 1.1.0).
 
 ## ✅ Implemented Features
 

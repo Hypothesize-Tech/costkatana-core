@@ -31,7 +31,9 @@ export type {
 export {
   GatewayClient,
   createGatewayClient,
-  createGatewayClientFromEnv
+  createGatewayClientFromEnv,
+  createStandardGatewayClient,
+  createCostKatanaGatewayClient
 } from './gateway';
 export type {
   GatewayConfig,
@@ -669,10 +671,14 @@ export class AICostTracker {
     const startTime = Date.now();
     
     try {
-      // Add project ID if not specified
-      const projectId = process.env.PROJECT_ID || this.config.projectId;
-      if (projectId && !options.budgetId) {
-        options.budgetId = projectId;
+      // Add project ID if not specified (prioritize options.projectId, then env, then config)
+      const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+      if (projectId) {
+        options.projectId = projectId;
+        // Also set budgetId for backward compatibility
+        if (!options.budgetId) {
+          options.budgetId = projectId;
+        }
       }
 
       // Make the gateway request
@@ -707,6 +713,16 @@ export class AICostTracker {
     const startTime = Date.now();
     
     try {
+      // Add project ID if not specified (prioritize options.projectId, then env, then config)
+      const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+      if (projectId) {
+        options.projectId = projectId;
+        // Also set budgetId for backward compatibility
+        if (!options.budgetId) {
+          options.budgetId = projectId;
+        }
+      }
+
       const response = await this.gatewayClient.openai(request, options);
       
       if (this.config.tracking.enableAutoTracking) {
@@ -734,6 +750,16 @@ export class AICostTracker {
     const startTime = Date.now();
     
     try {
+      // Add project ID if not specified (prioritize options.projectId, then env, then config)
+      const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+      if (projectId) {
+        options.projectId = projectId;
+        // Also set budgetId for backward compatibility
+        if (!options.budgetId) {
+          options.budgetId = projectId;
+        }
+      }
+
       const response = await this.gatewayClient.anthropic(request, options);
       
       if (this.config.tracking.enableAutoTracking) {
@@ -779,7 +805,7 @@ export class AICostTracker {
         responseTime,
         tags: options.properties ? Object.keys(options.properties) : [],
         sessionId: options.sessionId,
-        projectId: options.budgetId || this.config.projectId
+        projectId: options.projectId || options.budgetId || this.config.projectId
       };
 
       await this.trackUsage(usageMetadata);
@@ -881,6 +907,13 @@ export class AICostTracker {
     if (!this.gatewayClient) {
       throw new Error('Gateway client not initialized. Call initializeGateway() first.');
     }
+
+    // Add project ID if not specified (prioritize options.projectId, then env, then config)
+    const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+    if (projectId) {
+      options.projectId = projectId;
+    }
+
     return this.gatewayClient.makeProxyKeyRequest(targetUrl, requestData, options);
   }
 
@@ -952,6 +985,17 @@ export class AICostTracker {
     if (!this.gatewayClient) {
       throw new Error('Gateway client not initialized. Call initializeGateway() first.');
     }
+
+    // Add project ID if not specified (prioritize options.projectId, then env, then config)
+    const projectId = requestOptions.projectId || process.env.PROJECT_ID || this.config.projectId;
+    if (projectId) {
+      requestOptions.projectId = projectId;
+      // Also set budgetId for backward compatibility
+      if (!requestOptions.budgetId) {
+        requestOptions.budgetId = projectId;
+      }
+    }
+
     return this.gatewayClient.makeFirewallProtectedRequest(endpoint, data, firewallOptions, requestOptions);
   }
 
@@ -970,6 +1014,16 @@ export class AICostTracker {
     const startTime = Date.now();
     
     try {
+      // Add project ID if not specified (prioritize options.projectId, then env, then config)
+      const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+      if (projectId) {
+        options.projectId = projectId;
+        // Also set budgetId for backward compatibility
+        if (!options.budgetId) {
+          options.budgetId = projectId;
+        }
+      }
+
       const response = await this.gatewayClient.openai(request, {
         ...options,
         firewall: firewallOptions
@@ -1001,6 +1055,16 @@ export class AICostTracker {
     const startTime = Date.now();
     
     try {
+      // Add project ID if not specified (prioritize options.projectId, then env, then config)
+      const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
+      if (projectId) {
+        options.projectId = projectId;
+        // Also set budgetId for backward compatibility
+        if (!options.budgetId) {
+          options.budgetId = projectId;
+        }
+      }
+
       const response = await this.gatewayClient.anthropic(request, {
         ...options,
         firewall: firewallOptions
