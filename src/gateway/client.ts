@@ -196,7 +196,9 @@ export class GatewayClient {
           processingTime: parseInt(response.headers['costkatana-processing-time']) || processingTime,
           retryAttempts: parseInt(response.headers['costkatana-retry-attempts']) || 0,
           budgetRemaining: parseFloat(response.headers['costkatana-budget-remaining']),
-          requestId: response.headers['costkatana-id']
+          requestId: response.headers['costkatana-request-id'] || response.headers['costkatana-id'],
+          failoverProviderIndex: response.headers['costkatana-failover-index'] ? 
+            parseInt(response.headers['costkatana-failover-index']) : undefined
         }
       };
 
@@ -431,6 +433,26 @@ export class GatewayClient {
         if (options.firewall.llamaThreshold !== undefined) {
           headers['CostKatana-Firewall-Llama-Threshold'] = options.firewall.llamaThreshold.toString();
         }
+      }
+    }
+
+    // Failover configuration
+    if (options.failover !== undefined) {
+      if (typeof options.failover === 'boolean') {
+        // Use default failover policy from config if available
+        if (options.failover && this.config.failover?.defaultPolicy) {
+          headers['CostKatana-Failover-Policy'] = JSON.stringify(this.config.failover.defaultPolicy);
+        }
+      } else {
+        // Use specific failover policy from options
+        if (options.failover.policy) {
+          headers['CostKatana-Failover-Policy'] = JSON.stringify(options.failover.policy);
+        }
+      }
+      
+      // Remove target URL header for failover requests as it's not needed
+      if (headers['CostKatana-Failover-Policy']) {
+        delete headers['CostKatana-Target-Url'];
       }
     }
     

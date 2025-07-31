@@ -1013,6 +1013,94 @@ const response = await tracker.gatewayOpenAIWithFirewall({
 - **Zero Downtime**: Fail-open design ensures service availability
 - **Multi-Provider**: Works with OpenAI, Anthropic, Google AI, Cohere, and more
 
+## 📊 User Feedback & Value Tracking
+
+Move beyond cost tracking to measure **Return on AI Spend** by connecting every dollar spent to actual user value.
+
+### Quick Start
+
+```typescript
+import AICostTracker from 'ai-cost-tracker';
+
+const tracker = new AICostTracker({
+  apiKey: 'your-costkatana-api-key'
+});
+
+// 1. Make a request and capture the request ID
+const requestId = crypto.randomUUID();
+const response = await tracker.gatewayOpenAI({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'How do I return an item?' }]
+}, { requestId });
+
+// 2. Submit user feedback
+await tracker.submitFeedback(requestId, {
+  rating: true, // true = positive, false = negative
+  comment: 'Very helpful response!',
+  implicitSignals: {
+    copied: true,
+    conversationContinued: false,
+    sessionDuration: 45000
+  }
+});
+
+// 3. Analyze Return on AI Spend
+const analytics = await tracker.getEnhancedFeedbackAnalytics();
+console.log(`Wasted Spend: ${analytics.insights.wastedSpendPercentage}%`);
+console.log(`ROI Score: ${analytics.insights.returnOnAISpend * 100}%`);
+```
+
+### Key Features
+
+#### Explicit + Implicit Feedback
+- **Explicit**: User clicks thumbs up/down (rare but accurate)
+- **Implicit**: Track copy behavior, session duration, conversation flow (scale)
+
+#### Cost-Value Correlation
+- See exactly how much you spend on positive vs negative responses
+- Calculate cost per positive rating
+- Identify wasted spending on unhelpful responses
+
+#### Actionable Insights
+```typescript
+const analytics = await tracker.getEnhancedFeedbackAnalytics();
+
+// Get automatic recommendations
+analytics.insights.recommendations.forEach(rec => {
+  console.log(rec);
+  // "You're spending 30% of budget on negatively-rated responses"
+  // "Model X has low satisfaction - consider switching"
+  // "Feature Y needs optimization - poor user feedback"
+});
+```
+
+#### Business Intelligence
+Answer critical questions:
+- "What percentage of our AI spend is wasted on unhelpful responses?"
+- "Which features have the highest ROI?"
+- "Should we switch AI models based on user satisfaction?"
+- "How much money could we save by improving prompts?"
+
+### Advanced Usage
+
+```typescript
+// Track behavioral signals automatically
+await tracker.updateImplicitSignals(requestId, {
+  copied: true,              // User copied the response
+  conversationContinued: false, // No follow-up questions
+  immediateRephrase: false,  // Didn't rephrase query
+  sessionDuration: 45000,    // 45 seconds engaged
+  codeAccepted: true         // Accepted code suggestion
+});
+
+// Get feature-specific ROI analysis
+const analytics = await tracker.getFeedbackAnalytics();
+Object.entries(analytics.ratingsByFeature).forEach(([feature, stats]) => {
+  const satisfaction = stats.positive / (stats.positive + stats.negative);
+  console.log(`${feature}: ${satisfaction * 100}% satisfaction, $${stats.cost} spent`);
+});
+```
+
 ## Examples
 
 See the [examples](./examples) directory for complete implementation examples:
@@ -1023,6 +1111,7 @@ See the [examples](./examples) directory for complete implementation examples:
 - [Team Collaboration](./examples/team-collaboration.ts)
 - [Proxy Key Usage](./examples/proxy-key-usage.ts)
 - [Firewall Usage](./examples/firewall-usage.ts)
+- [Feedback & Value Tracking](./examples/feedback-usage.ts)
 
 ## Support
 

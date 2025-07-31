@@ -23,6 +23,8 @@ export interface GatewayConfig {
   keyVault?: KeyVaultConfig;
   /** Firewall configuration for prompt security */
   firewall?: FirewallConfig;
+  /** Failover configuration for high availability */
+  failover?: FailoverConfig;
 }
 
 export interface KeyVaultConfig {
@@ -43,6 +45,44 @@ export interface FirewallConfig {
   promptThreshold?: number;
   /** Llama Guard confidence threshold (0.0-1.0) */
   llamaThreshold?: number;
+}
+
+export interface FailoverConfig {
+  /** Enable failover functionality */
+  enabled?: boolean;
+  /** Default failover policy */
+  defaultPolicy?: FailoverPolicy;
+  /** Global timeout for failover sequences (milliseconds) */
+  globalTimeout?: number;
+}
+
+export interface FailoverTarget {
+  /** The base URL of the AI provider to try */
+  'target-url': string;
+  /** Authentication headers needed for this specific provider */
+  headers: Record<string, string>;
+  /** HTTP status codes that will trigger a failover to the next provider */
+  onCodes: (number | { from: number; to: number })[];
+  /** Optional object to modify keys in the request body */
+  bodyKeyOverride?: Record<string, string>;
+  /** Optional timeout for this specific provider (milliseconds) */
+  timeout?: number;
+}
+
+export interface FailoverPolicy {
+  /** Array of providers in order of priority */
+  targets: FailoverTarget[];
+  /** Global timeout for the entire failover sequence (milliseconds) */
+  globalTimeout?: number;
+  /** Whether to continue trying providers after a successful response */
+  continueOnSuccess?: boolean;
+}
+
+export interface FailoverOptions {
+  /** Enable failover for this request */
+  enabled?: boolean;
+  /** Failover policy to use for this request */
+  policy?: FailoverPolicy;
 }
 
 export interface RetryConfig {
@@ -97,6 +137,8 @@ export interface GatewayRequestOptions {
   security?: boolean;
   /** Firewall configuration for this request */
   firewall?: boolean | FirewallOptions;
+  /** Failover configuration for this request */
+  failover?: boolean | FailoverOptions;
   /** Rate limiting policy */
   rateLimitPolicy?: string;
   /** Session ID for grouping requests */
@@ -126,6 +168,8 @@ export interface GatewayResponse<T = any> {
     budgetRemaining?: number;
     /** Unique request ID from gateway */
     requestId?: string;
+    /** Index of the provider that handled the request (for failover) */
+    failoverProviderIndex?: number;
   };
 }
 

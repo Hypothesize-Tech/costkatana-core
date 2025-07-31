@@ -20,7 +20,11 @@ export type {
   TrackingConfig,
   AlertConfig,
   CustomPricing,
-  AIResponse
+  AIResponse,
+  FailoverTarget,
+  FailoverPolicy,
+  FailoverOptions,
+  FailoverResponse
 } from './types';
 
 // Gateway exports
@@ -52,6 +56,21 @@ export type {
   FirewallAnalytics,
   FirewallOptions
 } from './types/gateway';
+
+// Feedback exports
+export { FeedbackClient } from './feedback';
+export type {
+  FeedbackOptions,
+  ImplicitSignals,
+  FeedbackAnalytics,
+  ProviderRatings,
+  ModelRatings,
+  FeatureRatings,
+  ImplicitSignalsAnalysis,
+  FeedbackInsights,
+  FeedbackSubmissionResult,
+  FeedbackConfig
+} from './types/feedback';
 
 // Provider types
 export type {
@@ -163,6 +182,8 @@ import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 import { GatewayClient } from './gateway/client';
 import { FirewallAnalytics, FirewallOptions, GatewayConfig, GatewayRequestOptions, GatewayResponse, ProxyKeyInfo, ProxyKeyUsageOptions } from './types/gateway';
+import { FeedbackClient } from './feedback';
+import { FeedbackOptions, ImplicitSignals, FeedbackAnalytics, FeedbackSubmissionResult } from './types/feedback';
 
 
 const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
@@ -994,6 +1015,90 @@ export class AICostTracker {
       logger.error('Gateway Anthropic request with firewall failed', error as Error);
       throw error;
     }
+  }
+
+  // ============================================
+  // FEEDBACK METHODS
+  // ============================================
+
+  private feedbackClient?: FeedbackClient;
+
+  /**
+   * Initialize feedback client
+   */
+  initializeFeedback(apiKey?: string, baseURL?: string): void {
+    let key = apiKey;
+    
+    // If no API key provided, try to get from first provider config
+    if (!key && this.config.providers.length > 0) {
+      key = this.config.providers[0].apiKey;
+    }
+    
+    if (!key) {
+      throw new Error('API key is required for feedback functionality. Provide it in initializeFeedback() or in provider config.');
+    }
+    
+    this.feedbackClient = new FeedbackClient(key, baseURL);
+  }
+
+  /**
+   * Submit feedback for a specific request
+   */
+  async submitFeedback(requestId: string, feedback: FeedbackOptions): Promise<FeedbackSubmissionResult> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.submitFeedback(requestId, feedback);
+  }
+
+  /**
+   * Update implicit signals for a request
+   */
+  async updateImplicitSignals(requestId: string, signals: ImplicitSignals): Promise<FeedbackSubmissionResult> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.updateImplicitSignals(requestId, signals);
+  }
+
+  /**
+   * Get feedback for a specific request
+   */
+  async getFeedback(requestId: string): Promise<any> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.getFeedback(requestId);
+  }
+
+  /**
+   * Get user feedback analytics (Return on AI Spend)
+   */
+  async getFeedbackAnalytics(): Promise<FeedbackAnalytics> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.getFeedbackAnalytics();
+  }
+
+  /**
+   * Get enhanced feedback analytics with insights and recommendations
+   */
+  async getEnhancedFeedbackAnalytics(): Promise<FeedbackAnalytics> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.getEnhancedFeedbackAnalytics();
+  }
+
+  /**
+   * Get global feedback analytics (admin only)
+   */
+  async getGlobalFeedbackAnalytics(): Promise<FeedbackAnalytics> {
+    if (!this.feedbackClient) {
+      this.initializeFeedback();
+    }
+    return this.feedbackClient!.getGlobalFeedbackAnalytics();
   }
 }
 
