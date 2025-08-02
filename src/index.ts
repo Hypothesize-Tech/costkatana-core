@@ -224,9 +224,7 @@ import { FirewallAnalytics, FirewallOptions, GatewayConfig, GatewayRequestOption
 import { FeedbackClient } from './feedback';
 import { FeedbackOptions, ImplicitSignals, FeedbackAnalytics, FeedbackSubmissionResult } from './types/feedback';
 import { ProviderModelMap, SimpleRequest, SimpleResponse, SimpleCostEstimate } from './types/simplified';
-import { getModelPricing as getModelPricingUtil } from './config/pricing-data';
-
-
+import { getModelPricing } from './config/pricing-data';
 
 const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
 
