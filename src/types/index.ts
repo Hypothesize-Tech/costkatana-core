@@ -124,6 +124,8 @@ export enum AIProvider {
   Gemini = 'gemini',
   DeepSeek = 'deepseek',
   Groq = 'groq',
+  Mistral = 'mistral',
+  XAI = 'xai',
   HuggingFace = 'huggingface',
   Ollama = 'ollama',
   Replicate = 'replicate',

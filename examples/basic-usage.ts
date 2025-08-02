@@ -2,8 +2,65 @@
 
 import AICostTracker, {
     AIProvider,
-    TrackerConfig
+    TrackerConfig,
+    createTracker,
+    createOpenAITracker,
+    createBedrockTracker,
+    type OpenAIModels,
+    type AWSBedrockModels
 } from '../src';
+
+// ==================================================================================
+// SUPER SIMPLE INTEGRATION - JUST 3 LINES OF CODE!
+// ==================================================================================
+
+async function superSimpleExample() {
+    console.log('=== 🚀 Super Simple Integration (Just 3 lines!) ===\n');
+    
+    // 1. Create tracker with type-safe provider and model selection
+    const gpt4oModel: OpenAIModels = 'gpt-4o';
+    const tracker = await createTracker({
+        provider: AIProvider.OpenAI,
+        model: gpt4oModel // Type-safe! Only OpenAI models available
+    });
+    
+    // 2. Make a request with automatic cost tracking
+    const response = await tracker.complete({
+        prompt: 'Explain quantum computing in simple terms'
+    });
+    
+    // 3. Get your response with automatic cost calculation
+    console.log('✨ Response:', response.text);
+    console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
+    console.log('📊 Tokens:', response.usage.totalTokens);
+    console.log('📈 All usage automatically synced to costkatana.com dashboard!');
+    console.log();
+}
+
+// ==================================================================================
+// PROVIDER-SPECIFIC SHORTCUTS - EVEN SIMPLER!
+// ==================================================================================
+
+async function providerShortcutsExample() {
+    console.log('=== ⚡ Provider-Specific Shortcuts ===\n');
+    
+    // OpenAI shortcut - auto-detects OPENAI_API_KEY
+    const gpt4oModel: OpenAIModels = 'gpt-4o';
+    const openai = await createOpenAITracker({
+        model: gpt4oModel // Only OpenAI models - fully type-safe!
+    });
+    
+    // AWS Bedrock shortcut - auto-detects AWS credentials  
+    const claudeBedrockModel: AWSBedrockModels = 'anthropic.claude-3-5-sonnet-20241022-v2:0';
+    const bedrock = await createBedrockTracker({
+        model: claudeBedrockModel, // Only Bedrock models!
+        region: 'us-east-1'
+    });
+    
+    console.log('✅ Created OpenAI and Bedrock trackers with type safety');
+    console.log('🔒 No wrong provider-model combinations possible!');
+    console.log();
+}
 
 // Example 0: Cost Katana Dashboard Integration
 async function dashboardIntegrationExample() {
@@ -295,18 +352,29 @@ if (require.main === module) {
         const hasProjectId = process.env.PROJECT_ID;
 
         if (hasApiKey && hasProjectId) {
+            console.log('🎉 Starting AI Cost Tracker Examples\n');
+            
+            // Show the super simple integration first!
+            await superSimpleExample();
+            await providerShortcutsExample();
+            
             await dashboardIntegrationExample();
             console.log('\n');
         } else {
             console.log('⚠️  Cost Katana Dashboard Integration Required\n');
-            console.log('To use this package, you need to:');
+            console.log('To use this package with full features, you need to:');
             console.log('1. Register at https://costkatana.com');
             console.log('2. Create a project in your dashboard');
             console.log('3. Get your API_KEY and PROJECT_ID from dashboard settings');
             console.log('4. Set them in your environment variables:\n');
             console.log('   API_KEY=dak_your_api_key_here');
             console.log('   PROJECT_ID=your_project_id_here\n');
-            console.log('💡 Without these credentials, the package cannot track usage or sync data.\n');
+            console.log('💡 You can still use basic features without these credentials.\n');
+            
+            // Show simplified examples even without full credentials
+            console.log('🚀 Here\'s how simple the integration is:\n');
+            await superSimpleExample();
+            await providerShortcutsExample();
         }
 
         console.log('=== Basic Usage Example ===\n');
@@ -323,5 +391,9 @@ if (require.main === module) {
 
         console.log('\n=== Export Data Example ===\n');
         await exportUsageData();
+        
+        console.log('\n🎯 For more provider-specific examples, check out:');
+        console.log('   simple-provider-examples.ts - Examples for all providers');
+        console.log('   See other example files for advanced features!');
     })().catch(console.error);
 }

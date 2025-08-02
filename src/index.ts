@@ -27,6 +27,27 @@ export type {
   FailoverResponse
 } from './types';
 
+// Simplified API will be exported after implementation below
+
+export type {
+  OpenAIModels,
+  AnthropicModels,
+  AWSBedrockModels,
+  GoogleModels,
+  CohereModels,
+  MistralModels,
+  GroqModels,
+  DeepSeekModels,
+  XAIModels,
+  AllModels,
+  ProviderModelMap,
+  SimpleConfig,
+  AnySimpleConfig,
+  SimpleRequest,
+  SimpleResponse,
+  SimpleCostEstimate
+} from './types/simplified';
+
 // Gateway exports
 export {
   GatewayClient,
@@ -146,6 +167,21 @@ export {
   alertThresholds
 } from './config/default';
 
+// Model types and utilities from config
+export {
+  OPENAI_MODEL_IDS,
+  ANTHROPIC_MODEL_IDS,
+  AWS_BEDROCK_MODEL_IDS,
+  GOOGLE_MODEL_IDS,
+  COHERE_MODEL_IDS,
+  GROQ_MODEL_IDS,
+  DEEPSEEK_MODEL_IDS,
+  MISTRAL_MODEL_IDS,
+  XAI_MODEL_IDS,
+  getModelsForProvider,
+  validateModelForProvider
+} from './config/model-types';
+
 export {
   PRICING_CONFIG,
   PRICING_METADATA,
@@ -169,7 +205,8 @@ import {
   UsageMetadata,
   CostEstimate,
   OptimizationSuggestion,
-  OptimizationConfig
+  OptimizationConfig,
+  ProviderConfig
 } from './types';
 import { createProvider, BaseProvider } from './providers';
 import { CostAnalyzer } from './analyzers/cost-analyzer';
@@ -186,6 +223,9 @@ import { GatewayClient } from './gateway/client';
 import { FirewallAnalytics, FirewallOptions, GatewayConfig, GatewayRequestOptions, GatewayResponse, ProxyKeyInfo, ProxyKeyUsageOptions } from './types/gateway';
 import { FeedbackClient } from './feedback';
 import { FeedbackOptions, ImplicitSignals, FeedbackAnalytics, FeedbackSubmissionResult } from './types/feedback';
+import { ProviderModelMap, SimpleRequest, SimpleResponse, SimpleCostEstimate } from './types/simplified';
+import { getModelPricing as getModelPricingUtil } from './config/pricing-data';
+
 
 
 const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
@@ -1168,3 +1208,427 @@ export class AICostTracker {
 
 // Export the main class as default
 export default AICostTracker;
+
+// ============================================================================
+// SIMPLIFIED API - Easy integration using existing AICostTracker
+// ============================================================================
+
+
+
+/**
+ * Simplified wrapper around AICostTracker for easy integration
+ */
+class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMap> {
+  private tracker: AICostTracker;
+  private providerType: T;
+  private modelName: ProviderModelMap[T];
+
+  private constructor(tracker: AICostTracker, provider: T, model: ProviderModelMap[T]) {
+    this.tracker = tracker;
+    this.providerType = provider;
+    this.modelName = model;
+  }
+
+  /**
+   * Create a simple cost tracker with type-safe provider-model selection
+   */
+  static async create<T extends keyof ProviderModelMap>(config: {
+    provider: T;
+    model: ProviderModelMap[T];
+    apiKey?: string;
+    region?: string;
+    projectId?: string;
+    enableOptimization?: boolean;
+    enableAutoTracking?: boolean;
+  }): Promise<SimpleCostTracker<T>> {
+    // Build provider config based on provider type
+    const providerConfig: ProviderConfig = {
+      provider: config.provider as AIProvider,
+      apiKey: config.apiKey || getDefaultApiKey(config.provider)
+    };
+
+    // Add region for AWS Bedrock
+    if (config.provider === AIProvider.AWSBedrock) {
+      (providerConfig as any).region = config.region || process.env.AWS_REGION || 'us-east-1';
+    }
+
+    // Build full tracker config using existing types
+    const trackerConfig: TrackerConfig = {
+      providers: [providerConfig],
+      optimization: {
+        enablePromptOptimization: config.enableOptimization ?? true,
+        enableModelSuggestions: config.enableOptimization ?? true,
+        enableCachingSuggestions: config.enableOptimization ?? true,
+        thresholds: {
+          highCostPerRequest: 0.1,
+          highTokenUsage: 2000,
+          frequencyThreshold: 10
+        }
+      },
+      tracking: {
+        enableAutoTracking: config.enableAutoTracking ?? true
+      },
+      ...(config.projectId && { projectId: config.projectId })
+    };
+
+    // Create the underlying tracker using existing method
+    const tracker = await AICostTracker.create(trackerConfig);
+
+    logger.info('Simple Cost Tracker created', { 
+      provider: config.provider, 
+      model: config.model 
+    });
+
+    return new SimpleCostTracker(tracker, config.provider, config.model);
+  }
+
+  /**
+   * Complete a prompt with automatic cost tracking
+   */
+  async complete(request: SimpleRequest): Promise<SimpleResponse> {
+    const startTime = Date.now();
+
+    try {
+      // Build the request using existing ProviderRequest format
+      const providerRequest: ProviderRequest = this.buildProviderRequest(request);
+      
+      // Make the request through existing AICostTracker method
+      const response = await this.tracker.makeRequest(providerRequest);
+      
+      const responseTime = Date.now() - startTime;
+
+      // Parse response into simplified format
+      return this.parseProviderResponse(response, responseTime);
+    } catch (error) {
+      logger.error('Failed to complete request', error as Error, {
+        provider: this.providerType,
+        model: this.modelName
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Estimate cost before making a request using existing method
+   */
+  async estimateCost(
+    prompt: string, 
+    expectedCompletionTokens?: number
+  ): Promise<SimpleCostEstimate> {
+    try {
+      const estimate = await this.tracker.estimateCost(
+        prompt,
+        this.modelName as string,
+        this.providerType as AIProvider,
+        expectedCompletionTokens
+      );
+
+      return {
+        estimatedCost: estimate.totalCost,
+        currency: estimate.currency,
+        breakdown: {
+          promptCost: estimate.promptCost,
+          estimatedCompletionCost: estimate.completionCost
+        },
+        tokens: {
+          promptTokens: estimate.breakdown.promptTokens,
+          estimatedCompletionTokens: expectedCompletionTokens || 0
+        }
+      };
+    } catch (error) {
+      logger.error('Failed to estimate cost', error as Error, {
+        provider: this.providerType,
+        model: this.modelName
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get usage analytics using existing method
+   */
+  async getAnalytics(startDate?: Date, endDate?: Date) {
+    return this.tracker.getAnalytics(startDate, endDate);
+  }
+
+  /**
+   * Export usage data using existing method
+   */
+  async exportUsageData(format: 'json' | 'csv' = 'json') {
+    return this.tracker.exportData(format);
+  }
+
+  /**
+   * Get the provider being used
+   */
+  getProvider(): T {
+    return this.providerType;
+  }
+
+  /**
+   * Get the model being used  
+   */
+  getModel(): string {
+    return this.modelName as string;
+  }
+
+  // Private helper methods
+
+  private buildProviderRequest(request: SimpleRequest): ProviderRequest {
+    const baseRequest = {
+      model: this.modelName as string,
+      maxTokens: request.maxTokens || 1000,
+      temperature: request.temperature || 0.7
+    };
+
+    switch (this.providerType) {
+      case AIProvider.OpenAI:
+      case AIProvider.Mistral:
+      case AIProvider.XAI:
+        return {
+          ...baseRequest,
+          messages: [
+            ...(request.systemMessage ? [{ role: 'system' as const, content: request.systemMessage }] : []),
+            { role: 'user' as const, content: request.prompt }
+          ]
+        } as ProviderRequest;
+      
+      case AIProvider.Anthropic:
+        return {
+          ...baseRequest,
+          messages: [
+            { role: 'user' as const, content: request.prompt }
+          ],
+          ...(request.systemMessage && { system: request.systemMessage })
+        } as ProviderRequest;
+      
+      case AIProvider.AWSBedrock:
+        // Handle different Bedrock model families
+        if ((this.modelName as string).includes('anthropic.claude')) {
+          return {
+            ...baseRequest,
+            messages: [
+              { role: 'user' as const, content: request.prompt }
+            ],
+            ...(request.systemMessage && { system: request.systemMessage })
+          } as ProviderRequest;
+        } else if ((this.modelName as string).includes('amazon.nova')) {
+          return {
+            ...baseRequest,
+            messages: [
+              { role: 'user' as const, content: request.prompt }
+            ]
+          } as ProviderRequest;
+        } else {
+          return {
+            ...baseRequest,
+            prompt: request.prompt
+          } as ProviderRequest;
+        }
+      
+      default:
+        return {
+          ...baseRequest,
+          prompt: request.prompt
+        } as ProviderRequest;
+    }
+  }
+
+  private parseProviderResponse(response: any, responseTime: number): SimpleResponse {
+    let text = '';
+    let usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+
+    // Parse response based on provider using existing patterns
+    switch (this.providerType) {
+      case AIProvider.OpenAI:
+      case AIProvider.Mistral:
+      case AIProvider.XAI:
+        text = response.choices?.[0]?.message?.content || '';
+        usage = {
+          promptTokens: response.usage?.prompt_tokens || 0,
+          completionTokens: response.usage?.completion_tokens || 0,
+          totalTokens: response.usage?.total_tokens || 0
+        };
+        break;
+      
+      case AIProvider.Anthropic:
+        text = response.content?.[0]?.text || '';
+        usage = {
+          promptTokens: response.usage?.input_tokens || 0,
+          completionTokens: response.usage?.output_tokens || 0,
+          totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0)
+        };
+        break;
+      
+      case AIProvider.AWSBedrock:
+        // Handle different Bedrock response formats
+        if (response.content) {
+          text = response.content[0]?.text || '';
+          usage = {
+            promptTokens: response.usage?.input_tokens || 0,
+            completionTokens: response.usage?.output_tokens || 0,
+            totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0)
+          };
+        } else if (response.output?.message) {
+          text = response.output.message.content?.[0]?.text || '';
+          usage = {
+            promptTokens: response.usage?.inputTokens || 0,
+            completionTokens: response.usage?.outputTokens || 0,
+            totalTokens: (response.usage?.inputTokens || 0) + (response.usage?.outputTokens || 0)
+          };
+        } else {
+          text = response.text || response.completion || '';
+        }
+        break;
+      
+      default:
+        text = response.text || response.content || response.completion || '';
+        break;
+    }
+
+    // Calculate cost using existing pricing utilities from config
+    let promptCost = 0;
+    let completionCost = 0;
+    
+    try {
+      const modelPricing = getModelPricing(this.getProviderName(), this.modelName as string);
+      if (modelPricing) {
+        promptCost = (usage.promptTokens / 1_000_000) * modelPricing.inputPrice;
+        completionCost = (usage.completionTokens / 1_000_000) * modelPricing.outputPrice;
+      }
+    } catch (error) {
+      // Fallback to basic estimation if pricing not found
+      promptCost = usage.promptTokens * 0.000001; // $0.001 per 1K tokens
+      completionCost = usage.completionTokens * 0.000002; // $0.002 per 1K tokens
+    }
+
+    return {
+      text,
+      usage,
+      cost: {
+        promptCost,
+        completionCost,
+        totalCost: promptCost + completionCost,
+        currency: 'USD'
+      },
+      model: this.modelName as string,
+      provider: this.providerType as string,
+      responseTime
+    };
+  }
+
+  private getProviderName(): string {
+    switch (this.providerType) {
+      case AIProvider.OpenAI:
+        return 'OpenAI';
+      case AIProvider.Anthropic:
+        return 'Anthropic';
+      case AIProvider.AWSBedrock:
+        return 'AWS Bedrock';
+      case AIProvider.Google:
+        return 'Google AI';
+      case AIProvider.Cohere:
+        return 'Cohere';
+      case AIProvider.Groq:
+        return 'Groq';
+      case AIProvider.DeepSeek:
+        return 'DeepSeek';
+      case AIProvider.Mistral:
+        return 'Mistral AI';
+      case AIProvider.XAI:
+        return 'xAI';
+      default:
+        return 'Unknown';
+    }
+  }
+}
+
+// Helper function to get default API keys from environment
+function getDefaultApiKey(provider: keyof ProviderModelMap): string | undefined {
+  switch (provider) {
+    case AIProvider.OpenAI:
+      return process.env.OPENAI_API_KEY;
+    case AIProvider.Anthropic:
+      return process.env.ANTHROPIC_API_KEY;
+    case AIProvider.Google:
+      return process.env.GOOGLE_API_KEY;
+    case AIProvider.Cohere:
+      return process.env.COHERE_API_KEY;
+    case AIProvider.Groq:
+      return process.env.GROQ_API_KEY;
+    case AIProvider.DeepSeek:
+      return process.env.DEEPSEEK_API_KEY;
+    case AIProvider.Mistral:
+      return process.env.MISTRAL_API_KEY;
+    case AIProvider.XAI:
+      return process.env.XAI_API_KEY;
+    default:
+      return undefined;
+  }
+}
+
+// ============================================================================
+// CONVENIENCE FUNCTIONS - Simple creation methods for each provider
+// ============================================================================
+
+/**
+ * Generic simple tracker creation with type safety
+ */
+export const createTracker = SimpleCostTracker.create;
+
+/**
+ * Create OpenAI tracker with type-safe model selection
+ */
+export const createOpenAITracker = (config: Omit<Parameters<typeof createTracker<AIProvider.OpenAI>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.OpenAI });
+
+/**
+ * Create Anthropic tracker with type-safe model selection
+ */
+export const createAnthropicTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Anthropic>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.Anthropic });
+
+/**
+ * Create AWS Bedrock tracker with type-safe model selection
+ */
+export const createBedrockTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.AWSBedrock>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.AWSBedrock });
+
+/**
+ * Create Google AI tracker with type-safe model selection
+ */
+export const createGoogleTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Google>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.Google });
+
+/**
+ * Create Cohere tracker with type-safe model selection
+ */
+export const createCohereTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Cohere>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.Cohere });
+
+/**
+ * Create Groq tracker with type-safe model selection
+ */
+export const createGroqTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Groq>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.Groq });
+
+/**
+ * Create DeepSeek tracker with type-safe model selection
+ */
+export const createDeepSeekTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.DeepSeek>>[0], 'provider'>) =>  
+  createTracker({ ...config, provider: AIProvider.DeepSeek });
+
+/**
+ * Create Mistral tracker with type-safe model selection
+ */
+export const createMistralTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Mistral>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.Mistral });
+
+/**
+ * Create xAI tracker with type-safe model selection
+ */
+export const createXAITracker = (config: Omit<Parameters<typeof createTracker<AIProvider.XAI>>[0], 'provider'>) =>
+  createTracker({ ...config, provider: AIProvider.XAI });
+
+// Export the SimpleCostTracker class for advanced usage
+export { SimpleCostTracker };
