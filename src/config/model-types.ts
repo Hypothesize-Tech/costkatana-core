@@ -20,15 +20,15 @@ const mistralModelIds = extractModelIds('Mistral AI');
 const xaiModelIds = extractModelIds('xAI');
 
 // Generate literal types from actual pricing data
-export type OpenAIModels = typeof openAIModelIds[number];
-export type AnthropicModels = typeof anthropicModelIds[number];
-export type AWSBedrockModels = typeof awsBedrockModelIds[number];
-export type GoogleModels = typeof googleModelIds[number];
-export type CohereModels = typeof cohereModelIds[number];
-export type GroqModels = typeof groqModelIds[number];
-export type DeepSeekModels = typeof deepSeekModelIds[number];
-export type MistralModels = typeof mistralModelIds[number];
-export type XAIModels = typeof xaiModelIds[number];
+export type OpenAIModels = (typeof openAIModelIds)[number];
+export type AnthropicModels = (typeof anthropicModelIds)[number];
+export type AWSBedrockModels = (typeof awsBedrockModelIds)[number];
+export type GoogleModels = (typeof googleModelIds)[number];
+export type CohereModels = (typeof cohereModelIds)[number];
+export type GroqModels = (typeof groqModelIds)[number];
+export type DeepSeekModels = (typeof deepSeekModelIds)[number];
+export type MistralModels = (typeof mistralModelIds)[number];
+export type XAIModels = (typeof xaiModelIds)[number];
 
 // Export the model ID arrays for runtime use
 export const OPENAI_MODEL_IDS = openAIModelIds;
@@ -69,39 +69,39 @@ export function getModelsForProvider(provider: string): string[] {
 
 // Type guard functions
 export function isOpenAIModel(model: string): model is OpenAIModels {
-  return OPENAI_MODEL_IDS.includes(model as any);
+  return OPENAI_MODEL_IDS.includes(model as OpenAIModels);
 }
 
 export function isAnthropicModel(model: string): model is AnthropicModels {
-  return ANTHROPIC_MODEL_IDS.includes(model as any);
+  return ANTHROPIC_MODEL_IDS.includes(model as AnthropicModels);
 }
 
 export function isAWSBedrockModel(model: string): model is AWSBedrockModels {
-  return AWS_BEDROCK_MODEL_IDS.includes(model as any);
+  return AWS_BEDROCK_MODEL_IDS.includes(model as AWSBedrockModels);
 }
 
 export function isGoogleModel(model: string): model is GoogleModels {
-  return GOOGLE_MODEL_IDS.includes(model as any);
+  return GOOGLE_MODEL_IDS.includes(model as GoogleModels);
 }
 
 export function isCohereModel(model: string): model is CohereModels {
-  return COHERE_MODEL_IDS.includes(model as any);
+  return COHERE_MODEL_IDS.includes(model as CohereModels);
 }
 
 export function isGroqModel(model: string): model is GroqModels {
-  return GROQ_MODEL_IDS.includes(model as any);
+  return GROQ_MODEL_IDS.includes(model as GroqModels);
 }
 
 export function isDeepSeekModel(model: string): model is DeepSeekModels {
-  return DEEPSEEK_MODEL_IDS.includes(model as any);
+  return DEEPSEEK_MODEL_IDS.includes(model as DeepSeekModels);
 }
 
 export function isMistralModel(model: string): model is MistralModels {
-  return MISTRAL_MODEL_IDS.includes(model as any);
+  return MISTRAL_MODEL_IDS.includes(model as MistralModels);
 }
 
 export function isXAIModel(model: string): model is XAIModels {
-  return XAI_MODEL_IDS.includes(model as any);
+  return XAI_MODEL_IDS.includes(model as XAIModels);
 }
 
 // Helper to validate model for provider
@@ -111,13 +111,13 @@ export function validateModelForProvider(provider: string, model: string): boole
 }
 
 // All models type (union of all provider models)
-export type AllModels = 
-  | OpenAIModels 
-  | AnthropicModels 
-  | AWSBedrockModels 
-  | GoogleModels 
-  | CohereModels 
-  | GroqModels 
-  | DeepSeekModels 
-  | MistralModels 
+export type AllModels =
+  | OpenAIModels
+  | AnthropicModels
+  | AWSBedrockModels
+  | GoogleModels
+  | CohereModels
+  | GroqModels
+  | DeepSeekModels
+  | MistralModels
   | XAIModels;

@@ -170,7 +170,7 @@ export function compareProviders(
   costBreakdown: { inputCost: number; outputCost: number };
   isLatest: boolean;
 }> {
-  let modelsToCompare: ModelPricingConfig[] = [];
+  const modelsToCompare: ModelPricingConfig[] = [];
 
   if (providers && providers.length > 0) {
     providers.forEach(provider => {

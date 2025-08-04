@@ -318,7 +318,7 @@ export class PromptCompressor {
     const hasDuplicates = Array.from(duplicates.values()).some(count => count > 1);
     if (!hasDuplicates) return null;
 
-    const deduplicatedPrompt = uniqueSentences.join('. ') + '.';
+    const deduplicatedPrompt = `${uniqueSentences.join('. ')}.`;
 
     const originalTokens = await TokenCounter.countTokens(prompt, targetProvider, targetModel);
     const deduplicatedTokens = await TokenCounter.countTokens(

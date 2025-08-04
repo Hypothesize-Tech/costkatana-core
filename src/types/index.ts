@@ -28,7 +28,14 @@ export interface CostEstimate {
 
 export interface OptimizationSuggestion {
   id: string;
-  type: 'prompt' | 'model' | 'batching' | 'caching' | 'compression' | 'context_trimming' | 'request_fusion';
+  type:
+    | 'prompt'
+    | 'model'
+    | 'batching'
+    | 'caching'
+    | 'compression'
+    | 'context_trimming'
+    | 'request_fusion';
   originalPrompt?: string;
   optimizedPrompt?: string;
   estimatedSavings: number;

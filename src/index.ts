@@ -220,10 +220,28 @@ import { getModelById } from './types/models';
 import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 import { GatewayClient } from './gateway/client';
-import { FirewallAnalytics, FirewallOptions, GatewayConfig, GatewayRequestOptions, GatewayResponse, ProxyKeyInfo, ProxyKeyUsageOptions } from './types/gateway';
+import {
+  FirewallAnalytics,
+  FirewallOptions,
+  GatewayConfig,
+  GatewayRequestOptions,
+  GatewayResponse,
+  ProxyKeyInfo,
+  ProxyKeyUsageOptions
+} from './types/gateway';
 import { FeedbackClient } from './feedback';
-import { FeedbackOptions, ImplicitSignals, FeedbackAnalytics, FeedbackSubmissionResult } from './types/feedback';
-import { ProviderModelMap, SimpleRequest, SimpleResponse, SimpleCostEstimate } from './types/simplified';
+import {
+  FeedbackOptions,
+  ImplicitSignals,
+  FeedbackAnalytics,
+  FeedbackSubmissionResult
+} from './types/feedback';
+import {
+  ProviderModelMap,
+  SimpleRequest,
+  SimpleResponse,
+  SimpleCostEstimate
+} from './types/simplified';
 import { getModelPricing } from './config/pricing-data';
 
 const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
@@ -258,7 +276,10 @@ export class AICostTracker {
     });
 
     // Initialize the enhanced prompt optimizer
-    this.promptOptimizer = new PromptOptimizer(config.optimization, config.optimization.bedrockConfig);
+    this.promptOptimizer = new PromptOptimizer(
+      config.optimization,
+      config.optimization.bedrockConfig
+    );
 
     logger.info('AICostTracker initialized', {
       providers: config.providers.map(p => p.provider)
@@ -271,10 +292,14 @@ export class AICostTracker {
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
     if (!apiKey) {
-      throw new Error('API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.');
+      throw new Error(
+        'API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.'
+      );
     }
     if (!projectId) {
-      throw new Error('PROJECT_ID environment variable not set. Please get your Project ID from the Cost Katana dashboard.');
+      throw new Error(
+        'PROJECT_ID environment variable not set. Please get your Project ID from the Cost Katana dashboard.'
+      );
     }
 
     const apiClient = axios.create({
@@ -290,7 +315,9 @@ export class AICostTracker {
       await apiClient.get('/user/profile');
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        throw new Error('Invalid or expired API_KEY. Please get a new API key from the Cost Katana dashboard.');
+        throw new Error(
+          'Invalid or expired API_KEY. Please get a new API key from the Cost Katana dashboard.'
+        );
       }
     }
 
@@ -405,13 +432,16 @@ export class AICostTracker {
     if (payload.usage && typeof payload.usage === 'object') {
       payload.promptTokens = payload.usage.promptTokens;
       payload.completionTokens = payload.usage.completionTokens;
-      payload.totalTokens = payload.usage.totalTokens ?? (payload.usage.promptTokens + payload.usage.completionTokens);
+      payload.totalTokens =
+        payload.usage.totalTokens ?? payload.usage.promptTokens + payload.usage.completionTokens;
       delete payload.usage;
       transformed = true;
     }
     // Warn if transformation was needed
     if (transformed) {
-      logger.warn('trackUsage: Transformed payload to match backend schema. Please use the flat UsageMetadata structure.');
+      logger.warn(
+        'trackUsage: Transformed payload to match backend schema. Please use the flat UsageMetadata structure.'
+      );
     }
 
     // Ensure required fields are present for backend API
@@ -584,7 +614,9 @@ export class AICostTracker {
     return modelInfo.provider;
   }
 
-  private async checkAlerts(_metadata: Omit<UsageMetadata, 'prompt' | 'completion'>): Promise<void> {
+  private async checkAlerts(
+    _metadata: Omit<UsageMetadata, 'prompt' | 'completion'>
+  ): Promise<void> {
     if (!this.config.alerts) return;
 
     // The backend now handles user-specific alerts based on the token.
@@ -642,7 +674,10 @@ export class AICostTracker {
   updateOptimizationConfig(config: Partial<OptimizationConfig>): void {
     this.config.optimization = { ...this.config.optimization, ...config };
     // Recreate the optimizer with new config
-    this.promptOptimizer = new PromptOptimizer(this.config.optimization, this.config.optimization.bedrockConfig);
+    this.promptOptimizer = new PromptOptimizer(
+      this.config.optimization,
+      this.config.optimization.bedrockConfig
+    );
     logger.info('Optimization configuration updated', config);
   }
 
@@ -651,9 +686,11 @@ export class AICostTracker {
    */
   initializeGateway(gatewayConfig: Partial<GatewayConfig> = {}): GatewayClient {
     const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
-    
+
     if (!apiKey) {
-      throw new Error('COSTKATANA_API_KEY or API_KEY environment variable not set for gateway functionality.');
+      throw new Error(
+        'COSTKATANA_API_KEY or API_KEY environment variable not set for gateway functionality.'
+      );
     }
 
     const defaultConfig: GatewayConfig = {
@@ -674,7 +711,7 @@ export class AICostTracker {
 
     const config = { ...defaultConfig, ...gatewayConfig };
     this.gatewayClient = new GatewayClient(config);
-    
+
     logger.info('Gateway client initialized', {
       baseUrl: config.baseUrl,
       enableCache: config.enableCache,
@@ -707,7 +744,7 @@ export class AICostTracker {
     }
 
     const startTime = Date.now();
-    
+
     try {
       // Add project ID if not specified (prioritize options.projectId, then env, then config)
       const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
@@ -721,7 +758,7 @@ export class AICostTracker {
 
       // Make the gateway request
       const response = await this.gatewayClient.makeRequest(endpoint, data, options);
-      
+
       // Auto-track usage if enabled
       if (this.config.tracking.enableAutoTracking) {
         await this.trackGatewayUsage(data, response, startTime, options);
@@ -740,16 +777,13 @@ export class AICostTracker {
   /**
    * Make an OpenAI-compatible request through the gateway
    */
-  async gatewayOpenAI(
-    request: any,
-    options: GatewayRequestOptions = {}
-  ): Promise<GatewayResponse> {
+  async gatewayOpenAI(request: any, options: GatewayRequestOptions = {}): Promise<GatewayResponse> {
     if (!this.gatewayClient) {
       throw new Error('Gateway client not initialized. Call initializeGateway() first.');
     }
 
     const startTime = Date.now();
-    
+
     try {
       // Add project ID if not specified (prioritize options.projectId, then env, then config)
       const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
@@ -762,7 +796,7 @@ export class AICostTracker {
       }
 
       const response = await this.gatewayClient.openai(request, options);
-      
+
       if (this.config.tracking.enableAutoTracking) {
         await this.trackGatewayUsage(request, response, startTime, options);
       }
@@ -786,7 +820,7 @@ export class AICostTracker {
     }
 
     const startTime = Date.now();
-    
+
     try {
       // Add project ID if not specified (prioritize options.projectId, then env, then config)
       const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
@@ -799,7 +833,7 @@ export class AICostTracker {
       }
 
       const response = await this.gatewayClient.anthropic(request, options);
-      
+
       if (this.config.tracking.enableAutoTracking) {
         await this.trackGatewayUsage(request, response, startTime, options);
       }
@@ -823,14 +857,14 @@ export class AICostTracker {
     try {
       // Extract usage information from the response
       const responseTime = Date.now() - startTime;
-      
+
       // Estimate tokens and cost (this would be enhanced with actual response parsing)
       const promptText = this.extractPromptFromRequest(request);
       const completionText = this.extractCompletionFromResponse(response.data);
-      
+
       const promptTokens = Math.ceil(promptText.length / 4); // Rough estimation
       const completionTokens = Math.ceil(completionText.length / 4);
-      
+
       const usageMetadata: UsageMetadata = {
         provider: this.inferProviderFromOptions(options),
         model: request.model || 'unknown',
@@ -847,7 +881,6 @@ export class AICostTracker {
       };
 
       await this.trackUsage(usageMetadata);
-      
     } catch (error) {
       logger.error('Failed to track gateway usage', error as Error);
       // Don't throw here to avoid breaking the main request
@@ -865,9 +898,9 @@ export class AICostTracker {
       return request.prompt;
     }
     if (request.contents && Array.isArray(request.contents)) {
-      return request.contents.map((content: any) => 
-        content.parts?.map((part: any) => part.text).join(' ') || ''
-      ).join('\n');
+      return request.contents
+        .map((content: any) => content.parts?.map((part: any) => part.text).join(' ') || '')
+        .join('\n');
     }
     return JSON.stringify(request);
   }
@@ -877,9 +910,9 @@ export class AICostTracker {
    */
   private extractCompletionFromResponse(response: any): string {
     if (response.choices && Array.isArray(response.choices)) {
-      return response.choices.map((choice: any) => 
-        choice.message?.content || choice.text || ''
-      ).join('\n');
+      return response.choices
+        .map((choice: any) => choice.message?.content || choice.text || '')
+        .join('\n');
     }
     if (response.content && Array.isArray(response.content)) {
       return response.content.map((item: any) => item.text || '').join('\n');
@@ -888,9 +921,12 @@ export class AICostTracker {
       return response.generations.map((gen: any) => gen.text || '').join('\n');
     }
     if (response.candidates && Array.isArray(response.candidates)) {
-      return response.candidates.map((candidate: any) => 
-        candidate.content?.parts?.map((part: any) => part.text).join(' ') || ''
-      ).join('\n');
+      return response.candidates
+        .map(
+          (candidate: any) =>
+            candidate.content?.parts?.map((part: any) => part.text).join(' ') || ''
+        )
+        .join('\n');
     }
     return '';
   }
@@ -987,7 +1023,9 @@ export class AICostTracker {
   /**
    * Validate proxy key permissions for a specific operation
    */
-  async validateProxyKeyPermissions(requiredPermission: 'read' | 'write' | 'admin'): Promise<boolean> {
+  async validateProxyKeyPermissions(
+    requiredPermission: 'read' | 'write' | 'admin'
+  ): Promise<boolean> {
     if (!this.gatewayClient) {
       throw new Error('Gateway client not initialized. Call initializeGateway() first.');
     }
@@ -1034,7 +1072,12 @@ export class AICostTracker {
       }
     }
 
-    return this.gatewayClient.makeFirewallProtectedRequest(endpoint, data, firewallOptions, requestOptions);
+    return this.gatewayClient.makeFirewallProtectedRequest(
+      endpoint,
+      data,
+      firewallOptions,
+      requestOptions
+    );
   }
 
   /**
@@ -1050,7 +1093,7 @@ export class AICostTracker {
     }
 
     const startTime = Date.now();
-    
+
     try {
       // Add project ID if not specified (prioritize options.projectId, then env, then config)
       const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
@@ -1066,7 +1109,7 @@ export class AICostTracker {
         ...options,
         firewall: firewallOptions
       });
-      
+
       if (this.config.tracking.enableAutoTracking) {
         await this.trackGatewayUsage(request, response, startTime, options);
       }
@@ -1091,7 +1134,7 @@ export class AICostTracker {
     }
 
     const startTime = Date.now();
-    
+
     try {
       // Add project ID if not specified (prioritize options.projectId, then env, then config)
       const projectId = options.projectId || process.env.PROJECT_ID || this.config.projectId;
@@ -1107,7 +1150,7 @@ export class AICostTracker {
         ...options,
         firewall: firewallOptions
       });
-      
+
       if (this.config.tracking.enableAutoTracking) {
         await this.trackGatewayUsage(request, response, startTime, options);
       }
@@ -1130,23 +1173,28 @@ export class AICostTracker {
    */
   initializeFeedback(apiKey?: string, baseURL?: string): void {
     let key = apiKey;
-    
+
     // If no API key provided, try to get from first provider config
     if (!key && this.config.providers.length > 0) {
       key = this.config.providers[0].apiKey;
     }
-    
+
     if (!key) {
-      throw new Error('API key is required for feedback functionality. Provide it in initializeFeedback() or in provider config.');
+      throw new Error(
+        'API key is required for feedback functionality. Provide it in initializeFeedback() or in provider config.'
+      );
     }
-    
+
     this.feedbackClient = new FeedbackClient(key, baseURL);
   }
 
   /**
    * Submit feedback for a specific request
    */
-  async submitFeedback(requestId: string, feedback: FeedbackOptions): Promise<FeedbackSubmissionResult> {
+  async submitFeedback(
+    requestId: string,
+    feedback: FeedbackOptions
+  ): Promise<FeedbackSubmissionResult> {
     if (!this.feedbackClient) {
       this.initializeFeedback();
     }
@@ -1156,7 +1204,10 @@ export class AICostTracker {
   /**
    * Update implicit signals for a request
    */
-  async updateImplicitSignals(requestId: string, signals: ImplicitSignals): Promise<FeedbackSubmissionResult> {
+  async updateImplicitSignals(
+    requestId: string,
+    signals: ImplicitSignals
+  ): Promise<FeedbackSubmissionResult> {
     if (!this.feedbackClient) {
       this.initializeFeedback();
     }
@@ -1210,8 +1261,6 @@ export default AICostTracker;
 // ============================================================================
 // SIMPLIFIED API - Easy integration using existing AICostTracker
 // ============================================================================
-
-
 
 /**
  * Simplified wrapper around AICostTracker for easy integration
@@ -1272,9 +1321,9 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
     // Create the underlying tracker using existing method
     const tracker = await AICostTracker.create(trackerConfig);
 
-    logger.info('Simple Cost Tracker created', { 
-      provider: config.provider, 
-      model: config.model 
+    logger.info('Simple Cost Tracker created', {
+      provider: config.provider,
+      model: config.model
     });
 
     return new SimpleCostTracker(tracker, config.provider, config.model);
@@ -1289,10 +1338,10 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
     try {
       // Build the request using existing ProviderRequest format
       const providerRequest: ProviderRequest = this.buildProviderRequest(request);
-      
+
       // Make the request through existing AICostTracker method
       const response = await this.tracker.makeRequest(providerRequest);
-      
+
       const responseTime = Date.now() - startTime;
 
       // Parse response into simplified format
@@ -1310,7 +1359,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
    * Estimate cost before making a request using existing method
    */
   async estimateCost(
-    prompt: string, 
+    prompt: string,
     expectedCompletionTokens?: number
   ): Promise<SimpleCostEstimate> {
     try {
@@ -1364,7 +1413,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
   }
 
   /**
-   * Get the model being used  
+   * Get the model being used
    */
   getModel(): string {
     return this.modelName as string;
@@ -1386,36 +1435,32 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
         return {
           ...baseRequest,
           messages: [
-            ...(request.systemMessage ? [{ role: 'system' as const, content: request.systemMessage }] : []),
+            ...(request.systemMessage
+              ? [{ role: 'system' as const, content: request.systemMessage }]
+              : []),
             { role: 'user' as const, content: request.prompt }
           ]
         } as ProviderRequest;
-      
+
       case AIProvider.Anthropic:
         return {
           ...baseRequest,
-          messages: [
-            { role: 'user' as const, content: request.prompt }
-          ],
+          messages: [{ role: 'user' as const, content: request.prompt }],
           ...(request.systemMessage && { system: request.systemMessage })
         } as ProviderRequest;
-      
+
       case AIProvider.AWSBedrock:
         // Handle different Bedrock model families
         if ((this.modelName as string).includes('anthropic.claude')) {
           return {
             ...baseRequest,
-            messages: [
-              { role: 'user' as const, content: request.prompt }
-            ],
+            messages: [{ role: 'user' as const, content: request.prompt }],
             ...(request.systemMessage && { system: request.systemMessage })
           } as ProviderRequest;
         } else if ((this.modelName as string).includes('amazon.nova')) {
           return {
             ...baseRequest,
-            messages: [
-              { role: 'user' as const, content: request.prompt }
-            ]
+            messages: [{ role: 'user' as const, content: request.prompt }]
           } as ProviderRequest;
         } else {
           return {
@@ -1423,7 +1468,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
             prompt: request.prompt
           } as ProviderRequest;
         }
-      
+
       default:
         return {
           ...baseRequest,
@@ -1448,7 +1493,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
           totalTokens: response.usage?.total_tokens || 0
         };
         break;
-      
+
       case AIProvider.Anthropic:
         text = response.content?.[0]?.text || '';
         usage = {
@@ -1457,7 +1502,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
           totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0)
         };
         break;
-      
+
       case AIProvider.AWSBedrock:
         // Handle different Bedrock response formats
         if (response.content) {
@@ -1478,7 +1523,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
           text = response.text || response.completion || '';
         }
         break;
-      
+
       default:
         text = response.text || response.content || response.completion || '';
         break;
@@ -1487,7 +1532,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
     // Calculate cost using existing pricing utilities from config
     let promptCost = 0;
     let completionCost = 0;
-    
+
     try {
       const modelPricing = getModelPricing(this.getProviderName(), this.modelName as string);
       if (modelPricing) {
@@ -1577,56 +1622,65 @@ export const createTracker = SimpleCostTracker.create;
 /**
  * Create OpenAI tracker with type-safe model selection
  */
-export const createOpenAITracker = (config: Omit<Parameters<typeof createTracker<AIProvider.OpenAI>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.OpenAI });
+export const createOpenAITracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.OpenAI>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.OpenAI });
 
 /**
  * Create Anthropic tracker with type-safe model selection
  */
-export const createAnthropicTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Anthropic>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.Anthropic });
+export const createAnthropicTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.Anthropic>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Anthropic });
 
 /**
  * Create AWS Bedrock tracker with type-safe model selection
  */
-export const createBedrockTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.AWSBedrock>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.AWSBedrock });
+export const createBedrockTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.AWSBedrock>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.AWSBedrock });
 
 /**
  * Create Google AI tracker with type-safe model selection
  */
-export const createGoogleTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Google>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.Google });
+export const createGoogleTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.Google>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Google });
 
 /**
  * Create Cohere tracker with type-safe model selection
  */
-export const createCohereTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Cohere>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.Cohere });
+export const createCohereTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.Cohere>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Cohere });
 
 /**
  * Create Groq tracker with type-safe model selection
  */
-export const createGroqTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Groq>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.Groq });
+export const createGroqTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.Groq>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Groq });
 
 /**
  * Create DeepSeek tracker with type-safe model selection
  */
-export const createDeepSeekTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.DeepSeek>>[0], 'provider'>) =>  
-  createTracker({ ...config, provider: AIProvider.DeepSeek });
+export const createDeepSeekTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.DeepSeek>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.DeepSeek });
 
 /**
  * Create Mistral tracker with type-safe model selection
  */
-export const createMistralTracker = (config: Omit<Parameters<typeof createTracker<AIProvider.Mistral>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.Mistral });
+export const createMistralTracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.Mistral>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Mistral });
 
 /**
  * Create xAI tracker with type-safe model selection
  */
-export const createXAITracker = (config: Omit<Parameters<typeof createTracker<AIProvider.XAI>>[0], 'provider'>) =>
-  createTracker({ ...config, provider: AIProvider.XAI });
+export const createXAITracker = (
+  config: Omit<Parameters<typeof createTracker<AIProvider.XAI>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.XAI });
 
 // Export the SimpleCostTracker class for advanced usage
 export { SimpleCostTracker };

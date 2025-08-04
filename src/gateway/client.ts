@@ -29,11 +29,11 @@ export class GatewayClient {
 
   constructor(config: GatewayConfig) {
     this.config = config;
-    
+
     // Determine which authentication header to use
     const authMethod = config.authMethod || 'gateway';
     const authHeader = authMethod === 'gateway' ? 'CostKatana-Auth' : 'Authorization';
-    
+
     // Create axios client with gateway configuration
     this.client = axios.create({
       baseURL: config.baseUrl,
@@ -46,7 +46,7 @@ export class GatewayClient {
     });
 
     // Add request interceptor to add default headers
-    this.client.interceptors.request.use((requestConfig) => {
+    this.client.interceptors.request.use(requestConfig => {
       // Add default properties if configured
       if (this.config.defaultProperties) {
         Object.entries(this.config.defaultProperties).forEach(([key, value]) => {
@@ -57,55 +57,62 @@ export class GatewayClient {
       // Add default cache settings
       if (this.config.enableCache) {
         requestConfig.headers['CostKatana-Cache-Enabled'] = 'true';
-        
+
         if (this.config.cacheConfig?.ttl) {
           requestConfig.headers['Cache-Control'] = `max-age=${this.config.cacheConfig.ttl}`;
         }
-        
+
         if (this.config.cacheConfig?.userScope) {
           requestConfig.headers['CostKatana-Cache-User-Scope'] = this.config.cacheConfig.userScope;
         }
-        
+
         if (this.config.cacheConfig?.bucketMaxSize) {
-          requestConfig.headers['CostKatana-Cache-Bucket-Max-Size'] = this.config.cacheConfig.bucketMaxSize.toString();
+          requestConfig.headers['CostKatana-Cache-Bucket-Max-Size'] =
+            this.config.cacheConfig.bucketMaxSize.toString();
         }
       }
 
       // Add default retry settings
       if (this.config.enableRetries) {
         requestConfig.headers['CostKatana-Retry-Enabled'] = 'true';
-        
+
         if (this.config.retryConfig?.count !== undefined) {
-          requestConfig.headers['CostKatana-Retry-Count'] = this.config.retryConfig.count.toString();
+          requestConfig.headers['CostKatana-Retry-Count'] =
+            this.config.retryConfig.count.toString();
         }
-        
+
         if (this.config.retryConfig?.factor !== undefined) {
-          requestConfig.headers['CostKatana-Retry-Factor'] = this.config.retryConfig.factor.toString();
+          requestConfig.headers['CostKatana-Retry-Factor'] =
+            this.config.retryConfig.factor.toString();
         }
-        
+
         if (this.config.retryConfig?.minTimeout !== undefined) {
-          requestConfig.headers['CostKatana-Retry-Min-Timeout'] = this.config.retryConfig.minTimeout.toString();
+          requestConfig.headers['CostKatana-Retry-Min-Timeout'] =
+            this.config.retryConfig.minTimeout.toString();
         }
-        
+
         if (this.config.retryConfig?.maxTimeout !== undefined) {
-          requestConfig.headers['CostKatana-Retry-Max-Timeout'] = this.config.retryConfig.maxTimeout.toString();
+          requestConfig.headers['CostKatana-Retry-Max-Timeout'] =
+            this.config.retryConfig.maxTimeout.toString();
         }
       }
 
       // Add default firewall settings
       if (this.config.firewall?.enabled) {
         requestConfig.headers['CostKatana-Firewall-Enabled'] = 'true';
-        
+
         if (this.config.firewall.advanced) {
           requestConfig.headers['CostKatana-Firewall-Advanced'] = 'true';
         }
-        
+
         if (this.config.firewall.promptThreshold !== undefined) {
-          requestConfig.headers['CostKatana-Firewall-Prompt-Threshold'] = this.config.firewall.promptThreshold.toString();
+          requestConfig.headers['CostKatana-Firewall-Prompt-Threshold'] =
+            this.config.firewall.promptThreshold.toString();
         }
-        
+
         if (this.config.firewall.llamaThreshold !== undefined) {
-          requestConfig.headers['CostKatana-Firewall-Llama-Threshold'] = this.config.firewall.llamaThreshold.toString();
+          requestConfig.headers['CostKatana-Firewall-Llama-Threshold'] =
+            this.config.firewall.llamaThreshold.toString();
         }
       }
 
@@ -128,7 +135,7 @@ export class GatewayClient {
   ): Promise<GatewayResponse> {
     const targetUrl = options.targetUrl || 'https://api.openai.com';
     const endpoint = '/v1/chat/completions';
-    
+
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
   }
 
@@ -141,7 +148,7 @@ export class GatewayClient {
   ): Promise<GatewayResponse> {
     const targetUrl = options.targetUrl || 'https://api.anthropic.com';
     const endpoint = '/v1/messages';
-    
+
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
   }
 
@@ -155,7 +162,7 @@ export class GatewayClient {
   ): Promise<GatewayResponse> {
     const targetUrl = options.targetUrl || 'https://generativelanguage.googleapis.com';
     const endpoint = `/v1/models/${model}:generateContent`;
-    
+
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
   }
 
@@ -168,7 +175,7 @@ export class GatewayClient {
   ): Promise<GatewayResponse> {
     const targetUrl = options.targetUrl || 'https://api.cohere.ai';
     const endpoint = '/v1/generate';
-    
+
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
   }
 
@@ -181,16 +188,16 @@ export class GatewayClient {
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse> {
     const startTime = Date.now();
-    
+
     try {
       // Build headers from options
       const headers = this.buildHeaders(options);
-      
+
       // Make the request through the gateway
       const response: AxiosResponse = await this.client.post(endpoint, data, { headers });
-      
+
       const processingTime = Date.now() - startTime;
-      
+
       // Extract gateway metadata from response headers
       const gatewayResponse: GatewayResponse = {
         data: response.data,
@@ -198,12 +205,14 @@ export class GatewayClient {
         status: response.status,
         metadata: {
           cacheStatus: response.headers['costkatana-cache-status'] as 'HIT' | 'MISS',
-          processingTime: parseInt(response.headers['costkatana-processing-time']) || processingTime,
+          processingTime:
+            parseInt(response.headers['costkatana-processing-time']) || processingTime,
           retryAttempts: parseInt(response.headers['costkatana-retry-attempts']) || 0,
           budgetRemaining: parseFloat(response.headers['costkatana-budget-remaining']),
           requestId: response.headers['costkatana-request-id'] || response.headers['costkatana-id'],
-          failoverProviderIndex: response.headers['costkatana-failover-index'] ? 
-            parseInt(response.headers['costkatana-failover-index']) : undefined
+          failoverProviderIndex: response.headers['costkatana-failover-index']
+            ? parseInt(response.headers['costkatana-failover-index'])
+            : undefined
         }
       };
 
@@ -216,7 +225,6 @@ export class GatewayClient {
       });
 
       return gatewayResponse;
-      
     } catch (error) {
       logger.error('Gateway request failed', error as Error, {
         endpoint,
@@ -260,7 +268,7 @@ export class GatewayClient {
       const params = new URLSearchParams();
       if (options.userScope) params.append('userScope', options.userScope);
       if (options.expired) params.append('expired', 'true');
-      
+
       await this.client.delete(`/cache?${params.toString()}`);
       logger.info('Cache cleared successfully', options);
     } catch (error) {
@@ -272,19 +280,21 @@ export class GatewayClient {
   /**
    * Get workflow summaries
    */
-  async getWorkflows(options: {
-    startDate?: Date;
-    endDate?: Date;
-    workflowName?: string;
-    limit?: number;
-  } = {}): Promise<WorkflowSummary[]> {
+  async getWorkflows(
+    options: {
+      startDate?: Date;
+      endDate?: Date;
+      workflowName?: string;
+      limit?: number;
+    } = {}
+  ): Promise<WorkflowSummary[]> {
     try {
       const params = new URLSearchParams();
       if (options.startDate) params.append('startDate', options.startDate.toISOString());
       if (options.endDate) params.append('endDate', options.endDate.toISOString());
       if (options.workflowName) params.append('workflowName', options.workflowName);
       if (options.limit) params.append('limit', options.limit.toString());
-      
+
       const response = await this.client.get(`/workflows/summary?${params.toString()}`);
       return response.data.data;
     } catch (error) {
@@ -309,11 +319,13 @@ export class GatewayClient {
   /**
    * Export workflow data as CSV
    */
-  async exportWorkflows(options: {
-    startDate?: Date;
-    endDate?: Date;
-    workflowName?: string;
-  } = {}): Promise<string> {
+  async exportWorkflows(
+    options: {
+      startDate?: Date;
+      endDate?: Date;
+      workflowName?: string;
+    } = {}
+  ): Promise<string> {
     try {
       const workflows = await this.getWorkflows(options);
       return this.workflowsToCSV(workflows);
@@ -341,12 +353,12 @@ export class GatewayClient {
    */
   updateConfig(config: Partial<GatewayConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // Update client headers if API key changed
     if (config.apiKey) {
       this.client.defaults.headers['CostKatana-Auth'] = `Bearer ${config.apiKey}`;
     }
-    
+
     logger.info('Gateway configuration updated', config);
   }
 
@@ -355,22 +367,22 @@ export class GatewayClient {
    */
   private buildHeaders(options: GatewayRequestOptions): Record<string, string> {
     const headers: Record<string, string> = {};
-    
+
     // Target URL
     if (options.targetUrl || this.config.defaultTargetUrl) {
       headers['CostKatana-Target-Url'] = options.targetUrl || this.config.defaultTargetUrl!;
     }
-    
+
     // Project ID
     if (options.projectId) {
       headers['CostKatana-Project-Id'] = options.projectId;
     }
-    
+
     // Authentication method override
     if (options.authMethodOverride) {
       headers['CostKatana-Auth-Method'] = options.authMethodOverride;
     }
-    
+
     // Cache configuration
     if (options.cache !== undefined) {
       if (typeof options.cache === 'boolean') {
@@ -388,7 +400,7 @@ export class GatewayClient {
         }
       }
     }
-    
+
     // Retry configuration
     if (options.retry !== undefined) {
       if (typeof options.retry === 'boolean') {
@@ -409,7 +421,7 @@ export class GatewayClient {
         }
       }
     }
-    
+
     // Workflow configuration
     if (options.workflow) {
       headers['CostKatana-Workflow-Id'] = options.workflow.workflowId;
@@ -418,21 +430,21 @@ export class GatewayClient {
         headers['CostKatana-Workflow-Step'] = options.workflow.workflowStep;
       }
     }
-    
+
     // Custom properties
     if (options.properties) {
       Object.entries(options.properties).forEach(([key, value]) => {
         headers[`CostKatana-Property-${key}`] = value;
       });
     }
-    
+
     // Other options
     if (options.budgetId) headers['CostKatana-Budget-Id'] = options.budgetId;
     if (options.modelOverride) headers['CostKatana-Model-Override'] = options.modelOverride;
     if (options.omitRequest) headers['CostKatana-Omit-Request'] = 'true';
     if (options.omitResponse) headers['CostKatana-Omit-Response'] = 'true';
     if (options.security) headers['CostKatana-LLM-Security-Enabled'] = 'true';
-    
+
     // Firewall configuration
     if (options.firewall !== undefined) {
       if (typeof options.firewall === 'boolean') {
@@ -443,10 +455,12 @@ export class GatewayClient {
           headers['CostKatana-Firewall-Advanced'] = 'true';
         }
         if (options.firewall.promptThreshold !== undefined) {
-          headers['CostKatana-Firewall-Prompt-Threshold'] = options.firewall.promptThreshold.toString();
+          headers['CostKatana-Firewall-Prompt-Threshold'] =
+            options.firewall.promptThreshold.toString();
         }
         if (options.firewall.llamaThreshold !== undefined) {
-          headers['CostKatana-Firewall-Llama-Threshold'] = options.firewall.llamaThreshold.toString();
+          headers['CostKatana-Firewall-Llama-Threshold'] =
+            options.firewall.llamaThreshold.toString();
         }
       }
     }
@@ -456,7 +470,9 @@ export class GatewayClient {
       if (typeof options.failover === 'boolean') {
         // Use default failover policy from config if available
         if (options.failover && this.config.failover?.defaultPolicy) {
-          headers['CostKatana-Failover-Policy'] = JSON.stringify(this.config.failover.defaultPolicy);
+          headers['CostKatana-Failover-Policy'] = JSON.stringify(
+            this.config.failover.defaultPolicy
+          );
         }
       } else {
         // Use specific failover policy from options
@@ -464,18 +480,18 @@ export class GatewayClient {
           headers['CostKatana-Failover-Policy'] = JSON.stringify(options.failover.policy);
         }
       }
-      
+
       // Remove target URL header for failover requests as it's not needed
       if (headers['CostKatana-Failover-Policy']) {
         delete headers['CostKatana-Target-Url'];
       }
     }
-    
+
     if (options.rateLimitPolicy) headers['CostKatana-RateLimit-Policy'] = options.rateLimitPolicy;
     if (options.sessionId) headers['CostKatana-Session-Id'] = options.sessionId;
     if (options.traceId) headers['CostKatana-Property-Trace-Id'] = options.traceId;
     if (options.userId) headers['CostKatana-User-Id'] = options.userId;
-    
+
     return headers;
   }
 
@@ -536,7 +552,7 @@ export class GatewayClient {
       const response = await this.client.get('/key-vault/proxy-keys', {
         params: { keyId: this.config.apiKey }
       });
-      
+
       const proxyKeys = response.data.data;
       return proxyKeys.find((key: any) => key.keyId === this.config.apiKey) || null;
     } catch (error) {
@@ -624,13 +640,25 @@ export class GatewayClient {
 
       // Check if approaching limits (80% threshold)
       if (budgetLimit && usageStats.totalCost >= budgetLimit * 0.8) {
-        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching total budget limit' };
+        return {
+          withinBudget: true,
+          budgetStatus: 'warning',
+          message: 'Approaching total budget limit'
+        };
       }
       if (dailyBudgetLimit && usageStats.dailyCost >= dailyBudgetLimit * 0.8) {
-        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching daily budget limit' };
+        return {
+          withinBudget: true,
+          budgetStatus: 'warning',
+          message: 'Approaching daily budget limit'
+        };
       }
       if (monthlyBudgetLimit && usageStats.monthlyCost >= monthlyBudgetLimit * 0.8) {
-        return { withinBudget: true, budgetStatus: 'warning', message: 'Approaching monthly budget limit' };
+        return {
+          withinBudget: true,
+          budgetStatus: 'warning',
+          message: 'Approaching monthly budget limit'
+        };
       }
 
       return { withinBudget: true, budgetStatus: 'good', message: 'Within budget limits' };
@@ -643,7 +671,9 @@ export class GatewayClient {
   /**
    * Validate proxy key permissions for a specific operation
    */
-  public async validateProxyKeyPermissions(requiredPermission: 'read' | 'write' | 'admin'): Promise<boolean> {
+  public async validateProxyKeyPermissions(
+    requiredPermission: 'read' | 'write' | 'admin'
+  ): Promise<boolean> {
     if (!this.isUsingProxyKey()) {
       return true; // Dashboard API keys have full permissions
     }
@@ -655,7 +685,10 @@ export class GatewayClient {
       }
 
       // Check if proxy key has required permission
-      return proxyKeyInfo.permissions.includes(requiredPermission) || proxyKeyInfo.permissions.includes('admin');
+      return (
+        proxyKeyInfo.permissions.includes(requiredPermission) ||
+        proxyKeyInfo.permissions.includes('admin')
+      );
     } catch (error) {
       logger.error('Failed to validate proxy key permissions:', error as Error);
       return false;
@@ -671,18 +704,18 @@ export class GatewayClient {
   ): Promise<FirewallAnalytics> {
     try {
       const params: Record<string, string> = {};
-      
+
       if (userId) {
         params.userId = userId;
       }
-      
+
       if (dateRange) {
         params.startDate = dateRange.start.toISOString();
         params.endDate = dateRange.end.toISOString();
       }
 
       const response = await this.client.get('/firewall/analytics', { params });
-      
+
       return response.data.data;
     } catch (error) {
       logger.error('Failed to get firewall analytics:', error as Error);

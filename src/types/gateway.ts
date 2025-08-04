@@ -7,7 +7,7 @@ export interface GatewayConfig {
   baseUrl: string;
   /** API key for authentication (dashboard API key, proxy key, or JWT token) */
   apiKey: string;
-  /** 
+  /**
    * Authentication method - determines which header to use
    * 'gateway' uses CostKatana-Auth header (default for gateway requests)
    * 'standard' uses Authorization header (for direct API calls)
@@ -196,11 +196,14 @@ export interface GatewayStats {
   /** Success rate percentage */
   successRate: number;
   /** Requests by provider */
-  providerStats: Record<string, {
-    requests: number;
-    successRate: number;
-    averageResponseTime: number;
-  }>;
+  providerStats: Record<
+    string,
+    {
+      requests: number;
+      successRate: number;
+      averageResponseTime: number;
+    }
+  >;
 }
 
 export interface CacheStats {

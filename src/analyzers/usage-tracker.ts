@@ -159,7 +159,7 @@ export class UsageTracker {
     return Promise.resolve();
   }
 
-  async clearCache(): Promise<void> {
+  clearCache(): void {
     this.cache.clear();
   }
 }

@@ -119,7 +119,7 @@ export class RequestFusion {
     }
 
     // Also check for numbered lists or similar patterns
-    const hasNumbering = prompts.some(p => /^\d+[\.\)]\s/.test(p) || /step\s+\d+/i.test(p));
+    const hasNumbering = prompts.some(p => /^\d+[.)]\s/.test(p) || /step\s+\d+/i.test(p));
 
     return sequentialCount >= requests.length / 2 || hasNumbering;
   }

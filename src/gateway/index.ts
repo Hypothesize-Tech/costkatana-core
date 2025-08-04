@@ -21,10 +21,13 @@ export function createGatewayClient(config: GatewayConfig): GatewayClient {
  */
 export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {}): GatewayClient {
   const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
-  const baseUrl = process.env.COSTKATANA_GATEWAY_URL || 'https://cost-katana-backend.store/api/gateway';
-  
+  const baseUrl =
+    process.env.COSTKATANA_GATEWAY_URL || 'https://cost-katana-backend.store/api/gateway';
+
   if (!apiKey) {
-    throw new Error('COSTKATANA_API_KEY or API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.');
+    throw new Error(
+      'COSTKATANA_API_KEY or API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.'
+    );
   }
 
   const config: GatewayConfig = {
@@ -51,7 +54,9 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
 /**
  * Create a gateway client with standard Authorization header (for direct API calls)
  */
-export function createStandardGatewayClient(config: Omit<GatewayConfig, 'authMethod'>): GatewayClient {
+export function createStandardGatewayClient(
+  config: Omit<GatewayConfig, 'authMethod'>
+): GatewayClient {
   return createGatewayClient({
     ...config,
     authMethod: 'standard'
@@ -61,7 +66,9 @@ export function createStandardGatewayClient(config: Omit<GatewayConfig, 'authMet
 /**
  * Create a gateway client with CostKatana-Auth header (for gateway requests)
  */
-export function createCostKatanaGatewayClient(config: Omit<GatewayConfig, 'authMethod'>): GatewayClient {
+export function createCostKatanaGatewayClient(
+  config: Omit<GatewayConfig, 'authMethod'>
+): GatewayClient {
   return createGatewayClient({
     ...config,
     authMethod: 'gateway'

@@ -51,7 +51,7 @@ export interface SimpleConfig<T extends keyof ProviderModelMap> {
 }
 
 // Union type for all possible simple configs
-export type AnySimpleConfig = 
+export type AnySimpleConfig =
   | SimpleConfig<AIProvider.OpenAI>
   | SimpleConfig<AIProvider.Anthropic>
   | SimpleConfig<AIProvider.AWSBedrock>
