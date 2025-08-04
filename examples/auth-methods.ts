@@ -166,7 +166,7 @@ async function usageTrackingExample() {
     {
       name: 'Standard Auth with Project ID',
       client: createStandardGatewayClient({
-        baseUrl: 'https://api.costkatana.com',
+        baseUrl: 'https://cost-katana-backend.store',
         apiKey: process.env.COSTKATANA_API_KEY!
       })
     }

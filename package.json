@@ -16,7 +16,16 @@
     "format": "prettier --write 'src/**/*.ts'",
     "prepublishOnly": "npm run test && npm run build",
     "prepare": "npm run build",
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "ci:test": "npm test",
+    "ci:lint": "npm run lint",
+    "ci:format": "npx prettier --check 'src/**/*.ts'",
+    "ci:build": "npm run build",
+    "ci:check": "npm pack --dry-run",
+    "ci:security": "npm audit --audit-level=moderate",
+    "release:prepare": "./scripts/prepare-release.sh",
+    "release:push": "git push origin main && git push --tags",
+    "release:full": "npm run release:prepare && npm run release:push"
   },
   "keywords": [
     "ai",
