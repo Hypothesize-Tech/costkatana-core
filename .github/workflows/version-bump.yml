@@ -49,6 +49,28 @@ jobs:
           exit 1
         fi
     
+    - name: Verify GitHub token
+      run: |
+        if [ -n "${{ secrets.AI_GITHUB_TOKEN }}" ]; then
+          echo "AI_GITHUB_TOKEN is available"
+          # Test token with GitHub API
+          if curl -H "Authorization: token ${{ secrets.AI_GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  https://api.github.com/user 2>/dev/null | grep -q "login"; then
+            echo "✅ GitHub token is valid"
+          else
+            echo "❌ GitHub token is invalid or has insufficient permissions"
+            echo "Please check that your AI_GITHUB_TOKEN has the following permissions:"
+            echo "- Contents: Write"
+            echo "- Metadata: Read"
+            echo "- Actions: Write"
+            exit 1
+          fi
+        else
+          echo "AI_GITHUB_TOKEN is not available"
+          exit 1
+        fi
+    
     - name: Install dependencies
       run: npm ci
     
@@ -132,21 +154,45 @@ jobs:
         
         # Push with explicit authentication
         echo "Pushing commit to ${{ github.ref }}..."
-        if ! git push origin HEAD:${{ github.ref }}; then
+        
+        # Try direct git push first
+        if git push origin HEAD:${{ github.ref }}; then
+          echo "✅ Successfully pushed commit"
+        else
           echo "Git push failed, trying with GitHub CLI..."
           echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
-          if ! git push origin HEAD:${{ github.ref }}; then
-            echo "❌ Failed to push commit. Please check token permissions."
+          
+          # Try again with GitHub CLI authentication
+          if git push origin HEAD:${{ github.ref }}; then
+            echo "✅ Successfully pushed commit with GitHub CLI"
+          else
+            echo "❌ Failed to push commit even with GitHub CLI"
+            echo "Please check:"
+            echo "1. AI_GITHUB_TOKEN has 'Contents: Write' permission"
+            echo "2. Token is valid and not expired"
+            echo "3. You have write access to the repository"
             exit 1
           fi
         fi
         
         echo "Pushing tag v${{ steps.new_version.outputs.new_version }}..."
-        if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+        
+        # Try direct git push for tag
+        if git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+          echo "✅ Successfully pushed tag"
+        else
           echo "Tag push failed, trying with GitHub CLI..."
           echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
-          if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
-            echo "❌ Failed to push tag. Please check token permissions."
+          
+          # Try again with GitHub CLI authentication
+          if git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+            echo "✅ Successfully pushed tag with GitHub CLI"
+          else
+            echo "❌ Failed to push tag even with GitHub CLI"
+            echo "Please check:"
+            echo "1. AI_GITHUB_TOKEN has 'Contents: Write' permission"
+            echo "2. Token is valid and not expired"
+            echo "3. You have write access to the repository"
             exit 1
           fi
         fi
@@ -164,7 +210,22 @@ jobs:
         if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
           echo "NPM_TOKEN is available"
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm whoami --registry=https://registry.npmjs.org/
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          
+          # Test token with a simple API call instead of npm whoami
+          echo "Testing npm token..."
+          if curl -H "Authorization: Bearer ${{ secrets.NPM_TOKEN }}" \
+                  -H "Accept: application/json" \
+                  https://registry.npmjs.org/-/whoami 2>/dev/null | grep -q "username"; then
+            echo "✅ NPM token is valid"
+          else
+            echo "❌ NPM token is invalid or has insufficient permissions"
+            echo "Please check that your NPM_TOKEN has the following permissions:"
+            echo "- Read packages"
+            echo "- Publish packages"
+            exit 1
+          fi
         else
           echo "NPM_TOKEN is not available"
           exit 1
@@ -175,8 +236,39 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-        npm publish --access public --registry=https://registry.npmjs.org/
-        echo "Successfully published ai-cost-tracker@${{ steps.new_version.outputs.new_version }} to npm"
+        echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+        
+        # Check if package exists and we have access
+        echo "Checking package access..."
+        
+        # Check if package exists on npm
+        PACKAGE_EXISTS=$(curl -s https://registry.npmjs.org/ai-cost-tracker | grep -c "error" || echo "0")
+        
+        if [ "$PACKAGE_EXISTS" -eq 0 ]; then
+          echo "✅ Package 'ai-cost-tracker' exists on npm"
+          
+          # Check if we have access to publish
+          if curl -H "Authorization: Bearer ${{ secrets.NPM_TOKEN }}" \
+                  -H "Accept: application/json" \
+                  https://registry.npmjs.org/ai-cost-tracker 2>/dev/null | grep -q "error"; then
+            echo "❌ No access to publish to 'ai-cost-tracker'"
+            echo "Please check:"
+            echo "1. NPM_TOKEN has publish permissions"
+            echo "2. You own the package or have publish access"
+            exit 1
+          fi
+        else
+          echo "ℹ️ Package 'ai-cost-tracker' does not exist yet - will create new package"
+        fi
+        
+        # Try to publish
+        if npm publish --access public --registry=https://registry.npmjs.org/; then
+          echo "✅ Successfully published ai-cost-tracker@${{ steps.new_version.outputs.new_version }} to npm"
+        else
+          echo "❌ Failed to publish to npm"
+          echo "Please check your NPM_TOKEN permissions"
+          exit 1
+        fi
     
     - name: Trigger publish workflow
       uses: actions/github-script@v7
