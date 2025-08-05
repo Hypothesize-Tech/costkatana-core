@@ -38,7 +38,22 @@ jobs:
       run: |
         if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
           echo "NPM_TOKEN is available"
-          npm whoami --registry=https://registry.npmjs.org/
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          
+          # Test token with a simple API call instead of npm whoami
+          echo "Testing npm token..."
+          if curl -H "Authorization: Bearer ${{ secrets.NPM_TOKEN }}" \
+                  -H "Accept: application/json" \
+                  https://registry.npmjs.org/-/whoami 2>/dev/null | grep -q "username"; then
+            echo "✅ NPM token is valid"
+          else
+            echo "❌ NPM token is invalid or has insufficient permissions"
+            echo "Please check that your NPM_TOKEN has the following permissions:"
+            echo "- Read packages"
+            echo "- Publish packages"
+            exit 1
+          fi
         else
           echo "NPM_TOKEN is not available"
           exit 1
