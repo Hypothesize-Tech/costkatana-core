@@ -30,6 +30,7 @@ export class TokenCounter {
       return encoded.length;
     } catch (error) {
       // Fallback for unsupported models
+      console.warn('Token counting failed for OpenAI model:', error);
       return this.countGenericTokens(text);
     }
   }

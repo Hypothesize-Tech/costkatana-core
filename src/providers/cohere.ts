@@ -58,6 +58,7 @@ export class CohereProvider extends BaseProvider {
       const encoded = encode(text);
       return Promise.resolve(encoded.length);
     } catch (error) {
+      console.warn('Token counting failed for Cohere model:', error);
       return Promise.resolve(Math.ceil(text.length / 4));
     }
   }
@@ -85,7 +86,8 @@ export class CohereProvider extends BaseProvider {
             errorMsg = errObj.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`Cohere API error: ${errorMsg}`);
       }

@@ -54,6 +54,7 @@ export class OpenAIProvider extends BaseProvider {
       return Promise.resolve(encoded.length);
     } catch (error) {
       // Fallback to rough estimation
+      console.warn('Token counting failed for OpenAI model:', error);
       return Promise.resolve(Math.ceil(text.length / 4));
     }
   }
@@ -97,7 +98,8 @@ export class OpenAIProvider extends BaseProvider {
             errorMsg = errObj.error?.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`OpenAI API error: ${errorMsg}`);
       }
@@ -186,7 +188,8 @@ export class OpenAIProvider extends BaseProvider {
             errorMsg = errObj.error?.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`OpenAI API error: ${errorMsg}`);
       }
@@ -220,7 +223,8 @@ export class OpenAIProvider extends BaseProvider {
             errorMsg = errObj.error?.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`OpenAI API error: ${errorMsg}`);
       }

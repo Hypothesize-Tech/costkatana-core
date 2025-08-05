@@ -72,7 +72,8 @@ export class AnthropicProvider extends BaseProvider {
             errorMsg = errObj.error?.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`Anthropic API error: ${errorMsg}`);
       }

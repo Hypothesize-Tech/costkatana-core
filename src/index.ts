@@ -1541,6 +1541,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
       }
     } catch (error) {
       // Fallback to basic estimation if pricing not found
+      console.warn('Model pricing not found, using fallback estimation:', error);
       promptCost = usage.promptTokens * 0.000001; // $0.001 per 1K tokens
       completionCost = usage.completionTokens * 0.000002; // $0.002 per 1K tokens
     }

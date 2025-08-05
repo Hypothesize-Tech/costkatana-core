@@ -79,6 +79,7 @@ export class GoogleProvider extends BaseProvider {
       return data.totalTokens || Math.ceil(text.length / 4);
     } catch (error) {
       // Fallback to approximation
+      console.warn('Token counting failed for Google model:', error);
       return Math.ceil(text.length / 4);
     }
   }
@@ -106,7 +107,8 @@ export class GoogleProvider extends BaseProvider {
             errorMsg = errObj.error?.message || errorMsg;
           }
         } catch (_err) {
-          /* ignore */
+          /* ignore parsing error */
+          console.debug('Error parsing response:', _err);
         }
         throw new Error(`Google API error: ${errorMsg}`);
       }

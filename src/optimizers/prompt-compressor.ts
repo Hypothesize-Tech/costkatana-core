@@ -75,6 +75,7 @@ export class PromptCompressor {
         }
       } catch (e) {
         // Not valid JSON, skip
+        console.debug('JSON parsing failed:', e);
         continue;
       }
     }

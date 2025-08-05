@@ -288,6 +288,7 @@ Format as JSON.`;
       return { response, optimization };
     } catch (error) {
       // If optimization fails, just make the regular request
+      console.warn('Optimization failed, using regular request:', error);
       const response = await this.makeRequest(request);
       return { response };
     }
