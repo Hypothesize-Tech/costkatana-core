@@ -234,7 +234,7 @@ jobs:
     - name: Create GitHub Release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
+        AI_GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
       with:
         tag_name: v${{ steps.new_version.outputs.new_version }}
         release_name: Auto-release v${{ steps.new_version.outputs.new_version }}
