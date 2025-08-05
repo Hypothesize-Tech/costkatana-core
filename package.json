@@ -83,7 +83,7 @@
   },
   "homepage": "https://github.com/Hypothesize-Tech/ai-cost-optimizer-core#readme",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
     "dist",
@@ -93,7 +93,6 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.450.0",
     "@aws-sdk/credential-providers": "^3.450.0",
-    "ai-cost-tracker": "^1.0.7",
     "axios": "^1.11.0",
     "dotenv": "^16.5.0",
     "gpt-3-encoder": "^1.1.4",
