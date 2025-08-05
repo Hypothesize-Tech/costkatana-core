@@ -38,6 +38,28 @@ jobs:
         sudo apt-get update
         sudo apt-get install gh -y
     
+    - name: Verify GitHub token
+      run: |
+        if [ -n "${{ secrets.AI_GITHUB_TOKEN }}" ]; then
+          echo "AI_GITHUB_TOKEN is available"
+          # Test token with GitHub API
+          if curl -H "Authorization: token ${{ secrets.AI_GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  https://api.github.com/user 2>/dev/null | grep -q "login"; then
+            echo "✅ GitHub token is valid"
+          else
+            echo "❌ GitHub token is invalid or has insufficient permissions"
+            echo "Please check that your AI_GITHUB_TOKEN has the following permissions:"
+            echo "- Contents: Write"
+            echo "- Metadata: Read"
+            echo "- Actions: Write"
+            exit 1
+          fi
+        else
+          echo "AI_GITHUB_TOKEN is not available"
+          exit 1
+        fi
+    
     - name: Run tests
       run: npm test
     
@@ -132,17 +154,27 @@ jobs:
         git tag -a "v${{ steps.new_version.outputs.new_version }}" -m "Auto-release version ${{ steps.new_version.outputs.new_version }}"
         
         # Push with explicit authentication
+        echo "Pushing commit to ${{ github.ref }}..."
         if ! git push origin HEAD:${{ github.ref }}; then
           echo "Git push failed, trying with GitHub CLI..."
-          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
-          git push origin HEAD:${{ github.ref }}
+          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          if ! git push origin HEAD:${{ github.ref }}; then
+            echo "❌ Failed to push commit. Please check token permissions."
+            exit 1
+          fi
         fi
         
+        echo "Pushing tag v${{ steps.new_version.outputs.new_version }}..."
         if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
           echo "Tag push failed, trying with GitHub CLI..."
-          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
-          git push origin "v${{ steps.new_version.outputs.new_version }}"
+          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+            echo "❌ Failed to push tag. Please check token permissions."
+            exit 1
+          fi
         fi
+        
+        echo "✅ Successfully pushed commit and tag"
     
     - name: Create GitHub Release
       uses: actions/create-release@v1

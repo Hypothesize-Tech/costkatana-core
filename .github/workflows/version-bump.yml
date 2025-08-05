@@ -131,17 +131,27 @@ jobs:
         git tag -a "v${{ steps.new_version.outputs.new_version }}" -m "Release version ${{ steps.new_version.outputs.new_version }}"
         
         # Push with explicit authentication
+        echo "Pushing commit to ${{ github.ref }}..."
         if ! git push origin HEAD:${{ github.ref }}; then
           echo "Git push failed, trying with GitHub CLI..."
-          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
-          git push origin HEAD:${{ github.ref }}
+          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          if ! git push origin HEAD:${{ github.ref }}; then
+            echo "❌ Failed to push commit. Please check token permissions."
+            exit 1
+          fi
         fi
         
+        echo "Pushing tag v${{ steps.new_version.outputs.new_version }}..."
         if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
           echo "Tag push failed, trying with GitHub CLI..."
-          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
-          git push origin "v${{ steps.new_version.outputs.new_version }}"
+          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+            echo "❌ Failed to push tag. Please check token permissions."
+            exit 1
+          fi
         fi
+        
+        echo "✅ Successfully pushed commit and tag"
     
     - name: Build package
       run: npm run build
