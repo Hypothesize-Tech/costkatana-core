@@ -93,6 +93,10 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        
+        # Configure git to use the token for authentication
+        git remote set-url origin https://x-access-token:${{ secrets.AI_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        
         git add package.json
         git commit -m "Bump version to ${{ steps.new_version.outputs.new_version }}"
         git tag -a "v${{ steps.new_version.outputs.new_version }}" -m "Release version ${{ steps.new_version.outputs.new_version }}"
