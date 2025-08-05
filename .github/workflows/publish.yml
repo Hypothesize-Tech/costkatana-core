@@ -18,6 +18,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         token: ${{ secrets.AI_GITHUB_TOKEN }}
+        ssh-strict: false
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -49,6 +50,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         token: ${{ secrets.AI_GITHUB_TOKEN }}
+        ssh-strict: false
     
     - name: Use Node.js
       uses: actions/setup-node@v4

@@ -28,12 +28,22 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.AI_GITHUB_TOKEN }}
+        ssh-strict: false
     
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
+    
+    - name: Debug token availability
+      run: |
+        if [ -n "${{ secrets.AI_GITHUB_TOKEN }}" ]; then
+          echo "AI_GITHUB_TOKEN is available"
+        else
+          echo "AI_GITHUB_TOKEN is not available"
+          exit 1
+        fi
     
     - name: Install dependencies
       run: npm ci
