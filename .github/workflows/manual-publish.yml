@@ -1,0 +1,68 @@
+name: Manual Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.4.5)'
+        required: true
+        type: string
+
+jobs:
+  manual-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        ssh-strict: false
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Build package
+      run: npm run build
+    
+    - name: Verify npm token
+      run: |
+        if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
+          echo "NPM_TOKEN is available"
+          npm whoami --registry=https://registry.npmjs.org/
+        else
+          echo "NPM_TOKEN is not available"
+          exit 1
+        fi
+    
+    - name: Update version
+      run: |
+        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        echo "Updated version to ${{ github.event.inputs.version }}"
+    
+    - name: Publish to npm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        npm publish --access public --registry=https://registry.npmjs.org/
+    
+    - name: Create git tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${{ secrets.AI_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git add package.json
+        git commit -m "Bump version to ${{ github.event.inputs.version }}"
+        git tag -a "v${{ github.event.inputs.version }}" -m "Release version ${{ github.event.inputs.version }}"
+        git push origin HEAD:${{ github.ref }}
+        git push origin "v${{ github.event.inputs.version }}" 
