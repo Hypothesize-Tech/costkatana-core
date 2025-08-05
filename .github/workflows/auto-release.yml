@@ -1,0 +1,146 @@
+name: Auto Release on Push
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - 'CHANGELOG.md'
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        ssh-strict: false
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Run linting
+      run: npm run lint
+    
+    - name: Build package
+      run: npm run build
+    
+    - name: Get current version
+      id: current_version
+      run: |
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "Current version: $CURRENT_VERSION"
+    
+    - name: Calculate new version
+      id: new_version
+      run: |
+        CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+        
+        # Split version into components
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR="${VERSION_PARTS[0]}"
+        MINOR="${VERSION_PARTS[1]}"
+        PATCH="${VERSION_PARTS[2]}"
+        
+        # Always bump patch version for auto-releases
+        NEW_MAJOR=$MAJOR
+        NEW_MINOR=$MINOR
+        NEW_PATCH=$((PATCH + 1))
+        
+        NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_VERSION"
+    
+    - name: Update version in package.json
+      run: |
+        npm version ${{ steps.new_version.outputs.new_version }} --no-git-tag-version
+        echo "Updated package.json version to ${{ steps.new_version.outputs.new_version }}"
+    
+    - name: Verify npm token
+      run: |
+        if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
+          echo "NPM_TOKEN is available"
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm whoami --registry=https://registry.npmjs.org/
+        else
+          echo "NPM_TOKEN is not available"
+          exit 1
+        fi
+    
+    - name: Publish to npm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        npm publish --access public --registry=https://registry.npmjs.org/
+        echo "Successfully published ai-cost-tracker@${{ steps.new_version.outputs.new_version }} to npm"
+    
+    - name: Create and push tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Configure git to use the token for authentication
+        git remote set-url origin https://x-access-token:${{ secrets.AI_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        
+        # Verify the remote URL is set correctly
+        echo "Remote URL: $(git remote get-url origin)"
+        
+        # Add and commit changes
+        git add package.json
+        git commit -m "Auto-release: Bump version to ${{ steps.new_version.outputs.new_version }}"
+        
+        # Create tag
+        git tag -a "v${{ steps.new_version.outputs.new_version }}" -m "Auto-release version ${{ steps.new_version.outputs.new_version }}"
+        
+        # Push with explicit authentication
+        if ! git push origin HEAD:${{ github.ref }}; then
+          echo "Git push failed, trying with GitHub CLI..."
+          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
+          git push origin HEAD:${{ github.ref }}
+        fi
+        
+        if ! git push origin "v${{ steps.new_version.outputs.new_version }}"; then
+          echo "Tag push failed, trying with GitHub CLI..."
+          gh auth login --with-token <<< "${{ secrets.AI_GITHUB_TOKEN }}"
+          git push origin "v${{ steps.new_version.outputs.new_version }}"
+        fi
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.new_version.outputs.new_version }}
+        release_name: Auto-release v${{ steps.new_version.outputs.new_version }}
+        body: |
+          ## Auto-release v${{ steps.new_version.outputs.new_version }}
+          
+          This is an automatic release triggered by changes to the main branch.
+          
+          ### Installation
+          ```bash
+          npm install ai-cost-tracker@${{ steps.new_version.outputs.new_version }}
+          ```
+          
+          ### Changes
+          - Automatic version bump and release
+          - Updated dependencies and improvements
+          - Enhanced TypeScript definitions
+          - Better error handling
+        draft: false
+        prerelease: false 
