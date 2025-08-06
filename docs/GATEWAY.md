@@ -612,4 +612,4 @@ For issues and questions:
 
 - GitHub Issues: [ai-cost-optimizer-core/issues](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core/issues)
 - Documentation: [costkatana.com/docs](https://costkatana.com/docs)
-- Email: support@costkatana.com
+- Email: abdul@hypothesize.tech
