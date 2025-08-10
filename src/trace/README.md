@@ -106,7 +106,7 @@ const traceService = new LocalTraceService({
 import { TraceClient } from 'ai-cost-tracker/trace';
 
 const traceService = new TraceClient({
-  apiKey: process.env.COST_KATANA_API_KEY,
+  apiKey: process.env.API_KEY,
   projectId: process.env.PROJECT_ID,
   apiUrl: 'https://cost-katana-backend.store'
 });

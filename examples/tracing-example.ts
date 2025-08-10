@@ -19,7 +19,7 @@ const useCloudTracing = process.env.USE_CLOUD_TRACING === 'true';
 
 const traceService = useCloudTracing
   ? new TraceClient({
-      apiKey: process.env.COST_KATANA_API_KEY!,
+      apiKey: process.env.API_KEY!,
       projectId: process.env.PROJECT_ID!
     })
   : new LocalTraceService({
