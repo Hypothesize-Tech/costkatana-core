@@ -10,10 +10,12 @@ A comprehensive toolkit for optimizing AI model costs, tracking usage, and analy
 - **Project Management**: Organize usage by projects with budget tracking
 - **Real-time Analytics**: Monitor costs, tokens, and performance metrics via web dashboard
 - **Suggestion Engine**: AI-powered recommendations for cost reduction
+- **🔍 Distributed Tracing**: Visualize AI workflows with hierarchical traces and timelines
 - **🚀 AI Gateway**: Intelligent proxy with caching, retries, and cost optimization
 - **💾 Smart Caching**: Reduce costs with configurable response caching
 - **🔄 Smart Retries**: Automatic retry logic with exponential backoff
 - **📊 Workflow Tracking**: Group related requests for end-to-end cost analysis
+- **🎯 Session Analysis**: Track and visualize complete agent flows with cost attribution
 
 ## Prerequisites
 
@@ -80,6 +82,70 @@ const response = await tracker.makeRequest({
 
 console.log('Response:', response.choices[0].message.content);
 // Usage data is automatically sent to your costkatana.com dashboard
+```
+
+## 🔍 Sessions & Distributed Tracing
+
+Cost Katana provides enterprise-grade distributed tracing for all your AI operations. Track every LLM call, tool execution, and API request with automatic parent-child relationships, latency metrics, and cost attribution.
+
+### Tracing Features
+
+- **🌳 Hierarchical Traces**: Automatic parent-child span relationships
+- **⚡ Zero-Code Instrumentation**: Automatic tracing with our middleware
+- **💰 Cost Attribution**: Per-span cost tracking with token counts
+- **📊 Visual Timeline**: Interactive trace visualization in dashboard
+- **🔒 PII Redaction**: Automatic server-side data sanitization
+- **⏱️ Performance Metrics**: Latency, duration, and throughput analysis
+- **🎯 Error Tracking**: Trace errors through your entire AI pipeline
+
+### How It Works
+
+```typescript
+// 1. Add tracing middleware (Express example)
+import { traceMiddleware } from 'ai-cost-tracker/trace';
+app.use(traceMiddleware);
+
+// 2. Use traced LLM wrapper
+import { TrackedOpenAI } from 'ai-cost-tracker/providers';
+const ai = new TrackedOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// 3. All calls are automatically traced!
+const response = await ai.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+// Creates: HTTP span → LLM span with tokens, cost, latency
+
+// 4. View traces in dashboard
+// Navigate to costkatana.com/sessions to see:
+// - Hierarchical trace tree
+// - Visual timeline
+// - Cost breakdown per span
+// - Token usage metrics
+```
+
+### Manual Instrumentation
+
+For custom logic, tools, or database calls:
+
+```typescript
+import { traceService } from 'ai-cost-tracker/trace';
+
+// Start a custom span
+const span = await traceService.startSpan({
+  name: 'database-query',
+  type: 'tool',
+  metadata: { query: 'SELECT * FROM users' }
+});
+
+// Your custom logic here
+const result = await db.query('...');
+
+// End the span with metrics
+await traceService.endSpan(span.traceId, {
+  status: 'ok',
+  metadata: { rowCount: result.rows.length }
+});
 ```
 
 ## 🚀 AI Gateway - Intelligent Proxy

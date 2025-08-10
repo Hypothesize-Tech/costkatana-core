@@ -1685,3 +1685,32 @@ export const createXAITracker = (
 
 // Export the SimpleCostTracker class for advanced usage
 export { SimpleCostTracker };
+
+// ============================================================================
+// DISTRIBUTED TRACING - Enterprise-grade tracing for AI operations
+// ============================================================================
+
+export * from './trace';
+export {
+  createTraceMiddleware,
+  createChildSpan,
+  TrackedOpenAI,
+  TrackedAnthropic,
+  createTrackedProvider,
+  TraceClient,
+  LocalTraceService
+} from './trace';
+
+// Export trace types for convenience
+export type {
+  TraceContext,
+  TraceService,
+  StartSpanInput,
+  EndSpanInput,
+  RecordMessageInput,
+  TraceNode,
+  SessionGraph,
+  SessionDetails,
+  LocalTraceServiceConfig,
+  TraceClientConfig
+} from './trace';
