@@ -1190,3 +1190,36 @@ For questions and support:
 ## License
 
 MIT License - see [LICENSE](./LICENSE) file for details.
+
+## Observability & OpenTelemetry
+
+The core library emits OpenTelemetry spans/metrics for AI requests, tools, and HTTP operations. It integrates with the backend’s OTel setup and any OTLP-compatible vendor.
+
+### Emitted Telemetry
+- LLM spans with token counts and per-span cost attribution
+- HTTP spans for gateway/proxy calls
+- Custom spans (tools, DB) via helper APIs
+- Metrics: request rate, error rate, duration percentiles; GenAI cost/tokens
+
+### Environment
+```env
+# OTLP exporters (example)
+OTLP_HTTP_TRACES_URL=https://tempo-prod-us-central1.grafana.net/tempo/api/push
+OTLP_HTTP_METRICS_URL=https://prometheus-prod-us-central1.grafana.net/api/prom/push
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <YOUR_TOKEN>
+
+# Privacy (optional)
+CK_CAPTURE_MODEL_TEXT=false
+```
+
+### Frontend Dashboard Coverage
+The telemetry dashboard surfaces these from your data:
+- KPIs (RPM, Error %, Avg & P95 latency)
+- Cost Analytics by model
+- Recent Errors and Top Errors
+- Top Operations
+- Telemetry Explorer (filters + pagination)
+- Trace Viewer (hierarchical)
+- Service Dependency Graph
+
+See backend `OBSERVABILITY.md` for vendor-specific setup and local collector instructions.
