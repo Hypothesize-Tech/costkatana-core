@@ -1,6 +1,6 @@
 {
   "name": "ai-cost-tracker",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Track, analyze, and optimize AI API costs across multiple providers with intelligent gateway, caching, retries, workflow tracking, secure proxy key authentication, prompt firewall protection, user feedback & value tracking, and high-availability failover",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

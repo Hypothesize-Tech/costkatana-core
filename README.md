@@ -17,6 +17,14 @@ A comprehensive toolkit for optimizing AI model costs, tracking usage, and analy
 - **📊 Workflow Tracking**: Group related requests for end-to-end cost analysis
 - **🎯 Session Analysis**: Track and visualize complete agent flows with cost attribution
 
+## Documentation
+
+- [API Reference](docs/API.md) - Detailed API documentation
+- [Gateway Guide](docs/GATEWAY.md) - AI Gateway setup and configuration
+- [Prompt Optimization](docs/PROMPT_OPTIMIZATION.md) - Techniques for optimizing prompts
+- [Webhooks](docs/WEBHOOKS.md) - Real-time event notifications
+- [Examples](docs/EXAMPLES.md) - Code examples and use cases
+
 ## Prerequisites
 
 **⚠️ Important: Registration Required**

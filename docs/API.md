@@ -7,6 +7,7 @@
 - [Providers](#providers)
 - [Analyzers](#analyzers)
 - [Optimizers](#optimizers)
+- [Webhooks](#webhooks)
 - [Utilities](#utilities)
 
 ## AICostTracker Class
@@ -496,6 +497,141 @@ class Logger {
   logCostAlert(userId: string, cost: number, threshold: number, period: string): void;
   logOptimization(type: string, originalCost: number, optimizedCost: number, savings: number): void;
 }
+```
+
+## Webhooks
+
+For detailed webhook integration documentation, see [WEBHOOKS.md](WEBHOOKS.md).
+
+### WebhookManager
+
+```typescript
+class WebhookManager {
+  constructor(config: WebhookConfig);
+
+  // Register a webhook endpoint
+  async registerWebhook(endpoint: WebhookEndpoint): Promise<WebhookRegistration>;
+  
+  // Update an existing webhook
+  async updateWebhook(id: string, updates: Partial<WebhookEndpoint>): Promise<WebhookRegistration>;
+  
+  // Delete a webhook
+  async deleteWebhook(id: string): Promise<boolean>;
+  
+  // Get all registered webhooks
+  async getWebhooks(): Promise<WebhookRegistration[]>;
+  
+  // Trigger a test event to a webhook
+  async testWebhook(id: string, eventType: WebhookEventType, data?: any): Promise<WebhookDeliveryResult>;
+  
+  // Get webhook delivery history
+  async getWebhookDeliveries(id: string, options?: WebhookDeliveryOptions): Promise<WebhookDelivery[]>;
+}
+```
+
+### Webhook Types
+
+```typescript
+interface WebhookConfig {
+  apiKey: string;
+  projectId: string;
+  defaultSecret?: string;
+  defaultEvents?: WebhookEventType[];
+  defaultTimeout?: number;
+  retryConfig?: {
+    maxRetries: number;
+    backoffMultiplier: number;
+    initialDelay: number;
+  };
+}
+
+interface WebhookEndpoint {
+  url: string;
+  events: WebhookEventType[];
+  name: string;
+  description?: string;
+  secret?: string;
+  active?: boolean;
+  headers?: Record<string, string>;
+  timeout?: number;
+  retryConfig?: {
+    maxRetries: number;
+    backoffMultiplier: number;
+    initialDelay: number;
+  };
+}
+
+interface WebhookRegistration extends WebhookEndpoint {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface WebhookDelivery {
+  id: string;
+  webhookId: string;
+  eventType: WebhookEventType;
+  status: 'pending' | 'success' | 'failed' | 'timeout' | 'cancelled';
+  request: {
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    body: string;
+    timestamp: string;
+  };
+  response?: {
+    statusCode: number;
+    headers: Record<string, string>;
+    body: string;
+    responseTime: number;
+    timestamp: string;
+  };
+  error?: {
+    type: string;
+    message: string;
+    code?: string;
+  };
+  createdAt: string;
+}
+
+type WebhookEventType = 
+  | 'cost.alert'
+  | 'cost.threshold_exceeded'
+  | 'cost.spike_detected'
+  | 'cost.anomaly_detected'
+  | 'budget.warning'
+  | 'budget.exceeded'
+  | 'optimization.completed'
+  | 'optimization.failed'
+  | 'optimization.suggested'
+  | 'optimization.applied'
+  | 'savings.milestone_reached'
+  | 'model.performance_degraded'
+  | 'model.error_rate_high'
+  | 'model.latency_high'
+  | 'model.quota_warning'
+  | 'model.quota_exceeded'
+  | 'usage.spike_detected'
+  | 'usage.pattern_changed';
+```
+
+### Webhook Utilities
+
+```typescript
+// Verify webhook signature
+function verifyWebhookSignature(
+  payload: string,
+  timestamp: string,
+  signature: string,
+  secret: string
+): boolean;
+
+// Create webhook signature for testing
+function createWebhookSignature(
+  payload: string,
+  timestamp: string,
+  secret: string
+): string;
 ```
 
 ## Constants and Configuration

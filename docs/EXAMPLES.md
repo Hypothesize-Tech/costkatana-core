@@ -12,8 +12,9 @@ This document provides comprehensive examples for using the AI Cost Tracker NPM 
 6. [Prompt Optimization](#prompt-optimization)
 7. [Storage Options](#storage-options)
 8. [Alert Configuration](#alert-configuration)
-9. [Batch Processing](#batch-processing)
-10. [Advanced Scenarios](#advanced-scenarios)
+9. [Webhook Integration](#webhook-integration)
+10. [Batch Processing](#batch-processing)
+11. [Advanced Scenarios](#advanced-scenarios)
 
 ## Basic Setup
 
@@ -605,6 +606,116 @@ class CustomAICostTracker extends AICostTracker {
   }
 }
 ```
+
+## Webhook Integration
+
+Webhooks allow you to receive real-time notifications about important events in your AI cost optimization workflow.
+
+### Setting Up Webhooks
+
+```typescript
+import { AICostTracker, WebhookManager } from 'ai-cost-tracker';
+
+// Initialize the webhook manager
+const webhookManager = new WebhookManager({
+  apiKey: process.env.API_KEY!,
+  projectId: process.env.PROJECT_ID!,
+  defaultSecret: 'your_webhook_secret',
+  retryConfig: {
+    maxRetries: 3,
+    backoffMultiplier: 2,
+    initialDelay: 5000,
+  },
+});
+
+// Register a new webhook endpoint
+const webhook = await webhookManager.registerWebhook({
+  name: 'Cost Alert Webhook',
+  description: 'Receive notifications for cost alerts',
+  url: 'https://your-api.example.com/webhooks/cost-katana',
+  events: [
+    'cost.alert',
+    'cost.threshold_exceeded',
+    'budget.warning',
+    'budget.exceeded',
+  ],
+  active: true,
+  secret: 'your_custom_webhook_secret',
+});
+
+console.log('Webhook registered:', webhook);
+```
+
+### Managing Webhooks
+
+```typescript
+// List all registered webhooks
+const webhooks = await webhookManager.getWebhooks();
+console.log(`You have ${webhooks.length} registered webhooks`);
+
+// Update an existing webhook
+await webhookManager.updateWebhook(webhook.id, {
+  events: [...webhook.events, 'optimization.suggested'],
+  description: 'Updated webhook description',
+});
+
+// Test a webhook
+await webhookManager.testWebhook(
+  webhook.id,
+  'cost.alert',
+  {
+    title: 'Test Cost Alert',
+    description: 'This is a test cost alert',
+    severity: 'medium',
+    cost: {
+      amount: 150,
+      currency: 'USD',
+      period: 'daily',
+    },
+  }
+);
+
+// Delete a webhook
+await webhookManager.deleteWebhook(webhook.id);
+```
+
+### Verifying Webhook Signatures
+
+```typescript
+import { verifyWebhookSignature } from 'ai-cost-tracker';
+import express from 'express';
+
+const app = express();
+const WEBHOOK_SECRET = 'your_webhook_secret';
+
+app.post('/webhooks/cost-katana', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-costkatana-signature'];
+  const timestamp = req.headers['x-costkatana-timestamp'];
+  const payload = req.body.toString();
+  
+  // Verify the signature
+  const isValid = verifyWebhookSignature(
+    payload,
+    timestamp,
+    signature,
+    WEBHOOK_SECRET
+  );
+  
+  if (!isValid) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process the webhook
+  const event = JSON.parse(payload);
+  console.log(`Received ${event.event_type} event:`, event);
+  
+  res.status(200).send('Webhook received');
+});
+
+app.listen(3000);
+```
+
+For more detailed information, see the [Webhooks documentation](WEBHOOKS.md).
 
 ## Batch Processing
 
