@@ -24,15 +24,15 @@ export interface Response {
     traceContext?: TraceContext;
   };
   statusCode: number;
-  send: Function;
-  json: Function;
-  end: Function;
-  on(event: string, listener: Function): this;
+  send: (body?: any) => Response;
+  json: (body: any) => Response;
+  end: (chunk?: any) => Response;
+  on(event: string, listener: (chunk?: any) => void): this;
   getHeaders(): { [key: string]: string | string[] | number | undefined };
 }
 
 export interface NextFunction {
-  (err?: any): void;
+  (err?: Error | string): void;
 }
 
 interface TraceMiddlewareOptions {
@@ -163,9 +163,9 @@ export function createTraceMiddleware(options: TraceMiddlewareOptions) {
         return originalJson.call(this, data);
       };
 
-      res.end = function (...args: any[]) {
+      res.end = function (chunk?: any) {
         endTrace();
-        return originalEnd.apply(this, args);
+        return originalEnd.call(this, chunk);
       };
 
       // Handle errors

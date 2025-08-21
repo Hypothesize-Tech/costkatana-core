@@ -174,7 +174,7 @@ export class TrackedOpenAI {
                   (promptTokens / 1_000_000) * pricing.inputPrice +
                   (completionTokens / 1_000_000) * pricing.outputPrice;
               }
-            } catch (err) {
+            } catch {
               // Fallback to basic estimation
               costUSD = promptTokens * 0.000001 + completionTokens * 0.000002;
             }
@@ -370,7 +370,7 @@ export class TrackedAnthropic {
                   (inputTokens / 1_000_000) * pricing.inputPrice +
                   (outputTokens / 1_000_000) * pricing.outputPrice;
               }
-            } catch (err) {
+            } catch {
               // Fallback to basic estimation
               costUSD = inputTokens * 0.000001 + outputTokens * 0.000002;
             }
