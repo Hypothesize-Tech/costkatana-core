@@ -123,7 +123,7 @@ async function realtimeDashboard() {
     const models = [
         { model: 'gpt-3.5-turbo', provider: AIProvider.OpenAI },
         { model: 'gpt-4', provider: AIProvider.OpenAI },
-        { model: 'anthropic.claude-3-haiku-20240307-v1:0', provider: AIProvider.AWSBedrock }
+        { model: 'anthropic.claude-sonnet-4-20250514-v1:0', provider: AIProvider.AWSBedrock }
     ];
 
     // Simulate 10 requests

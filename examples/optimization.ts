@@ -22,7 +22,7 @@ async function optimizePrompts() {
                     enableCachingSuggestions: true,
                     bedrockConfig: {
                         region: 'us-east-1',
-                        modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+                        modelId: 'anthropic.claude-sonnet-4-20250514-v1:0'
                     }
                 }
             }
@@ -87,7 +87,7 @@ async function getAIOptimizations() {
                     enableCachingSuggestions: true,
                     bedrockConfig: {
                         region: 'us-east-1',
-                        modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+                        modelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
                         // Add AWS credentials if not using default profile
                     }
                 }
@@ -177,7 +177,7 @@ async function generateOptimizationReport() {
     const scenarios = [
         { model: 'gpt-4', cost: 0.05, tokens: 1000, prompt: 'Complex analysis task' },
         { model: 'gpt-3.5-turbo', cost: 0.002, tokens: 500, prompt: 'Simple question' },
-        { model: 'anthropic.claude-3-5-sonnet-20240620-v1:0', cost: 0.015, tokens: 800, prompt: 'Code generation' }
+        { model: 'anthropic.claude-sonnet-4-20250514-v1:0', cost: 0.015, tokens: 800, prompt: 'Code generation' }
     ];
 
     // Generate usage data

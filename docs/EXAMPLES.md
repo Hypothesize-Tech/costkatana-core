@@ -68,7 +68,7 @@ const tracker = new AICostTracker({
     enableCachingSuggestions: true,
     bedrockConfig: {
       region: 'us-east-1',
-      modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+      modelId: 'anthropic.claude-sonnet-4-20250514-v1:0'
     }
   },
   tracking: {
@@ -112,7 +112,7 @@ const completionTokens = 500;
 const models = [
   MODELS['gpt-4'],
   MODELS['gpt-3.5-turbo'],
-  MODELS['anthropic.claude-3-5-sonnet-20240620-v1:0'],
+  MODELS['anthropic.claude-sonnet-4-20250514-v1:0'],
   MODELS['anthropic.claude-3-haiku-20240307-v1:0']
 ];
 
@@ -807,7 +807,7 @@ class SmartRouter {
       provider = AIProvider.OpenAI;
     } else if (isCreative) {
       // Creative tasks
-      model = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+      model = 'anthropic.claude-sonnet-4-20250514-v1:0';
       provider = AIProvider.AWSBedrock;
     } else {
       // Simple tasks

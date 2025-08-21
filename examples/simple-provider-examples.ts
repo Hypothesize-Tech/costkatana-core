@@ -190,14 +190,15 @@ async function bedrockExamples() {
 async function googleExamples() {
   console.log('=== 🔍 Google AI Examples ===\n');
 
+  // Gemini 2.5 Pro for advanced reasoning
   const geminiTracker = await createGoogleTracker({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.5-pro',
     apiKey: process.env.GOOGLE_API_KEY,
     enableOptimization: true,
     projectId: 'gemini-research-project'
   });
 
-  console.log('✅ Gemini 1.5 Pro tracker created');
+  console.log('✅ Gemini 2.5 Pro tracker created');
 
   const response = await geminiTracker.complete({
     prompt: 'Explain the latest developments in artificial general intelligence',
@@ -211,13 +212,31 @@ async function googleExamples() {
   console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
   console.log();
 
-  // Gemini Flash for faster responses
+  // Gemini 2.5 Flash for balanced performance
   const flashTracker = await createGoogleTracker({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     enableAutoTracking: true
   });
 
-  console.log('✅ Gemini 1.5 Flash tracker created for speed');
+  console.log('✅ Gemini 2.5 Flash tracker created for balanced performance');
+  console.log();
+
+  // Gemini 2.5 Flash Lite for high throughput
+  const flashLiteTracker = await createGoogleTracker({
+    model: 'gemini-2.5-flash-lite',
+    enableAutoTracking: true
+  });
+
+  console.log('✅ Gemini 2.5 Flash Lite tracker created for high throughput');
+  console.log();
+
+  // Gemini 1.5 Pro for long context tasks
+  const longContextTracker = await createGoogleTracker({
+    model: 'gemini-1.5-pro',
+    enableAutoTracking: true
+  });
+
+  console.log('✅ Gemini 1.5 Pro tracker created for long context tasks');
   console.log();
 }
 
@@ -229,12 +248,12 @@ async function cohereExamples() {
   console.log('=== 🔗 Cohere Examples ===\n');
 
   const cohereTracker = await createCohereTracker({
-    model: 'command-r-plus',
+    model: 'command-a-03-2025',
     apiKey: process.env.COHERE_API_KEY,
     enableOptimization: true
   });
 
-  console.log('✅ Cohere Command R+ tracker created');
+  console.log('✅ Cohere Command A tracker created');
 
   const response = await cohereTracker.complete({
     prompt: 'Generate a comprehensive marketing strategy for a new AI product',
@@ -247,13 +266,13 @@ async function cohereExamples() {
   console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
   console.log();
 
-  // Cohere Command for lighter tasks
+  // Cohere Command R7B for lighter tasks
   const commandTracker = await createCohereTracker({
-    model: 'command',
+    model: 'command-r7b-12-2024',
     enableAutoTracking: true
   });
 
-  console.log('✅ Cohere Command tracker created');
+  console.log('✅ Cohere Command R7B tracker created');
   console.log();
 }
 
@@ -304,15 +323,16 @@ async function groqExamples() {
 async function mistralExamples() {
   console.log('=== 🔮 Mistral AI Examples ===\n');
 
-  const mistralLargeModel: MistralModels = 'mistral-large-latest';
+  // Using the latest Mistral Medium 3.1 model
+  const mistralMediumModel: MistralModels = 'mistral-medium-2508';
   const mistralTracker = await createMistralTracker({
-    model: mistralLargeModel,
+    model: mistralMediumModel,
     apiKey: process.env.MISTRAL_API_KEY,
     enableOptimization: true,
     projectId: 'mistral-analysis-project'
   });
 
-  console.log('✅ Mistral Large tracker created');
+  console.log('✅ Mistral Medium 3.1 tracker created');
 
   const response = await mistralTracker.complete({
     prompt: 'Explain the future of artificial intelligence in Europe',
@@ -326,14 +346,129 @@ async function mistralExamples() {
   console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
   console.log();
 
-  // Mistral Small for lighter tasks
-  const mistralSmallModel: MistralModels = 'mistral-small-latest';
+  // Using the latest Magistral Medium reasoning model
+  const magistralMediumModel: MistralModels = 'magistral-medium-2507';
+  const magistralTracker = await createMistralTracker({
+    model: magistralMediumModel,
+    apiKey: process.env.MISTRAL_API_KEY,
+    enableOptimization: true,
+    projectId: 'mistral-reasoning-project'
+  });
+
+  console.log('✅ Magistral Medium 1.1 tracker created');
+
+  const reasoningResponse = await magistralTracker.complete({
+    prompt: 'Solve this complex mathematical problem step by step: What is the sum of all prime numbers between 1 and 100?',
+    maxTokens: 400,
+    temperature: 0.3,
+    systemMessage: 'You are a mathematics expert. Think through problems step by step.',
+    tags: ['mathematics', 'problem-solving', 'reasoning']
+  });
+
+  console.log('🧮 Reasoning Response:', reasoningResponse.text.substring(0, 100) + '...');
+  console.log('💰 Cost:', `$${reasoningResponse.cost.totalCost.toFixed(4)}`);
+  console.log();
+
+  // Using Codestral for coding tasks
+  const codestralModel: MistralModels = 'codestral-2508';
+  const codestralTracker = await createMistralTracker({
+    model: codestralModel,
+    apiKey: process.env.MISTRAL_API_KEY,
+    enableOptimization: true,
+    projectId: 'mistral-coding-project'
+  });
+
+  console.log('✅ Codestral 2508 tracker created');
+
+  const codingResponse = await codestralTracker.complete({
+    prompt: 'Write a Python function to find the longest common subsequence between two strings',
+    maxTokens: 300,
+    temperature: 0.2,
+    systemMessage: 'You are a coding expert. Write clean, efficient code with explanations.',
+    tags: ['coding', 'python', 'algorithms']
+  });
+
+  console.log('💻 Coding Response:', codingResponse.text.substring(0, 100) + '...');
+  console.log('💰 Cost:', `$${codingResponse.cost.totalCost.toFixed(4)}`);
+  console.log();
+
+  // Using Mistral Small for lighter tasks
+  const mistralSmallModel: MistralModels = 'mistral-small-2506';
   const smallTracker = await createMistralTracker({
     model: mistralSmallModel,
     enableAutoTracking: true
   });
 
-  console.log('✅ Mistral Small tracker created');
+  console.log('✅ Mistral Small 3.2 tracker created');
+  console.log();
+}
+
+// =============================================================================
+// Meta Llama 4 Examples
+// =============================================================================
+
+async function metaExamples() {
+  console.log('=== 🦙 Meta Llama 4 Examples ===\n');
+
+  // Using the latest Llama 4 Scout model
+  const llama4ScoutModel = 'llama-4-scout';
+  const scoutTracker = await createTracker({
+    provider: AIProvider.Meta,
+    model: llama4ScoutModel,
+    apiKey: process.env.META_API_KEY,
+    enableOptimization: true,
+    projectId: 'llama-4-scout-project'
+  });
+
+  console.log('✅ Llama 4 Scout tracker created');
+
+  const response = await scoutTracker.complete({
+    prompt: 'Analyze this long document and provide a comprehensive summary with key insights',
+    maxTokens: 500,
+    temperature: 0.3,
+    systemMessage: 'You are an expert document analyst with access to 10M context window',
+    tags: ['document-analysis', 'long-context', 'multimodal']
+  });
+
+  console.log('📝 Response:', response.text.substring(0, 100) + '...');
+  console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
+  console.log();
+
+  // Using Llama 4 Maverick for fast responses
+  const llama4MaverickModel = 'llama-4-maverick';
+  const maverickTracker = await createTracker({
+    provider: AIProvider.Meta,
+    model: llama4MaverickModel,
+    apiKey: process.env.META_API_KEY,
+    enableOptimization: true,
+    projectId: 'llama-4-maverick-project'
+  });
+
+  console.log('✅ Llama 4 Maverick tracker created');
+
+  const maverickResponse = await maverickTracker.complete({
+    prompt: 'Explain the concept of multimodal AI and its applications in modern technology',
+    maxTokens: 400,
+    temperature: 0.5,
+    systemMessage: 'You are a technology expert specializing in AI and multimodal systems',
+    tags: ['AI', 'multimodal', 'technology']
+  });
+
+  console.log('🚀 Maverick Response:', maverickResponse.text.substring(0, 100) + '...');
+  console.log('💰 Cost:', `$${maverickResponse.cost.totalCost.toFixed(4)}`);
+  console.log();
+
+  // Using Llama 4 Behemoth Preview for advanced tasks
+  const llama4BehemothModel = 'llama-4-behemoth-preview';
+  const behemothTracker = await createTracker({
+    provider: AIProvider.Meta,
+    model: llama4BehemothModel,
+    apiKey: process.env.META_API_KEY,
+    enableOptimization: true,
+    projectId: 'llama-4-behemoth-project'
+  });
+
+  console.log('✅ Llama 4 Behemoth Preview tracker created');
   console.log();
 }
 
@@ -344,36 +479,62 @@ async function mistralExamples() {
 async function xaiExamples() {
   console.log('=== 🤖 xAI Grok Examples ===\n');
 
-  const grokModel: XAIModels = 'grok-beta';
-  const grokTracker = await createXAITracker({
-    model: grokModel,
+  // Using the latest Grok 4 model
+  const grok4Model: XAIModels = 'grok-4-0709';
+  const grok4Tracker = await createXAITracker({
+    model: grok4Model,
     apiKey: process.env.XAI_API_KEY,
     enableOptimization: true,
-    projectId: 'grok-experiments'
+    projectId: 'grok-4-experiments'
   });
 
-  console.log('✅ Grok Beta tracker created');
+  console.log('✅ Grok 4 tracker created');
 
-  const response = await grokTracker.complete({
-    prompt: 'What are the most interesting developments in space exploration recently?',
+  const response = await grok4Tracker.complete({
+    prompt: 'Explain the concept of reasoning in AI models and how it differs from traditional language models',
     maxTokens: 400,
-    temperature: 0.8,
-    systemMessage: 'You are Grok, a witty AI assistant with real-time knowledge',
-    tags: ['space', 'exploration', 'current-events']
+    temperature: 0.7,
+    systemMessage: 'You are an AI researcher specializing in reasoning models',
+    tags: ['AI', 'reasoning', 'research']
   });
 
   console.log('📝 Response:', response.text.substring(0, 100) + '...');
   console.log('💰 Cost:', `$${response.cost.totalCost.toFixed(4)}`);
   console.log();
 
-  // Grok Vision for image analysis
-  const grokVisionModel: XAIModels = 'grok-vision-beta';
-  const visionTracker = await createXAITracker({
-    model: grokVisionModel,
-    enableAutoTracking: true
+  // Using Grok 3 for standard tasks
+  const grok3Model: XAIModels = 'grok-3';
+  const grok3Tracker = await createXAITracker({
+    model: grok3Model,
+    apiKey: process.env.XAI_API_KEY,
+    enableOptimization: true,
+    projectId: 'grok-3-experiments'
   });
 
-  console.log('✅ Grok Vision tracker created');
+  console.log('✅ Grok 3 tracker created');
+
+  const grok3Response = await grok3Tracker.complete({
+    prompt: 'Write a creative story about a robot learning to paint',
+    maxTokens: 300,
+    temperature: 0.8,
+    systemMessage: 'You are a creative storyteller',
+    tags: ['creative', 'story', 'AI']
+  });
+
+  console.log('📖 Story Response:', grok3Response.text.substring(0, 100) + '...');
+  console.log('💰 Cost:', `$${grok3Response.cost.totalCost.toFixed(4)}`);
+  console.log();
+
+  // Using Grok 3 Mini for cost-effective tasks
+  const grok3MiniModel: XAIModels = 'grok-3-mini';
+  const grok3MiniTracker = await createXAITracker({
+    model: grok3MiniModel,
+    apiKey: process.env.XAI_API_KEY,
+    enableOptimization: true,
+    projectId: 'grok-3-mini-experiments'
+  });
+
+  console.log('✅ Grok 3 Mini tracker created');
   console.log();
 }
 
@@ -426,14 +587,31 @@ async function multiProviderComparison() {
   const expectedTokens = 400;
 
   const providers = [
+    // === OpenAI GPT-5 Models (Latest) ===
+    { name: 'OpenAI GPT-5', create: () => createOpenAITracker({ model: 'gpt-5' }) },
+    { name: 'OpenAI GPT-5 Mini', create: () => createOpenAITracker({ model: 'gpt-5-mini' }) },
+    { name: 'OpenAI GPT-5 Nano', create: () => createOpenAITracker({ model: 'gpt-5-nano' }) },
+    { name: 'OpenAI GPT-5 Chat', create: () => createOpenAITracker({ model: 'gpt-5-chat-latest' }) },
+    
+    // === OpenAI GPT-4 Models ===
     { name: 'OpenAI GPT-4o', create: () => createOpenAITracker({ model: 'gpt-4o' }) },
     { name: 'OpenAI GPT-3.5', create: () => createOpenAITracker({ model: 'gpt-3.5-turbo' }) },
     { name: 'Claude 3.5 Sonnet', create: () => createAnthropicTracker({ model: 'claude-3-5-sonnet-20241022' }) },
     { name: 'Claude 3.5 Haiku', create: () => createAnthropicTracker({ model: 'claude-3-5-haiku-20241022' }) },
     { name: 'Bedrock Claude', create: () => createBedrockTracker({ model: 'anthropic.claude-3-5-sonnet-20241022-v2:0', region: 'us-east-1' }) },
     { name: 'Amazon Nova Pro', create: () => createBedrockTracker({ model: 'amazon.nova-pro-v1:0', region: 'us-east-1' }) },
+    { name: 'Gemini 2.5 Pro', create: () => createGoogleTracker({ model: 'gemini-2.5-pro' }) },
+    { name: 'Gemini 2.5 Flash', create: () => createGoogleTracker({ model: 'gemini-2.5-flash' }) },
     { name: 'Gemini 1.5 Pro', create: () => createGoogleTracker({ model: 'gemini-1.5-pro' }) },
-    { name: 'Cohere Command R+', create: () => createCohereTracker({ model: 'command-r-plus' }) },
+    { name: 'Cohere Command A', create: () => createCohereTracker({ model: 'command-a-03-2025' }) },
+    { name: 'Mistral Medium 3.1', create: () => createMistralTracker({ model: 'mistral-medium-2508' }) },
+    { name: 'Magistral Medium 1.1', create: () => createMistralTracker({ model: 'magistral-medium-2507' }) },
+    { name: 'Codestral 2508', create: () => createMistralTracker({ model: 'codestral-2508' }) },
+    { name: 'Grok 4', create: () => createXAITracker({ model: 'grok-4-0709' }) },
+    { name: 'Grok 3', create: () => createXAITracker({ model: 'grok-3' }) },
+    { name: 'Grok 3 Mini', create: () => createXAITracker({ model: 'grok-3-mini' }) },
+    { name: 'Llama 4 Scout', create: () => createTracker({ provider: AIProvider.Meta, model: 'llama-4-scout' }) },
+    { name: 'Llama 4 Maverick', create: () => createTracker({ provider: AIProvider.Meta, model: 'llama-4-maverick' }) },
     { name: 'Groq Llama 3.1', create: () => createGroqTracker({ model: 'llama-3.1-70b-versatile' }) },
     { name: 'DeepSeek Chat', create: () => createDeepSeekTracker({ model: 'deepseek-chat' }) }
   ];

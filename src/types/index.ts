@@ -136,7 +136,8 @@ export enum AIProvider {
   HuggingFace = 'huggingface',
   Ollama = 'ollama',
   Replicate = 'replicate',
-  Azure = 'azure'
+  Azure = 'azure',
+  Meta = 'meta'
 }
 
 import { LoggerConfig } from '../utils/logger';

@@ -250,12 +250,58 @@ const anthropicResponse = await gateway.anthropic({
 });
 
 // Google AI
-const googleResponse = await gateway.googleAI('gemini-pro', {
+const googleResponse = await gateway.googleAI('gemini-2.5-pro', {
   contents: [{
     parts: [{ text: 'Hello!' }]
   }]
 }, {
   targetUrl: 'https://generativelanguage.googleapis.com'
+});
+
+// Google AI with different models
+const flashResponse = await gateway.googleAI('gemini-2.5-flash', {
+  contents: [{
+    parts: [{ text: 'Explain quantum computing' }]
+  }]
+}, {
+  targetUrl: 'https://generativelanguage.googleapis.com'
+});
+
+const longContextResponse = await gateway.googleAI('gemini-1.5-pro', {
+  contents: [{
+    parts: [{ text: 'Analyze this long document...' }]
+  }]
+}, {
+  targetUrl: 'https://generativelanguage.googleapis.com'
+});
+
+// Mistral AI
+const mistralResponse = await gateway.mistralAI('mistral-medium-2508', {
+  messages: [{
+    role: 'user',
+    content: 'Hello!'
+  }]
+}, {
+  targetUrl: 'https://api.mistral.ai'
+});
+
+// Mistral AI with different models
+const magistralResponse = await gateway.mistralAI('magistral-medium-2507', {
+  messages: [{
+    role: 'user',
+    content: 'Solve this complex reasoning problem step by step...'
+  }]
+}, {
+  targetUrl: 'https://api.mistral.ai'
+});
+
+const codestralResponse = await gateway.mistralAI('codestral-2508', {
+  messages: [{
+    role: 'user',
+    content: 'Write a Python function to...'
+  }]
+}, {
+  targetUrl: 'https://api.mistral.ai'
 });
 
 // Cohere

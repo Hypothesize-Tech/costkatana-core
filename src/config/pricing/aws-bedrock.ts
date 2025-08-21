@@ -29,32 +29,6 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     notes: 'AI21 Labs Jamba 1.5 Mini via AWS Bedrock'
   },
   {
-    modelId: 'ai21.j2-mid-v1',
-    modelName: 'Jurassic-2 Mid (Bedrock)',
-    provider: 'AWS Bedrock',
-    inputPrice: 12.5,
-    outputPrice: 12.5,
-    unit: PricingUnit.Per1MTokens,
-    contextWindow: 8192,
-    capabilities: ['text'],
-    category: 'text',
-    isLatest: false,
-    notes: 'AI21 Labs Jurassic-2 Mid via AWS Bedrock'
-  },
-  {
-    modelId: 'ai21.j2-ultra-v1',
-    modelName: 'Jurassic-2 Ultra (Bedrock)',
-    provider: 'AWS Bedrock',
-    inputPrice: 18.8,
-    outputPrice: 18.8,
-    unit: PricingUnit.Per1MTokens,
-    contextWindow: 8192,
-    capabilities: ['text'],
-    category: 'text',
-    isLatest: false,
-    notes: 'AI21 Labs Jurassic-2 Ultra via AWS Bedrock'
-  },
-  {
     modelId: 'ai21.jamba-instruct-v1:0',
     modelName: 'Jamba-Instruct (Bedrock)',
     provider: 'AWS Bedrock',
@@ -209,6 +183,28 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
   },
 
   // === Anthropic Claude Models (Updated) ===
+  {
+    modelId: 'anthropic.claude-opus-4-1-20250805-v1:0',
+    modelName: 'Claude Opus 4.1 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 15.0,
+    outputPrice: 75.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200000,
+    cachedInputPrice: 1.5, // Cache read price
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'multimodal',
+    isLatest: true,
+    notes:
+      'Claude Opus 4.1 via AWS Bedrock - most capable and intelligent Claude model yet. Cache write: $18.75, Cache read: $1.50'
+  },
   {
     modelId: 'anthropic.claude-opus-4-20250514-v1:0',
     modelName: 'Claude Opus 4 (Bedrock)',
@@ -373,27 +369,27 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     modelId: 'cohere.command-r-plus-v1:0',
     modelName: 'Cohere Command R+ (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 3.0,
-    outputPrice: 15.0,
+    inputPrice: 2.5,
+    outputPrice: 10.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'enterprise', 'rag', 'tools', 'multilingual'],
     category: 'text',
     isLatest: true,
-    notes: 'Cohere Command R+ via AWS Bedrock'
+    notes: 'Cohere Command R+ via AWS Bedrock - updated pricing'
   },
   {
     modelId: 'cohere.command-r-v1:0',
     modelName: 'Cohere Command R (Bedrock)',
     provider: 'AWS Bedrock',
-    inputPrice: 0.5,
-    outputPrice: 1.5,
+    inputPrice: 0.15,
+    outputPrice: 0.6,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     capabilities: ['text', 'rag', 'tools', 'long-context'],
     category: 'text',
     isLatest: true,
-    notes: 'Cohere Command R via AWS Bedrock'
+    notes: 'Cohere Command R via AWS Bedrock - updated pricing'
   },
   {
     modelId: 'cohere.embed-english-v3',
@@ -746,5 +742,33 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes: 'Writer Palmyra X5 via AWS Bedrock'
+  },
+
+  // === TwelveLabs Models ===
+  {
+    modelId: 'twelvelabs.pegasus-1-2-v1:0',
+    modelName: 'Pegasus v1.2 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 0.0,
+    outputPrice: 0.0,
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['text', 'video', 'multimodal'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'TwelveLabs Pegasus v1.2 via AWS Bedrock - video understanding model'
+  },
+  {
+    modelId: 'twelvelabs.marengo-embed-2-7-v1:0',
+    modelName: 'Marengo Embed v2.7 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 0.0,
+    outputPrice: 0.0,
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['embedding', 'multimodal'],
+    category: 'embedding',
+    isLatest: true,
+    notes: 'TwelveLabs Marengo Embed v2.7 via AWS Bedrock - multimodal embeddings'
   }
 ];

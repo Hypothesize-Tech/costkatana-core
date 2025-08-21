@@ -40,7 +40,7 @@ interface TraceMiddlewareOptions {
    * Custom header name for session ID (default: x-session-id)
    */
   sessionHeader?: string;
-  
+
   /**
    * Function to start a span - implement this with your trace service
    */
@@ -50,16 +50,19 @@ interface TraceMiddlewareOptions {
     type: string;
     metadata?: Record<string, any>;
   }) => Promise<{ traceId: string }>;
-  
+
   /**
    * Function to end a span - implement this with your trace service
    */
-  endSpan: (traceId: string, input: {
-    status: 'ok' | 'error';
-    error?: { message: string; stack?: string };
-    metadata?: Record<string, any>;
-  }) => Promise<void>;
-  
+  endSpan: (
+    traceId: string,
+    input: {
+      status: 'ok' | 'error';
+      error?: { message: string; stack?: string };
+      metadata?: Record<string, any>;
+    }
+  ) => Promise<void>;
+
   /**
    * Whether to include request/response details in metadata
    */
@@ -68,12 +71,12 @@ interface TraceMiddlewareOptions {
 
 /**
  * Creates Express middleware for automatic request tracing
- * 
+ *
  * @example
  * ```typescript
  * import { createTraceMiddleware } from 'ai-cost-tracker/trace';
  * import { traceService } from './services/trace';
- * 
+ *
  * app.use(createTraceMiddleware({
  *   startSpan: traceService.startSpan,
  *   endSpan: traceService.endSpan,
@@ -82,30 +85,25 @@ interface TraceMiddlewareOptions {
  * ```
  */
 export function createTraceMiddleware(options: TraceMiddlewareOptions) {
-  const {
-    sessionHeader = 'x-session-id',
-    startSpan,
-    endSpan,
-    includeDetails = false
-  } = options;
+  const { sessionHeader = 'x-session-id', startSpan, endSpan, includeDetails = false } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     // Get or generate session ID
-    const sessionId = req.headers[sessionHeader] as string || uuidv4();
-    
+    const sessionId = (req.headers[sessionHeader] as string) || uuidv4();
+
     // Start root span for the HTTP request
     const metadata: Record<string, any> = {
       method: req.method,
       path: req.path,
       query: req.query
     };
-    
+
     if (includeDetails) {
       metadata.headers = req.headers;
       metadata.ip = req.ip;
       metadata.userAgent = req.get('user-agent');
     }
-    
+
     try {
       const { traceId } = await startSpan({
         sessionId,
@@ -113,64 +111,68 @@ export function createTraceMiddleware(options: TraceMiddlewareOptions) {
         type: 'http',
         metadata
       });
-      
+
       // Attach context to request and response
       const traceContext: TraceContext = {
         sessionId,
         traceId,
         parentId: undefined
       };
-      
+
       req.traceContext = traceContext;
       res.locals.sessionId = sessionId;
       res.locals.traceId = traceId;
       res.locals.traceContext = traceContext;
-      
+
       // Capture response
       const originalSend = res.send;
       const originalJson = res.json;
       const originalEnd = res.end;
-      
+
       const endTrace = async (error?: Error) => {
         try {
           await endSpan(traceId, {
             status: error || res.statusCode >= 400 ? 'error' : 'ok',
-            error: error ? {
-              message: error.message,
-              stack: error.stack
-            } : undefined,
+            error: error
+              ? {
+                  message: error.message,
+                  stack: error.stack
+                }
+              : undefined,
             metadata: {
               statusCode: res.statusCode,
-              ...(includeDetails ? {
-                responseHeaders: res.getHeaders()
-              } : {})
+              ...(includeDetails
+                ? {
+                    responseHeaders: res.getHeaders()
+                  }
+                : {})
             }
           });
         } catch (err) {
           console.error('Failed to end trace span:', err);
         }
       };
-      
-      res.send = function(data: any) {
+
+      res.send = function (data: any) {
         endTrace();
         return originalSend.call(this, data);
       };
-      
-      res.json = function(data: any) {
+
+      res.json = function (data: any) {
         endTrace();
         return originalJson.call(this, data);
       };
-      
-      res.end = function(...args: any[]) {
+
+      res.end = function (...args: any[]) {
         endTrace();
         return originalEnd.apply(this, args);
       };
-      
+
       // Handle errors
       res.on('error', (error: any) => {
         endTrace(error);
       });
-      
+
       next();
     } catch (error) {
       console.error('Failed to start trace span:', error);
@@ -181,7 +183,7 @@ export function createTraceMiddleware(options: TraceMiddlewareOptions) {
 
 /**
  * Helper to create child spans within a request handler
- * 
+ *
  * @example
  * ```typescript
  * app.get('/api/chat', async (req, res) => {
@@ -189,12 +191,12 @@ export function createTraceMiddleware(options: TraceMiddlewareOptions) {
  *     name: 'database-query',
  *     type: 'tool'
  *   });
- *   
+ *
  *   try {
  *     const result = await db.query('...');
  *     await span.end({ status: 'ok' });
  *   } catch (error) {
- *     await span.end({ 
+ *     await span.end({
  *       status: 'error',
  *       error: { message: error.message }
  *     });
@@ -215,7 +217,7 @@ export async function createChildSpan(
   if (!parentContext) {
     throw new Error('No trace context found on request');
   }
-  
+
   const { traceId } = await startSpanFn({
     sessionId: parentContext.sessionId,
     parentId: parentContext.traceId,
@@ -223,7 +225,7 @@ export async function createChildSpan(
     type: input.type,
     metadata: input.metadata
   });
-  
+
   return {
     traceId,
     end: async (_endInput: {
