@@ -11,6 +11,37 @@ export interface UsageMetadata {
   tags?: string[];
   sessionId?: string;
   projectId?: string;
+  userEmail?: string;
+  customerEmail?: string;
+  // Enhanced request/response data
+  messages?: Array<{
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+  }>;
+  system?: string;
+  input?: string;
+  output?: string;
+  // Additional metadata for comprehensive tracking
+  requestMetadata?: {
+    messages?: Array<{
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    }>;
+    system?: string;
+    input?: string;
+    prompt?: string;
+    [key: string]: any;
+  };
+  responseMetadata?: {
+    completion?: string;
+    output?: string;
+    choices?: Array<{
+      message?: { content: string; role: string };
+      text?: string;
+      [key: string]: any;
+    }>;
+    [key: string]: any;
+  };
 }
 
 export interface CostEstimate {

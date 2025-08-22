@@ -482,7 +482,17 @@ export class AICostTracker {
       ...(payload.errorOccurred && { errorOccurred: payload.errorOccurred }),
       ...(payload.errorMessage && { errorMessage: payload.errorMessage }),
       ...(payload.ipAddress && { ipAddress: payload.ipAddress }),
-      ...(payload.userAgent && { userAgent: payload.userAgent })
+      ...(payload.userAgent && { userAgent: payload.userAgent }),
+      ...(payload.userEmail && { userEmail: payload.userEmail }),
+      ...(payload.customerEmail && { customerEmail: payload.customerEmail }),
+      // Enhanced request/response data
+      ...(payload.messages && { messages: payload.messages }),
+      ...(payload.system && { system: payload.system }),
+      ...(payload.input && { input: payload.input }),
+      ...(payload.output && { output: payload.output }),
+      // Enhanced metadata handling
+      ...(payload.requestMetadata && { requestMetadata: payload.requestMetadata }),
+      ...(payload.responseMetadata && { responseMetadata: payload.responseMetadata })
     };
 
     // Send to backend
@@ -877,7 +887,25 @@ export class AICostTracker {
         responseTime,
         tags: options.properties ? Object.keys(options.properties) : [],
         sessionId: options.sessionId,
-        projectId: options.projectId || options.budgetId || this.config.projectId
+        projectId: options.projectId || options.budgetId || this.config.projectId,
+        userEmail: options.userEmail,
+        customerEmail: options.customerEmail,
+        // Enhanced request/response data
+        messages: this.extractMessagesFromRequest(request),
+        system: this.extractSystemFromRequest(request),
+        input: promptText,
+        output: completionText,
+        // Enhanced metadata
+        requestMetadata: {
+          messages: this.extractMessagesFromRequest(request),
+          system: this.extractSystemFromRequest(request),
+          input: promptText,
+          prompt: promptText
+        },
+        responseMetadata: {
+          completion: completionText,
+          output: completionText
+        }
       };
 
       await this.trackUsage(usageMetadata);
@@ -929,6 +957,29 @@ export class AICostTracker {
         .join('\n');
     }
     return '';
+  }
+
+  /**
+   * Extract messages from a request object
+   */
+  private extractMessagesFromRequest(request: any): any[] {
+    if (request.messages && Array.isArray(request.messages)) {
+      return request.messages.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      }));
+    }
+    return [];
+  }
+
+  /**
+   * Extract system message from a request object
+   */
+  private extractSystemFromRequest(request: any): string | undefined {
+    if (request.system) {
+      return request.system;
+    }
+    return undefined;
   }
 
   /**

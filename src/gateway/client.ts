@@ -491,6 +491,8 @@ export class GatewayClient {
     if (options.sessionId) headers['CostKatana-Session-Id'] = options.sessionId;
     if (options.traceId) headers['CostKatana-Property-Trace-Id'] = options.traceId;
     if (options.userId) headers['CostKatana-User-Id'] = options.userId;
+    if (options.userEmail) headers['CostKatana-User-Email'] = options.userEmail;
+    if (options.customerEmail) headers['CostKatana-Customer-Email'] = options.customerEmail;
 
     return headers;
   }

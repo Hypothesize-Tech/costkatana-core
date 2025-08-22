@@ -158,6 +158,10 @@ export interface GatewayRequestOptions {
   traceId?: string;
   /** User ID for user-scoped operations */
   userId?: string;
+  /** User email for usage tracking and analytics */
+  userEmail?: string;
+  /** Customer email for business intelligence and reporting */
+  customerEmail?: string;
 }
 
 export interface GatewayResponse<T = any> {
