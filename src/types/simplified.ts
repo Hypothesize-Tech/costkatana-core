@@ -9,6 +9,7 @@ import {
   DeepSeekModels,
   MistralModels,
   XAIModels,
+  MetaModels,
   AllModels
 } from '../config/model-types';
 
@@ -23,6 +24,7 @@ export type {
   DeepSeekModels,
   MistralModels,
   XAIModels,
+  MetaModels,
   AllModels
 };
 
@@ -37,6 +39,7 @@ export type ProviderModelMap = {
   [AIProvider.DeepSeek]: DeepSeekModels;
   [AIProvider.Mistral]: MistralModels;
   [AIProvider.XAI]: XAIModels;
+  [AIProvider.Meta]: MetaModels;
 };
 
 // Simplified configuration for easy setup
@@ -60,7 +63,8 @@ export type AnySimpleConfig =
   | SimpleConfig<AIProvider.Groq>
   | SimpleConfig<AIProvider.DeepSeek>
   | SimpleConfig<AIProvider.Mistral>
-  | SimpleConfig<AIProvider.XAI>;
+  | SimpleConfig<AIProvider.XAI>
+  | SimpleConfig<AIProvider.Meta>;
 
 // Simple request interface
 export interface SimpleRequest {

@@ -18,6 +18,7 @@ const groqModelIds = extractModelIds('Groq');
 const deepSeekModelIds = extractModelIds('DeepSeek');
 const mistralModelIds = extractModelIds('Mistral AI');
 const xaiModelIds = extractModelIds('xAI');
+const metaModelIds = extractModelIds('Meta');
 
 // Generate literal types from actual pricing data
 export type OpenAIModels = (typeof openAIModelIds)[number];
@@ -29,6 +30,7 @@ export type GroqModels = (typeof groqModelIds)[number];
 export type DeepSeekModels = (typeof deepSeekModelIds)[number];
 export type MistralModels = (typeof mistralModelIds)[number];
 export type XAIModels = (typeof xaiModelIds)[number];
+export type MetaModels = (typeof metaModelIds)[number];
 
 // Export the model ID arrays for runtime use
 export const OPENAI_MODEL_IDS = openAIModelIds;
@@ -40,6 +42,7 @@ export const GROQ_MODEL_IDS = groqModelIds;
 export const DEEPSEEK_MODEL_IDS = deepSeekModelIds;
 export const MISTRAL_MODEL_IDS = mistralModelIds;
 export const XAI_MODEL_IDS = xaiModelIds;
+export const META_MODEL_IDS = metaModelIds;
 
 // Utility function to get models for a specific provider
 export function getModelsForProvider(provider: string): string[] {
@@ -62,6 +65,8 @@ export function getModelsForProvider(provider: string): string[] {
       return [...MISTRAL_MODEL_IDS];
     case 'xAI':
       return [...XAI_MODEL_IDS];
+    case 'Meta':
+      return [...META_MODEL_IDS];
     default:
       return [];
   }
@@ -102,6 +107,10 @@ export function isMistralModel(model: string): model is MistralModels {
 
 export function isXAIModel(model: string): model is XAIModels {
   return XAI_MODEL_IDS.includes(model as XAIModels);
+}
+
+export function isMetaModel(model: string): model is MetaModels {
+  return META_MODEL_IDS.includes(model as MetaModels);
 }
 
 // Helper to validate model for provider
