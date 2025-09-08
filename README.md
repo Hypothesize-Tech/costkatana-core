@@ -16,6 +16,9 @@ A comprehensive toolkit for optimizing AI model costs, tracking usage, and analy
 - **🔄 Smart Retries**: Automatic retry logic with exponential backoff
 - **📊 Workflow Tracking**: Group related requests for end-to-end cost analysis
 - **🎯 Session Analysis**: Track and visualize complete agent flows with cost attribution
+- **🧠 Cortex Meta-Language**: Advanced semantic processing and optimization
+- **🌳 SAST Optimization**: Semantic Abstract Syntax Tree for universal text processing
+- **🌍 Cross-Lingual Support**: Universal semantic compatibility across languages
 
 ## Documentation
 
@@ -1133,6 +1136,258 @@ const response = await tracker.gatewayOpenAIWithFirewall({
 - **Zero Downtime**: Fail-open design ensures service availability
 - **Multi-Provider**: Works with OpenAI, Anthropic, Google AI, Cohere, and more
 
+## 🧠 Cortex Meta-Language & SAST Optimization
+
+CostKATANA's Cortex system provides advanced semantic processing capabilities through the Semantic Abstract Syntax Tree (SAST) optimizer, enabling universal text processing and cross-lingual compatibility.
+
+### What is Cortex?
+
+Cortex is a meta-language processing system that:
+- **Optimizes Text Semantically**: Reduces tokens while preserving meaning
+- **Resolves Ambiguities**: Automatically disambiguates complex language structures
+- **Enables Cross-Lingual Processing**: Universal semantic compatibility across languages
+- **Provides Intelligent Routing**: Automatically selects optimal processing strategies
+
+### What is SAST?
+
+SAST (Semantic Abstract Syntax Tree) is an advanced optimization technique that:
+- **Maps to Semantic Primitives**: Breaks down text into fundamental semantic units
+- **Preserves Universal Meaning**: Maintains semantic integrity across languages
+- **Reduces Token Usage**: Optimizes text length while preserving information
+- **Enables Ambiguity Resolution**: Automatically resolves linguistic ambiguities
+
+### Quick Start with Cortex
+
+```typescript
+import { createGatewayClient } from 'ai-cost-tracker';
+
+const gateway = createGatewayClient({
+  baseUrl: 'https://cost-katana-backend.store/api/gateway',
+  apiKey: 'your-costkatana-api-key',
+  enableCache: true,
+  enableRetries: true
+});
+
+// Basic Cortex optimization
+const response = await gateway.openai({
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'Explain machine learning algorithms in detail' }
+  ],
+  max_tokens: 500
+}, {
+  cortex: {
+    enabled: true,
+    operation: 'optimize',
+    style: 'technical',
+    format: 'structured',
+    semanticCache: true,
+    preserveSemantics: true,
+    intelligentRouting: true
+  }
+});
+
+console.log('Cortex Optimized Response:', response.data);
+```
+
+### SAST Optimization
+
+```typescript
+// SAST optimization with semantic primitives
+const sastResponse = await gateway.withSast('/v1/chat/completions', {
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'The quick brown fox jumps over the lazy dog and runs through the forest.' }
+  ],
+  max_tokens: 200
+}, {
+  language: 'en',
+  ambiguityResolution: true,
+  crossLingualMode: false,
+  disambiguationStrategy: 'hybrid',
+  preserveAmbiguity: false,
+  maxPrimitives: 50,
+  semanticThreshold: 0.8
+});
+
+console.log('SAST Optimized Response:', sastResponse.data);
+```
+
+### Compare Traditional vs SAST Optimization
+
+```typescript
+// Compare traditional vs SAST optimization
+const comparison = await gateway.compareSast('/v1/chat/completions', {
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'Analyze the relationship between AI, ML, and deep learning.' }
+  ],
+  max_tokens: 300
+});
+
+console.log('Token Reduction:', `${comparison.comparison.tokenReduction.toFixed(2)}%`);
+console.log('Processing Time Difference:', `${comparison.comparison.processingTimeDiff}ms`);
+console.log('Recommended Approach:', comparison.comparison.recommendedApproach);
+```
+
+### Cross-Lingual Semantic Processing
+
+```typescript
+// Test universal semantic compatibility across languages
+const responses = await gateway.testUniversalSemantics('/v1/chat/completions', {
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'Explain artificial intelligence concepts' }
+  ],
+  max_tokens: 200
+}, ['en', 'es', 'fr']);
+
+responses.forEach((response, index) => {
+  const languages = ['English', 'Spanish', 'French'];
+  console.log(`${languages[index]} Response:`, response.data.choices[0].message.content);
+});
+```
+
+### SAST Vocabulary Exploration
+
+```typescript
+// Get SAST vocabulary statistics
+const vocabularyStats = await gateway.getSastVocabulary();
+console.log('SAST Vocabulary Stats:', vocabularyStats.data);
+
+// Search semantic primitives
+const searchResults = await gateway.searchSemanticPrimitives({
+  term: 'intelligence',
+  category: 'concept',
+  language: 'en',
+  limit: 5
+});
+
+console.log('Semantic Primitives:', searchResults.data.results);
+
+// Get SAST performance statistics
+const sastStats = await gateway.getSastStats();
+console.log('SAST Performance:', sastStats.data);
+```
+
+### Direct SAST Optimizer Usage
+
+```typescript
+import { SastOptimizer } from 'ai-cost-tracker/optimizers';
+
+const sastOptimizer = new SastOptimizer();
+
+const result = await sastOptimizer.optimize(
+  "The artificial intelligence system processes natural language data efficiently.",
+  {
+    language: 'en',
+    disambiguationStrategy: 'hybrid',
+    preserveAmbiguity: false,
+    enableCrossLingual: true,
+    maxPrimitives: 50,
+    semanticThreshold: 0.8
+  }
+);
+
+console.log('Original Text:', result.originalText);
+console.log('Optimized Text:', result.optimizedText);
+console.log('Semantic Frame Type:', result.semanticFrame.frameType);
+console.log('Token Reduction:', result.optimizationMetrics.tokenReduction + '%');
+console.log('Ambiguities Resolved:', result.ambiguitiesResolved.length);
+```
+
+### Advanced Cortex Configuration
+
+```typescript
+// Advanced Cortex with custom SAST configuration
+const response = await gateway.openai({
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'Create a comprehensive analysis of renewable energy technologies.' }
+  ],
+  max_tokens: 600
+}, {
+  cortex: {
+    enabled: true,
+    operation: 'sast',
+    style: 'formal',
+    format: 'markdown',
+    semanticCache: true,
+    preserveSemantics: true,
+    intelligentRouting: true,
+    sast: {
+      enabled: true,
+      language: 'en',
+      ambiguityResolution: true,
+      crossLingualMode: true,
+      disambiguationStrategy: 'strict',
+      preserveAmbiguity: false,
+      maxPrimitives: 100,
+      semanticThreshold: 0.9
+    }
+  }
+});
+```
+
+### Cortex with Workflow Tracking
+
+```typescript
+const workflowId = `cortex-workflow-${Date.now()}`;
+
+// Step 1: Initial analysis with Cortex
+const analysisResponse = await gateway.openai({
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: 'Analyze AI implementation strategies' }
+  ],
+  max_tokens: 300
+}, {
+  cortex: {
+    enabled: true,
+    operation: 'optimize',
+    style: 'technical',
+    format: 'structured'
+  },
+  workflow: {
+    workflowId,
+    workflowName: 'AIStrategyAnalysis',
+    workflowStep: '/analyze'
+  }
+});
+
+// Step 2: SAST optimization for refinement
+const refinedResponse = await gateway.withSast('/v1/chat/completions', {
+  model: 'gpt-4o-mini',
+  messages: [
+    { role: 'user', content: `Based on: ${analysisResponse.data.choices[0].message.content}, provide recommendations.` }
+  ],
+  max_tokens: 400
+}, {
+  language: 'en',
+  ambiguityResolution: true,
+  disambiguationStrategy: 'hybrid'
+}, {
+  workflow: {
+    workflowId,
+    workflowName: 'AIStrategyAnalysis',
+    workflowStep: '/analyze/refine'
+  }
+});
+
+// Get workflow details
+const workflowDetails = await gateway.getWorkflowDetails(workflowId);
+console.log('Cortex Workflow Total Cost:', workflowDetails.totalCost);
+```
+
+### Key Benefits
+
+- **Token Reduction**: Up to 30% reduction in token usage while preserving meaning
+- **Semantic Preservation**: Maintains semantic integrity across optimizations
+- **Cross-Lingual Compatibility**: Universal semantic processing across languages
+- **Ambiguity Resolution**: Automatic resolution of linguistic ambiguities
+- **Intelligent Routing**: Optimal processing strategy selection
+- **Performance Optimization**: Faster processing with semantic caching
+
 ## 📊 User Feedback & Value Tracking
 
 Move beyond cost tracking to measure **Return on AI Spend** by connecting every dollar spent to actual user value.
@@ -1232,6 +1487,8 @@ See the [examples](./examples) directory for complete implementation examples:
 - [Proxy Key Usage](./examples/proxy-key-usage.ts)
 - [Firewall Usage](./examples/firewall-usage.ts)
 - [Feedback & Value Tracking](./examples/feedback-usage.ts)
+- [Cortex Usage](./examples/cortex-usage.ts) - Advanced semantic processing
+- [SAST Optimizer](./examples/sast-optimizer-usage.ts) - Semantic Abstract Syntax Tree
 
 ## Support
 

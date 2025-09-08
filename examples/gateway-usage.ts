@@ -271,6 +271,64 @@ async function integratedTrackerUsage() {
   console.log('Total cost:', analytics.totalCost);
 }
 
+async function cortexIntegration() {
+  console.log('=== Cortex Integration ===');
+  
+  const gateway = createGatewayClientFromEnv();
+
+  // Basic Cortex optimization
+  const cortexResponse = await gateway.openai({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'user', content: 'Explain machine learning algorithms in detail' }
+    ],
+    max_tokens: 300
+  }, {
+    cortex: {
+      enabled: true,
+      operation: 'optimize',
+      style: 'technical',
+      format: 'structured',
+      semanticCache: true,
+      preserveSemantics: true,
+      intelligentRouting: true
+    }
+  });
+
+  console.log('Cortex Optimized Response:', cortexResponse.data.choices[0].message.content);
+
+  // SAST optimization
+  const sastResponse = await gateway.withSast('/v1/chat/completions', {
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'user', content: 'The artificial intelligence system processes natural language data efficiently.' }
+    ],
+    max_tokens: 200
+  }, {
+    language: 'en',
+    ambiguityResolution: true,
+    crossLingualMode: false,
+    disambiguationStrategy: 'hybrid',
+    preserveAmbiguity: false,
+    maxPrimitives: 50,
+    semanticThreshold: 0.8
+  });
+
+  console.log('SAST Optimized Response:', sastResponse.data.choices[0].message.content);
+
+  // Compare traditional vs SAST
+  const comparison = await gateway.compareSast('/v1/chat/completions', {
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'user', content: 'Analyze the relationship between AI, ML, and deep learning.' }
+    ],
+    max_tokens: 250
+  });
+
+  console.log('Token Reduction:', `${comparison.comparison.tokenReduction.toFixed(2)}%`);
+  console.log('Recommended Approach:', comparison.comparison.recommendedApproach);
+}
+
 async function errorHandlingAndRetries() {
   console.log('=== Error Handling and Retries ===');
   
@@ -344,6 +402,7 @@ async function runAllExamples() {
     await multiProviderSupport();
     await cacheManagement();
     await integratedTrackerUsage();
+    await cortexIntegration();
     await errorHandlingAndRetries();
     await performanceMonitoring();
     
@@ -361,6 +420,7 @@ export {
   multiProviderSupport,
   cacheManagement,
   integratedTrackerUsage,
+  cortexIntegration,
   errorHandlingAndRetries,
   performanceMonitoring,
   runAllExamples

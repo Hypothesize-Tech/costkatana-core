@@ -92,6 +92,44 @@ export interface FailoverOptions {
   policy?: FailoverPolicy;
 }
 
+export interface CortexConfig {
+  /** Enable Cortex meta-language processing */
+  enabled?: boolean;
+  /** Cortex processing operation */
+  operation?: 'optimize' | 'compress' | 'analyze' | 'transform' | 'sast';
+  /** Output style for Cortex processing */
+  style?: 'formal' | 'casual' | 'technical' | 'conversational';
+  /** Output format for Cortex processing */
+  format?: 'plain' | 'markdown' | 'structured' | 'json';
+  /** Enable semantic caching */
+  semanticCache?: boolean;
+  /** Preserve semantics during optimization */
+  preserveSemantics?: boolean;
+  /** Enable intelligent model routing */
+  intelligentRouting?: boolean;
+  /** SAST-specific configuration */
+  sast?: SastConfig;
+}
+
+export interface SastConfig {
+  /** Enable SAST semantic processing */
+  enabled?: boolean;
+  /** Language for SAST processing */
+  language?: string;
+  /** Enable ambiguity resolution */
+  ambiguityResolution?: boolean;
+  /** Enable cross-lingual semantic mapping */
+  crossLingualMode?: boolean;
+  /** Disambiguation strategy */
+  disambiguationStrategy?: 'strict' | 'permissive' | 'hybrid';
+  /** Preserve ambiguous structures for analysis */
+  preserveAmbiguity?: boolean;
+  /** Maximum semantic primitives to use */
+  maxPrimitives?: number;
+  /** Semantic confidence threshold */
+  semanticThreshold?: number;
+}
+
 export interface RetryConfig {
   /** Maximum number of retry attempts (0-10) */
   count?: number;
@@ -162,6 +200,8 @@ export interface GatewayRequestOptions {
   userEmail?: string;
   /** Customer email for business intelligence and reporting */
   customerEmail?: string;
+  /** Cortex/SAST configuration for semantic optimization */
+  cortex?: CortexConfig;
 }
 
 export interface GatewayResponse<T = any> {

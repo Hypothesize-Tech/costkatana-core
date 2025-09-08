@@ -20,7 +20,9 @@ import {
   ProxyKeyInfo,
   FirewallOptions,
   ProxyKeyUsageOptions,
-  FirewallAnalytics
+  FirewallAnalytics,
+  CortexConfig,
+  SastConfig
 } from '../types/gateway';
 
 export class GatewayClient {
@@ -492,6 +494,60 @@ export class GatewayClient {
     if (options.traceId) headers['CostKatana-Property-Trace-Id'] = options.traceId;
     if (options.userId) headers['CostKatana-User-Id'] = options.userId;
     if (options.userEmail) headers['CostKatana-User-Email'] = options.userEmail;
+
+    // Cortex/SAST configuration
+    if (options.cortex) {
+      if (options.cortex.enabled) {
+        headers['CostKatana-Cortex-Enabled'] = 'true';
+      }
+      if (options.cortex.operation) {
+        headers['CostKatana-Cortex-Operation'] = options.cortex.operation;
+      }
+      if (options.cortex.style) {
+        headers['CostKatana-Cortex-Style'] = options.cortex.style;
+      }
+      if (options.cortex.format) {
+        headers['CostKatana-Cortex-Format'] = options.cortex.format;
+      }
+      if (options.cortex.semanticCache !== undefined) {
+        headers['CostKatana-Cortex-Semantic-Cache'] = options.cortex.semanticCache.toString();
+      }
+      if (options.cortex.preserveSemantics !== undefined) {
+        headers['CostKatana-Cortex-Preserve-Semantics'] = options.cortex.preserveSemantics.toString();
+      }
+      if (options.cortex.intelligentRouting !== undefined) {
+        headers['CostKatana-Cortex-Intelligent-Routing'] = options.cortex.intelligentRouting.toString();
+      }
+
+      // SAST-specific headers
+      if (options.cortex.sast) {
+        const sast = options.cortex.sast;
+        if (sast.enabled !== undefined) {
+          headers['CostKatana-Cortex-Sast-Processing'] = sast.enabled.toString();
+        }
+        if (sast.language) {
+          headers['CostKatana-Cortex-Sast-Language'] = sast.language;
+        }
+        if (sast.ambiguityResolution !== undefined) {
+          headers['CostKatana-Cortex-Ambiguity-Resolution'] = sast.ambiguityResolution.toString();
+        }
+        if (sast.crossLingualMode !== undefined) {
+          headers['CostKatana-Cortex-Cross-Lingual-Mode'] = sast.crossLingualMode.toString();
+        }
+        if (sast.disambiguationStrategy) {
+          headers['CostKatana-Cortex-Disambiguation-Strategy'] = sast.disambiguationStrategy;
+        }
+        if (sast.preserveAmbiguity !== undefined) {
+          headers['CostKatana-Cortex-Preserve-Ambiguity'] = sast.preserveAmbiguity.toString();
+        }
+        if (sast.maxPrimitives !== undefined) {
+          headers['CostKatana-Cortex-Max-Primitives'] = sast.maxPrimitives.toString();
+        }
+        if (sast.semanticThreshold !== undefined) {
+          headers['CostKatana-Cortex-Semantic-Threshold'] = sast.semanticThreshold.toString();
+        }
+      }
+    }
     if (options.customerEmail) headers['CostKatana-Customer-Email'] = options.customerEmail;
 
     return headers;
@@ -740,5 +796,138 @@ export class GatewayClient {
     };
 
     return this.makeRequest(endpoint, data, options);
+  }
+
+  /**
+   * Make a request with SAST (Semantic Abstract Syntax Tree) optimization
+   */
+  async withSast(
+    endpoint: string,
+    data: any,
+    sastOptions: Partial<SastConfig> = {},
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    const cortexOptions: CortexConfig = {
+      enabled: true,
+      operation: 'sast',
+      sast: {
+        enabled: true,
+        language: 'en',
+        ambiguityResolution: true,
+        crossLingualMode: false,
+        disambiguationStrategy: 'hybrid',
+        preserveAmbiguity: false,
+        maxPrimitives: 100,
+        semanticThreshold: 0.7,
+        ...sastOptions
+      }
+    };
+
+    return this.makeRequest(endpoint, data, {
+      ...options,
+      cortex: cortexOptions
+    });
+  }
+
+  /**
+   * Compare traditional optimization vs SAST optimization
+   */
+  async compareSast(
+    endpoint: string, 
+    data: any,
+    options: GatewayRequestOptions = {}
+  ): Promise<{
+    traditional: GatewayResponse;
+    sast: GatewayResponse;
+    comparison: {
+      tokenReduction: number;
+      processingTimeDiff: number;
+      recommendedApproach: 'traditional' | 'sast';
+    };
+  }> {
+    // Run traditional optimization
+    const traditionalPromise = this.makeRequest(endpoint, data, {
+      ...options,
+      cortex: { enabled: true, operation: 'optimize' }
+    });
+
+    // Run SAST optimization
+    const sastPromise = this.withSast(endpoint, data, {}, options);
+
+    const [traditional, sast] = await Promise.all([traditionalPromise, sastPromise]);
+
+    // Calculate comparison metrics
+    const traditionalTokens = traditional.metadata.processingTime || 0;
+    const sastTokens = sast.metadata.processingTime || 0;
+    const tokenReduction = traditionalTokens > 0 ? 
+      ((traditionalTokens - sastTokens) / traditionalTokens) * 100 : 0;
+    
+    const processingTimeDiff = (sast.metadata.processingTime || 0) - (traditional.metadata.processingTime || 0);
+
+    return {
+      traditional,
+      sast,
+      comparison: {
+        tokenReduction,
+        processingTimeDiff,
+        recommendedApproach: tokenReduction > 10 ? 'sast' : 'traditional'
+      }
+    };
+  }
+
+  /**
+   * Test universal semantic compatibility
+   */
+  async testUniversalSemantics(
+    endpoint: string,
+    data: any,
+    languages: string[] = ['en', 'es', 'fr'],
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse[]> {
+    const promises = languages.map(language =>
+      this.withSast(endpoint, data, {
+        language,
+        crossLingualMode: true,
+        ambiguityResolution: true
+      }, options)
+    );
+
+    return Promise.all(promises);
+  }
+
+  /**
+   * Get SAST vocabulary statistics
+   */
+  async getSastVocabulary(options: GatewayRequestOptions = {}): Promise<GatewayResponse> {
+    return this.makeRequest('/sast/vocabulary', {}, options);
+  }
+
+  /**
+   * Search semantic primitives
+   */
+  async searchSemanticPrimitives(
+    query: {
+      term?: string;
+      category?: string;
+      language?: string;
+      limit?: number;
+    },
+    options: GatewayRequestOptions = {}
+  ): Promise<GatewayResponse> {
+    return this.makeRequest('/sast/search', query, options);
+  }
+
+  /**
+   * Demonstrate telescope ambiguity resolution
+   */
+  async getTelescopeDemo(options: GatewayRequestOptions = {}): Promise<GatewayResponse> {
+    return this.makeRequest('/sast/telescope-demo', {}, options);
+  }
+
+  /**
+   * Get SAST performance statistics
+   */
+  async getSastStats(options: GatewayRequestOptions = {}): Promise<GatewayResponse> {
+    return this.makeRequest('/sast/stats', {}, options);
   }
 }
