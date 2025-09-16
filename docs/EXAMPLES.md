@@ -1153,4 +1153,4 @@ if (!model) {
 
 1. Explore the [API Reference](./API.md) for detailed documentation
 2. Check out the [example files](../examples/) for runnable code
-3. Contribute to the project on [GitHub](https://github.com/Hypothesize-Tech/ai-cost-optimizer-core)
+3. Contribute to the project on [GitHub](https://github.com/Hypothesize-Tech/aicostkatana-core)
