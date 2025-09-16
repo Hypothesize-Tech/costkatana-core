@@ -1,6 +1,6 @@
 {
   "name": "ai-cost-tracker",
-  "version": "1.5.9",
+  "version": "1.5.10",
   "description": "Track, analyze, and optimize AI API costs across multiple providers with intelligent gateway, caching, retries, workflow tracking, secure proxy key authentication, prompt firewall protection, user feedback & value tracking, and high-availability failover",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -76,12 +76,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Hypothesize-Tech/aicostkatana-core.git"
+    "url": "git+https://github.com/Hypothesize-Tech/costkatana-core.git"
   },
   "bugs": {
-    "url": "https://github.com/Hypothesize-Tech/aicostkatana-core/issues"
+    "url": "https://github.com/Hypothesize-Tech/costkatana-core/issues"
   },
-  "homepage": "https://github.com/Hypothesize-Tech/aicostkatana-core#readme",
+  "homepage": "https://github.com/Hypothesize-Tech/costkatana-core#readme",
   "engines": {
     "node": ">=18.0.0"
   },
