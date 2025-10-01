@@ -15,7 +15,7 @@ import { AICostTracker } from '../src/index';
 const tracker = new AICostTracker({
   apiKey: 'your-api-key',
   projectId: 'your-project-id',
-  endpoint: 'https://api.costkatana.com'
+  endpoint: 'https://cost-katana-backend.store'
 });
 
 /**

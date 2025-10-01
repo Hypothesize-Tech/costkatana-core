@@ -19,7 +19,7 @@ async function gatewayAuthExample() {
   
   const gateway = createGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!,
+    apiKey: process.env.API_KEY!,
     authMethod: 'gateway' // Uses CostKatana-Auth header
   });
 
@@ -45,7 +45,7 @@ async function standardAuthExample() {
   
   const client = createStandardGatewayClient({
     baseUrl: 'https://api.yourservice.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
     // authMethod: 'standard' is automatically set
   });
 
@@ -71,7 +71,7 @@ async function explicitCostKatanaAuthExample() {
   
   const client = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
     // authMethod: 'gateway' is automatically set
   });
 
@@ -120,7 +120,7 @@ async function mixedAuthExample() {
   // Gateway client for CostKATANA gateway
   const gatewayClient = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
   });
 
   // Standard client for direct API calls
@@ -160,14 +160,14 @@ async function usageTrackingExample() {
       name: 'Gateway Auth with Project ID',
       client: createCostKatanaGatewayClient({
         baseUrl: 'https://gateway.costkatana.com',
-        apiKey: process.env.COSTKATANA_API_KEY!
+        apiKey: process.env.API_KEY!
       })
     },
     {
       name: 'Standard Auth with Project ID',
       client: createStandardGatewayClient({
         baseUrl: 'https://cost-katana-backend.store',
-        apiKey: process.env.COSTKATANA_API_KEY!
+        apiKey: process.env.API_KEY!
       })
     }
   ];

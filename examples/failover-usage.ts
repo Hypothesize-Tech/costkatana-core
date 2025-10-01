@@ -10,7 +10,7 @@ import { createGatewayClient, FailoverPolicy } from '@ai-cost-optimizer/core';
 // Initialize the gateway client
 const gateway = createGatewayClient({
   baseUrl: 'https://gateway.costkatana.com',
-  apiKey: process.env.COSTKATANA_API_KEY!,
+  apiKey: process.env.API_KEY!,
   
   // Optional: Configure default failover policy
   failover: {

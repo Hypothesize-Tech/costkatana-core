@@ -14,7 +14,7 @@ async function initializeTrackerWithProjectId() {
   // Set environment variables
   process.env.API_KEY = 'dak_your_api_key_here';
   process.env.PROJECT_ID = 'my-main-project';
-  process.env.COSTKATANA_API_KEY = 'dak_your_api_key_here';
+  process.env.API_KEY = 'dak_your_api_key_here';
 
   try {
     const tracker = await AICostTracker.create({

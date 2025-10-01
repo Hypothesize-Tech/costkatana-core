@@ -695,11 +695,11 @@ export class AICostTracker {
    * Initialize gateway client for intelligent proxy functionality
    */
   initializeGateway(gatewayConfig: Partial<GatewayConfig> = {}): GatewayClient {
-    const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.API_KEY;
 
     if (!apiKey) {
       throw new Error(
-        'COSTKATANA_API_KEY or API_KEY environment variable not set for gateway functionality.'
+        'API_KEY or API_KEY environment variable not set for gateway functionality.'
       );
     }
 

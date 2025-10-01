@@ -666,7 +666,7 @@ Configure proxy keys via environment variables:
 
 ```bash
 # Set environment variables
-export COSTKATANA_API_KEY="ck-proxy-your-proxy-key-id"
+export API_KEY="ck-proxy-your-proxy-key-id"
 export COSTKATANA_GATEWAY_URL="https://cost-katana-backend.store/api/gateway"
 ```
 

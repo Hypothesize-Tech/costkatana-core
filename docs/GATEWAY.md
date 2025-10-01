@@ -27,7 +27,7 @@ npm install ai-cost-tracker
 
 ```bash
 # Required environment variables
-COSTKATANA_API_KEY=your_api_key_here
+API_KEY=your_api_key_here
 # or
 API_KEY=your_api_key_here
 

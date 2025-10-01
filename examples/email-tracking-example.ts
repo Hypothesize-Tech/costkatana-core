@@ -48,7 +48,7 @@ async function emailTrackingExample() {
     
     const gateway = tracker.initializeGateway({
       baseUrl: 'https://cost-katana-backend.store/api/gateway',
-      apiKey: process.env.COSTKATANA_API_KEY
+      apiKey: process.env.API_KEY
     });
 
     const response = await tracker.gatewayRequest('/v1/chat/completions', {

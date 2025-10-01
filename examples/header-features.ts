@@ -13,7 +13,7 @@ async function projectIdTrackingExample() {
   
   const gateway = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
   });
 
   try {
@@ -54,7 +54,7 @@ async function authMethodOverrideExample() {
   
   const gateway = createGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!,
+    apiKey: process.env.API_KEY!,
     authMethod: 'gateway' // Default to gateway auth
   });
 
@@ -99,7 +99,7 @@ async function combinedHeadersExample() {
   
   const gateway = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
   });
 
   try {
@@ -159,7 +159,7 @@ async function multiTenantExample() {
   
   const gateway = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
   });
 
   try {
@@ -210,7 +210,7 @@ async function abTestingExample() {
   
   const gateway = createCostKatanaGatewayClient({
     baseUrl: 'https://gateway.costkatana.com',
-    apiKey: process.env.COSTKATANA_API_KEY!
+    apiKey: process.env.API_KEY!
   });
 
   try {

@@ -20,13 +20,13 @@ export function createGatewayClient(config: GatewayConfig): GatewayClient {
  * Create a gateway client with environment variables
  */
 export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {}): GatewayClient {
-  const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
+  const apiKey = process.env.API_KEY || process.env.API_KEY;
   const baseUrl =
     process.env.COSTKATANA_GATEWAY_URL || 'https://cost-katana-backend.store/api/gateway';
 
   if (!apiKey) {
     throw new Error(
-      'COSTKATANA_API_KEY or API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.'
+      'API_KEY or API_KEY environment variable not set. Please get your API key from the Cost Katana dashboard.'
     );
   }
 

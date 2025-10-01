@@ -247,7 +247,7 @@ async function environmentBasedConfiguration() {
   console.log('\n=== Environment-Based Configuration ===');
 
   // Set environment variables
-  process.env.COSTKATANA_API_KEY = 'ck-proxy-4cc76c313710d9abe6a68103aa6bd4cb';
+  process.env.API_KEY = 'ck-proxy-4cc76c313710d9abe6a68103aa6bd4cb';
   process.env.COSTKATANA_GATEWAY_URL = 'https://cost-katana-backend.store/api/gateway';
 
   // Create client from environment
