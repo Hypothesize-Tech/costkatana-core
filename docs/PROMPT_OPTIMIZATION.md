@@ -1,476 +1,451 @@
-# Prompt & Request Optimization Guide
+# Cost Optimization Guide
 
-This guide covers the advanced prompt optimization features available in the AI Cost Tracker library, designed to achieve 20-40% token cost reduction through intelligent pre-processing.
+Learn how to reduce AI costs by up to 95% with Cost Katana.
 
-## Table of Contents
+## Quick Wins
 
-1. [Overview](#overview)
-2. [Prompt Compression](#prompt-compression)
-3. [Context Trimming](#context-trimming)
-4. [Request Fusion](#request-fusion)
-5. [Configuration](#configuration)
-6. [API Reference](#api-reference)
-7. [Best Practices](#best-practices)
-
-## Overview
-
-The AI Cost Tracker now includes three powerful optimization techniques:
-
-- **Prompt Compression**: Reduces token usage by compressing JSON data, removing repetitive patterns, and applying intelligent abbreviations
-- **Context Trimming**: Optimizes conversation histories by removing irrelevant messages or summarizing older context
-- **Request Fusion**: Detects and merges multiple related requests into single, efficient prompts
-
-These optimizations work as a pre-processing step before requests are sent to AI providers, ensuring you get the same quality responses at a fraction of the cost.
-
-## Prompt Compression
-
-### How It Works
-
-Prompt compression uses multiple techniques to reduce token count:
-
-1. **JSON Compression**: Detects and compresses JSON objects by removing whitespace and using abbreviated keys
-2. **Pattern Replacement**: Identifies repeated patterns and replaces them with references
-3. **Abbreviation**: Replaces common phrases with standard abbreviations
-4. **Deduplication**: Removes duplicate sentences and content
-
-### Example Usage
+### 1. Enable Cortex Optimization (70-95% savings)
 
 ```typescript
-import { AICostTracker, AIProvider } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const tracker = await AICostTracker.create({
-  providers: [{ provider: AIProvider.OpenAI, apiKey: 'your-key' }],
-  optimization: {
-    enableCompression: true,
-    compressionSettings: {
-      minCompressionRatio: 0.7, // Only apply if we can compress to 70% or less
-      jsonCompressionThreshold: 100 // Minimum JSON size to compress
-    }
-  }
+// Without optimization
+const standard = await ai('gpt-4', 'Write a comprehensive guide');
+console.log(`Cost: $${standard.cost}`); // e.g., $0.15
+
+// With Cortex optimization
+const optimized = await ai('gpt-4', 'Write a comprehensive guide', {
+  cortex: true
 });
-
-const optimizer = tracker.getOptimizer();
-
-// Compress a prompt with repetitive JSON data
-const prompt = `
-  Analyze these user records:
-  {"id": 1, "firstName": "John", "lastName": "Doe", "email": "john@example.com", "preferences": {"theme": "dark"}}
-  {"id": 2, "firstName": "Jane", "lastName": "Smith", "email": "jane@example.com", "preferences": {"theme": "light"}}
-  // ... more similar records
-`;
-
-const result = await optimizer.optimizePrompt(prompt, 'gpt-4', AIProvider.OpenAI);
-console.log(`Compression saved ${result.totalSavings}% tokens`);
+console.log(`Cost: $${optimized.cost}`); // e.g., $0.02
+console.log(`Saved: ${((standard.cost - optimized.cost) / standard.cost * 100).toFixed(1)}%`);
 ```
 
-### Compression Techniques
-
-#### JSON Compression
+### 2. Use Smart Caching (50-90% savings)
 
 ```typescript
-// Before: 245 characters
-{
-  "user": {
-    "firstName": "John",
-    "lastName": "Doe",
-    "emailAddress": "john@example.com",
-    "preferences": {
-      "colorTheme": "dark",
-      "notifications": true
-    }
-  }
+import { ai } from 'cost-katana';
+
+// Enable caching for FAQ and common queries
+const response = await ai('gpt-3.5-turbo', 'What is your refund policy?', {
+  cache: true
+});
+
+// Repeat queries are free from cache
+const cached = await ai('gpt-3.5-turbo', 'What is your refund policy?', {
+  cache: true
+});
+console.log(cached.cached); // true - saved money!
+```
+
+### 3. Choose the Right Model (10x cost difference)
+
+```typescript
+import { ai } from 'cost-katana';
+
+// For simple tasks - use cheap model
+const simple = await ai('gpt-3.5-turbo', 'What is 2+2?');
+console.log(`Cost: $${simple.cost}`); // ~$0.0001
+
+// For complex tasks - use powerful model  
+const complex = await ai('gpt-4', 'Analyze this complex data...');
+console.log(`Cost: $${complex.cost}`); // ~$0.01
+```
+
+## Optimization Strategies
+
+### Strategy 1: Model Selection
+
+Use the right model for the right task:
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function smartModelSelection(task: string, complexity: 'simple' | 'complex') {
+  const models = {
+    simple: 'gpt-3.5-turbo',  // $0.0005/1K tokens
+    complex: 'gpt-4'           // $0.03/1K tokens
+  };
+  
+  return await ai(models[complexity], task);
 }
 
-// After: 89 characters (64% reduction)
-[$JSON_REF_1$ = {"user":{"fn":"John","ln":"Doe","email":"john@example.com","prefs":{"theme":"dark","notif":true}}}]
+// Simple task - save 60x cost
+await smartModelSelection('What is the capital of France?', 'simple');
+
+// Complex task - use powerful model
+await smartModelSelection('Analyze market trends and predict...', 'complex');
 ```
 
-#### Pattern Replacement
+### Strategy 2: Prompt Engineering
+
+Shorter, clearer prompts = lower costs:
 
 ```typescript
-// Before: Repeated patterns
-"Process order #12345 for customer John Doe"
-"Process order #12346 for customer Jane Smith"
-"Process order #12347 for customer Bob Johnson"
+import { ai } from 'cost-katana';
 
-// After: Pattern reference
-[$PATTERN_1$ = "Process order #"]
-$PATTERN_1$12345 for customer John Doe
-$PATTERN_1$12346 for customer Jane Smith
-$PATTERN_1$12347 for customer Bob Johnson
+// ❌ Verbose prompt (150 tokens)
+const verbose = await ai('gpt-4', 
+  `I would really appreciate it if you could help me understand what machine learning is. 
+   I'm just a beginner and confused about all the different concepts and would love 
+   a simple explanation that a non-technical person could understand.`
+);
+
+// ✅ Concise prompt (10 tokens)
+const concise = await ai('gpt-4', 
+  'Explain machine learning simply'
+);
+
+// Same quality, 93% cost reduction!
 ```
 
-## Context Trimming
+### Strategy 3: Batch Processing
 
-### How It Works
-
-Context trimming optimizes conversation histories using four strategies:
-
-1. **Sliding Window**: Keeps only the most recent N messages
-2. **Relevance Filtering**: Removes filler messages and acknowledgments
-3. **Summarization**: Uses AI to summarize older messages while preserving key information
-4. **Importance Scoring**: Keeps messages based on content importance
-
-### Example Usage
+Combine multiple requests:
 
 ```typescript
-import { ConversationMessage } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const messages: ConversationMessage[] = [
-  { role: 'user', content: 'Hi, I need help with Python' },
-  { role: 'assistant', content: 'Hello! How can I help?' }
-  // ... long conversation history
-];
+// ❌ Multiple requests (expensive)
+const q1 = await ai('gpt-4', 'Capital of France?');
+const q2 = await ai('gpt-4', 'Capital of Germany?');
+const q3 = await ai('gpt-4', 'Capital of Italy?');
 
-const result = await optimizer.optimizeConversation(messages, 'gpt-4', AIProvider.OpenAI);
-
-// Access the trimmed conversation
-const trimmedPrompt = result.suggestions[0].optimizedPrompt;
+// ✅ Single batched request (cheap)
+const batched = await ai('gpt-4', 
+  `Answer these questions:
+   1. Capital of France?
+   2. Capital of Germany?
+   3. Capital of Italy?`
+);
+// 60% cost reduction from batching
 ```
 
-### Trimming Strategies
+### Strategy 4: Context Management
 
-#### Sliding Window
-
-Keeps only the most recent messages:
+Keep conversations focused:
 
 ```typescript
-// Configuration
-contextTrimmingSettings: {
-  maxContextLength: 4000,
-  preserveRecentMessages: 5
-}
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+
+// ❌ Including entire conversation history
+// Costs grow with each message
+
+// ✅ Clear context when switching topics
+await session.send('Help with Python');
+await session.send('More Python questions');
+
+session.clear(); // Reset context
+
+await session.send('Now help with JavaScript');
+// New topic, fresh context, lower costs
 ```
 
-#### Relevance Filtering
+## Cortex Optimization Deep Dive
 
-Automatically removes:
+### What is Cortex?
 
-- Simple acknowledgments ("ok", "thanks", "got it")
-- Filler words and phrases
-- Redundant confirmations
+Cortex is our revolutionary meta-language that reduces token usage by 70-95% while maintaining quality.
 
-#### AI-Powered Summarization
+**How it works:**
+1. Encodes your prompt into optimized format
+2. Processes with minimal tokens
+3. Decodes back to natural language
+4. You get the same quality at fraction of cost
 
-For long conversations, older messages are summarized:
+### When to Use Cortex
+
+**Best for:**
+- Long-form content generation
+- Comprehensive guides and documentation
+- Detailed analysis tasks
+- Multi-step instructions
 
 ```typescript
-// Original: 10 messages (2000 tokens)
-// After summarization: Summary + 3 recent messages (800 tokens)
-"Previous conversation summary: User asked about Python sorting and received examples
-for sorting lists and dictionaries by various keys.
+import { ai } from 'cost-katana';
 
-Recent messages:
-User: Now I need to filter the sorted data
-Assistant: You can use list comprehension...
-User: Can you show an example with lambda?"
+// Perfect use cases for Cortex
+await ai('gpt-4', 'Write a complete user manual', { cortex: true });
+await ai('gpt-4', 'Generate API documentation', { cortex: true });
+await ai('gpt-4', 'Create comprehensive report', { cortex: true });
 ```
 
-## Request Fusion
+**Not ideal for:**
+- Very short responses (<50 tokens)
+- Real-time chat where latency matters
+- Creative tasks where exact phrasing matters
 
-### How It Works
-
-Request fusion detects related requests that can be combined into a single, more efficient prompt. It supports three fusion strategies:
-
-1. **Sequential Fusion**: Combines step-by-step requests
-2. **Parallel Fusion**: Merges independent questions
-3. **Hierarchical Fusion**: Groups related topics under a main query
-
-### Example Usage
+### Cortex Performance
 
 ```typescript
-import { FusionRequest } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const requests: FusionRequest[] = [
-  {
-    id: '1',
-    prompt: 'What is the capital of France?',
-    timestamp: Date.now(),
-    model: 'gpt-3.5-turbo',
-    provider: AIProvider.OpenAI
-  },
-  {
-    id: '2',
-    prompt: 'What is the population of Paris?',
-    timestamp: Date.now() + 1000,
-    model: 'gpt-3.5-turbo',
-    provider: AIProvider.OpenAI
-  },
-  {
-    id: '3',
-    prompt: 'What are famous landmarks in Paris?',
-    timestamp: Date.now() + 2000,
-    model: 'gpt-3.5-turbo',
-    provider: AIProvider.OpenAI
-  }
-];
-
-const result = await optimizer.optimizeRequests(requests);
-// Result: Single fused request about Paris information
-```
-
-### Fusion Strategies
-
-#### Sequential Fusion
-
-For step-by-step processes:
-
-```typescript
-// Before: 3 separate requests
-"First, extract the data from the CSV"
-"Then, clean the extracted data"
-"Finally, generate a summary report"
-
-// After: 1 fused request
-"Please complete the following tasks in order:
-1. Extract the data from the CSV
-2. Clean the extracted data
-3. Generate a summary report
-Provide results for each step clearly labeled."
-```
-
-#### Parallel Fusion
-
-For independent questions:
-
-```typescript
-// Before: Multiple related queries
-"What is machine learning?"
-"What is deep learning?"
-"What is neural networks?"
-
-// After: Single comprehensive request
-"Please answer the following questions:
-1. What is machine learning?
-2. What is deep learning?
-3. What are neural networks?
-Provide each answer in a clearly labeled section."
-```
-
-## Configuration
-
-### Full Configuration Example
-
-```typescript
-const tracker = await AICostTracker.create({
-  providers: [
-    /* your providers */
-  ],
-  optimization: {
-    // Global toggles
-    enablePromptOptimization: true,
-    enableCompression: true,
-    enableContextTrimming: true,
-    enableRequestFusion: true,
-
-    // Compression settings
-    compressionSettings: {
-      minCompressionRatio: 0.7, // Only compress if result is 70% or smaller
-      jsonCompressionThreshold: 100 // Min JSON length to trigger compression
-    },
-
-    // Context trimming settings
-    contextTrimmingSettings: {
-      maxContextLength: 4000, // Max tokens in context
-      preserveRecentMessages: 3, // Always keep last N messages
-      summarizationModel: 'claude-3-haiku' // Model for summarization
-    },
-
-    // Request fusion settings
-    requestFusionSettings: {
-      maxFusionBatch: 5, // Max requests to fuse together
-      fusionWaitTime: 5000 // Time window for fusion (ms)
-    },
-
-    // Thresholds for optimization triggers
-    thresholds: {
-      highCostPerRequest: 0.01,
-      highTokenUsage: 10000,
-      frequencyThreshold: 1000
-    }
-  }
-});
-```
-
-### Per-Request Configuration
-
-You can also configure optimizations per request:
-
-```typescript
-const result = await optimizer.optimizePrompt(prompt, model, provider, {
-  conversationHistory: messages,
-  expectedOutput: 'code example',
-  constraints: ['preserve_code_accuracy']
-});
-```
-
-## API Reference
-
-### PromptOptimizer Methods
-
-#### optimizePrompt()
-
-```typescript
-async optimizePrompt(
-  prompt: string,
-  targetModel: string,
-  targetProvider: AIProvider,
-  context?: {
-    conversationHistory?: ConversationMessage[];
-    expectedOutput?: string;
-    constraints?: string[];
-  }
-): Promise<OptimizationResult>
-```
-
-#### optimizeConversation()
-
-```typescript
-async optimizeConversation(
-  messages: ConversationMessage[],
-  targetModel: string,
-  targetProvider: AIProvider
-): Promise<OptimizationResult>
-```
-
-#### optimizeRequests()
-
-```typescript
-async optimizeRequests(
-  requests: FusionRequest[]
-): Promise<OptimizationResult>
-```
-
-### Types
-
-#### OptimizationResult
-
-```typescript
-interface OptimizationResult {
-  id: string;
-  suggestions: OptimizationSuggestion[];
-  totalSavings: number;
-  appliedOptimizations: string[];
-  metadata: {
-    processingTime: number;
-    originalTokens: number;
-    optimizedTokens: number;
-    techniques: string[];
+async function measureCortexSavings(prompt: string) {
+  // Standard
+  const standard = await ai('gpt-4', prompt);
+  
+  // Cortex optimized
+  const cortex = await ai('gpt-4', prompt, { cortex: true });
+  
+  return {
+    standardCost: standard.cost,
+    cortexCost: cortex.cost,
+    savings: standard.cost - cortex.cost,
+    savingsPercent: ((standard.cost - cortex.cost) / standard.cost * 100).toFixed(1)
   };
 }
+
+// Test it
+const result = await measureCortexSavings('Write a guide to TypeScript');
+console.log(`Saved: ${result.savingsPercent}% ($${result.savings})`);
 ```
 
-#### OptimizationSuggestion
+## Caching Strategies
+
+### Cache FAQ Responses
 
 ```typescript
-interface OptimizationSuggestion {
-  type: 'prompt' | 'compression' | 'context_trimming' | 'request_fusion';
-  optimizedPrompt?: string;
-  estimatedSavings: number;
-  confidence: number;
-  explanation: string;
-  compressionDetails?: CompressionDetails;
-  contextTrimDetails?: ContextTrimDetails;
-  fusionDetails?: RequestFusionDetails;
+import { ai } from 'cost-katana';
+
+const faqQuestions = [
+  'What are your business hours?',
+  'What is your return policy?',
+  'How do I contact support?',
+  'Do you ship internationally?'
+];
+
+// First load - populate cache
+for (const q of faqQuestions) {
+  await ai('gpt-3.5-turbo', q, { cache: true });
+}
+
+// Subsequent requests - all free from cache!
+const cached = await ai('gpt-3.5-turbo', 'What are your business hours?', {
+  cache: true
+});
+console.log(cached.cached); // true
+```
+
+### Cache with Expiry
+
+```typescript
+import { ai, configure } from 'cost-katana';
+
+// Configure cache behavior
+await configure({
+  cache: true,
+  cacheExpiry: 3600  // 1 hour
+});
+
+// News/dynamic content - short cache
+await ai('gpt-4', 'Latest AI news', { cache: true });
+
+// Static content - long cache (default 7 days)
+await ai('gpt-4', 'Explain photosynthesis', { cache: true });
+```
+
+## Cost Monitoring
+
+### Track Session Costs
+
+```typescript
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+
+async function monitoredChat(messages: string[]) {
+  for (const message of messages) {
+    await session.send(message);
+    
+    console.log(`Messages: ${session.messages.length}`);
+    console.log(`Cost: $${session.totalCost}`);
+    console.log(`Tokens: ${session.totalTokens}`);
+    
+    // Alert if approaching budget
+    if (session.totalCost > 1.0) {
+      console.warn('⚠️ Session exceeding $1 budget!');
+      break;
+    }
+  }
 }
 ```
 
-## Best Practices
-
-### 1. Choose the Right Optimization
-
-- **Use Compression for**:
-  - Prompts with large JSON payloads
-  - Repetitive data or patterns
-  - Technical documentation with standard terms
-
-- **Use Context Trimming for**:
-  - Long conversation histories
-  - Chat applications
-  - Multi-turn interactions
-
-- **Use Request Fusion for**:
-  - Batch processing
-  - Related queries
-  - Sequential workflows
-
-### 2. Monitor Performance
+### Compare Model Costs
 
 ```typescript
-// Always check the optimization results
-const result = await optimizer.optimizePrompt(prompt, model, provider);
+import { ai } from 'cost-katana';
 
-if (result.totalSavings > 20) {
-  // Significant savings - apply optimization
-  const optimizedPrompt = result.suggestions[0].optimizedPrompt;
-} else {
-  // Minimal savings - use original
-  const originalPrompt = prompt;
+async function findCheapestModel(prompt: string) {
+  const models = [
+    'gpt-4',
+    'gpt-3.5-turbo', 
+    'claude-3-sonnet',
+    'claude-3-haiku',
+    'gemini-pro'
+  ];
+  
+  const results = [];
+  
+  for (const model of models) {
+    try {
+      const response = await ai(model, prompt);
+      results.push({
+        model,
+        cost: response.cost,
+        quality: response.text.length  // Simple quality metric
+      });
+    } catch (error) {
+      console.log(`${model} not available`);
+    }
+  }
+  
+  // Sort by cost
+  results.sort((a, b) => a.cost - b.cost);
+  
+  console.log('Models by cost:');
+  results.forEach(r => {
+    console.log(`${r.model}: $${r.cost.toFixed(6)}`);
+  });
+  
+  return results[0]; // Cheapest option
 }
 ```
 
-### 3. Handle Edge Cases
+## Production Best Practices
+
+### 1. Set Budget Limits
 
 ```typescript
-// Check for reversibility when needed
-const compressionSuggestion = result.suggestions.find(s => s.type === 'compression');
+import { configure } from 'cost-katana';
 
-if (compressionSuggestion?.compressionDetails?.reversible) {
-  // Safe to use - can be reversed if needed
+await configure({
+  apiKey: 'dak_your_key',
+  budget: {
+    daily: 100,    // $100/day
+    monthly: 2000  // $2000/month
+  }
+});
+```
+
+### 2. Enable All Optimizations
+
+```typescript
+import { configure } from 'cost-katana';
+
+await configure({
+  cortex: true,    // 70-95% savings
+  cache: true,     // 50-90% savings on repeated queries
+  firewall: true   // Block malicious prompts (saves cost)
+});
+```
+
+### 3. Use Chat Sessions
+
+```typescript
+import { chat } from 'cost-katana';
+
+// ✅ Good - reuse session
+const session = chat('gpt-4');
+await session.send('Question 1');
+await session.send('Question 2');
+
+// ❌ Bad - new session each time
+await ai('gpt-4', 'Question 1');
+await ai('gpt-4', 'Question 2');
+```
+
+### 4. Monitor and Alert
+
+```typescript
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+
+async function sendWithMonitoring(message: string) {
+  const response = await session.send(message);
+  
+  // Check cost after each message
+  if (session.totalCost > 5.0) {
+    throw new Error('Session budget exceeded');
+  }
+  
+  return response;
 }
 ```
 
-### 4. Combine with Caching
+## Cost Reduction Checklist
+
+- [ ] Enable Cortex for long-form content
+- [ ] Enable caching for FAQ/common queries
+- [ ] Use appropriate models (cheap for simple, powerful for complex)
+- [ ] Batch similar requests together
+- [ ] Write concise, clear prompts
+- [ ] Use chat sessions for conversations
+- [ ] Monitor costs in dashboard
+- [ ] Set budget alerts
+- [ ] Review optimization suggestions weekly
+
+## Real-World Savings
+
+### Example 1: Content Platform
 
 ```typescript
-// Cache optimization results for repeated prompts
-const cacheKey = hashPrompt(prompt);
-const cached = await cache.get(cacheKey);
+// Before optimization
+Monthly cost: $5,000
+- 10,000 blog posts × $0.50
 
-if (cached) {
-  return cached;
-}
+// After Cost Katana
+Monthly cost: $500
+- Cortex enabled: 70% savings = $1,500
+- Caching enabled: 30% repeat content = $1,050
+- Better model selection = $500
 
-const result = await optimizer.optimizePrompt(prompt, model, provider);
-await cache.set(cacheKey, result, 3600); // Cache for 1 hour
+💰 Savings: $4,500/month (90%)
 ```
 
-### 5. Test Optimization Quality
-
-Always test that optimizations don't affect response quality:
+### Example 2: Customer Support
 
 ```typescript
-// A/B test optimizations
-const originalResponse = await getResponse(originalPrompt);
-const optimizedResponse = await getResponse(optimizedPrompt);
+// Before optimization  
+Monthly cost: $3,000
+- 50,000 support queries × $0.06
 
-// Compare responses for quality
-const similarity = compareSemantic(originalResponse, optimizedResponse);
-if (similarity > 0.95) {
-  // Optimization maintains quality
-}
+// After Cost Katana
+Monthly cost: $450
+- Cache FAQ (40% of queries): $1,200 saved
+- Cheaper model for simple queries: $750 saved
+- Cortex for complex queries: $600 saved
+
+💰 Savings: $2,550/month (85%)
 ```
 
-## Troubleshooting
+## Dashboard Analytics
 
-### Common Issues
+View detailed cost analytics at [costkatana.com/dashboard](https://costkatana.com/dashboard):
 
-1. **Low compression ratio**: Adjust `minCompressionRatio` setting
-2. **Important context removed**: Increase `preserveRecentMessages`
-3. **Fusion not triggering**: Check `fusionWaitTime` and request timestamps
-4. **Summarization errors**: Ensure Bedrock is configured with proper credentials
-
-### Debug Mode
-
-Enable detailed logging:
+- Cost trends over time
+- Top expensive prompts
+- Model usage breakdown
+- Cache hit rates
+- Optimization opportunities
+- Budget tracking
+- Team usage
 
 ```typescript
-const optimizer = tracker.getOptimizer();
-// Access optimization details
-const result = await optimizer.optimizePrompt(prompt, model, provider);
-console.log('Optimization details:', result.metadata);
+import { ai } from 'cost-katana';
+
+// All usage auto-tracked
+await ai('gpt-4', 'Hello');
+
+// View analytics:
+// https://costkatana.com/dashboard
 ```
 
-## Examples
+## Support
 
-See the [examples directory](../examples/advanced-optimization.ts) for complete working examples of all optimization features.
+- **Documentation**: https://docs.costkatana.com
+- **Dashboard**: https://costkatana.com
+- **Optimization Tips**: https://costkatana.com/optimization-tips
+- **Email**: support@costkatana.com

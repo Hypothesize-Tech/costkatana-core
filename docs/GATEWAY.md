@@ -1,615 +1,395 @@
-# CostKATANA AI Gateway Documentation
+# Cost Katana Gateway Guide
 
 ## Overview
 
-The CostKATANA AI Gateway provides intelligent proxy functionality that sits between your application and AI providers, offering advanced features like caching, retries, workflow tracking, and cost optimization.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Gateway Client](#gateway-client)
-- [Configuration](#configuration)
-- [Features](#features)
-- [API Reference](#api-reference)
-- [Examples](#examples)
-- [Best Practices](#best-practices)
-
-## Installation
-
-```bash
-npm install ai-cost-tracker
-```
+The Cost Katana Gateway provides intelligent features like caching, retries, and optimization. With the simple API, these features work automatically.
 
 ## Quick Start
 
-### Environment Setup
-
-```bash
-# Required environment variables
-API_KEY=your_api_key_here
-# or
-API_KEY=your_api_key_here
-
-# Optional: Custom gateway URL
-COSTKATANA_GATEWAY_URL=https://cost-katana-backend.store/api/gateway
-```
-
-### Basic Usage
+### Automatic Gateway (Recommended)
 
 ```typescript
-import { createGatewayClientFromEnv } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-// Create client using environment variables
-const gateway = createGatewayClientFromEnv();
-
-// Make a request through the gateway
-const response = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [
-    { role: 'user', content: 'Hello, world!' }
-  ],
-  max_tokens: 50
+// Gateway features enabled automatically
+const response = await ai('gpt-4', 'Hello', {
+  cache: true,   // Smart caching
+  cortex: true   // Optimization
 });
 
-console.log(response.data.choices[0].message.content);
-console.log('Cache Status:', response.metadata.cacheStatus);
+console.log(response.cached); // true if from cache
+console.log(response.optimized); // true if optimized
 ```
 
-## Gateway Client
+### Smart Caching
 
-### Creating a Gateway Client
-
-#### Method 1: From Environment Variables
+Save money by caching repeated requests:
 
 ```typescript
-import { createGatewayClientFromEnv } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const gateway = createGatewayClientFromEnv({
-  // Optional overrides
-  enableCache: true,
-  enableRetries: true,
-  retryConfig: {
-    count: 3,
-    factor: 2,
-    minTimeout: 1000,
-    maxTimeout: 10000
-  }
-});
+// First request - costs money
+const r1 = await ai('gpt-4', 'What is 2+2?', { cache: true });
+console.log(r1.cached); // false
+console.log(`Cost: $${r1.cost}`);
+
+// Second identical request - free!
+const r2 = await ai('gpt-4', 'What is 2+2?', { cache: true });
+console.log(r2.cached); // true
+console.log(`Cost: $${r2.cost}`); // $0.00
 ```
 
-#### Method 2: Manual Configuration
+### Cortex Optimization
+
+Reduce costs by 70-95%:
 
 ```typescript
-import { createGatewayClient } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const gateway = createGatewayClient({
-  baseUrl: 'https://cost-katana-backend.store/api/gateway',
-  apiKey: 'your-api-key',
-  enableCache: true,
-  enableRetries: true,
-  defaultTargetUrl: 'https://api.openai.com',
-  defaultProperties: {
-    application: 'my-app',
-    version: '1.0.0'
-  }
+// Without optimization
+const standard = await ai('gpt-4', 'Write a guide to Python');
+console.log(`Standard cost: $${standard.cost}`);
+
+// With Cortex optimization
+const optimized = await ai('gpt-4', 'Write a guide to Python', {
+  cortex: true
 });
+console.log(`Optimized cost: $${optimized.cost}`);
+console.log(`Saved: ${(standard.cost - optimized.cost).toFixed(4)}`);
 ```
 
-#### Method 3: Via AICostTracker
+### Auto-Retry
+
+Automatically retry on failures:
 
 ```typescript
-import AICostTracker from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const tracker = await AICostTracker.create({
-  providers: [{ provider: 'openai' }],
-  optimization: { enablePromptOptimization: true },
-  tracking: { enableAutoTracking: true }
-});
-
-const gateway = tracker.initializeGateway({
-  baseUrl: 'https://cost-katana-backend.store/api/gateway',
-  enableCache: true,
-  enableRetries: true
-});
-```
-
-## Configuration
-
-### GatewayConfig Interface
-
-```typescript
-interface GatewayConfig {
-  baseUrl: string;                    // Gateway server URL
-  apiKey: string;                     // Authentication API key
-  defaultTargetUrl?: string;          // Default AI provider URL
-  enableCache?: boolean;              // Enable caching globally
-  enableRetries?: boolean;            // Enable retries globally
-  retryConfig?: RetryConfig;          // Default retry settings
-  cacheConfig?: CacheConfig;          // Default cache settings
-  defaultProperties?: Record<string, string>; // Default request properties
+// Retries are automatic - no configuration needed
+try {
+  const response = await ai('gpt-4', 'Hello');
+  // If OpenAI fails, automatically retries
+  // If still failing, fails over to alternative provider
+} catch (error) {
+  // Only throws after all retry attempts exhausted
+  console.error('Request failed:', error.message);
 }
 ```
 
-### RetryConfig Interface
+## Advanced Features
+
+### Multiple Providers
+
+Cost Katana automatically uses the best available provider:
 
 ```typescript
-interface RetryConfig {
-  count?: number;        // Max retry attempts (0-10, default: 3)
-  factor?: number;       // Exponential backoff factor (1-5, default: 2)
-  minTimeout?: number;   // Min wait time in ms (100-60000, default: 1000)
-  maxTimeout?: number;   // Max wait time in ms (1000-300000, default: 10000)
-}
+import { ai } from 'cost-katana';
+
+// Will use OpenAI if available
+// Falls back to Anthropic or Google if OpenAI is down
+const response = await ai('gpt-4', 'Hello');
+console.log(`Used provider: ${response.provider}`);
 ```
 
-### CacheConfig Interface
+### Cost Tracking
+
+Every request is automatically tracked:
 
 ```typescript
-interface CacheConfig {
-  ttl?: number;          // Cache TTL in seconds (default: 604800 = 7 days)
-  userScope?: string;    // User scope for cache isolation
-  bucketMaxSize?: number; // Max responses for variety (1-10, default: 1)
-}
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+await session.send('Message 1');
+await session.send('Message 2');
+await session.send('Message 3');
+
+// Automatic cost tracking
+console.log(`Total cost: $${session.totalCost}`);
+console.log(`Total tokens: ${session.totalTokens}`);
+console.log(`Average cost/message: $${(session.totalCost / 3).toFixed(4)}`);
+
+// View in dashboard: https://costkatana.com/dashboard
+```
+
+### Cache Management
+
+```typescript
+import { ai, configure } from 'cost-katana';
+
+// Enable caching globally
+await configure({ cache: true });
+
+// All requests now use cache
+await ai('gpt-4', 'Repeated question 1');
+await ai('gpt-4', 'Repeated question 2');
+
+// Or enable per-request
+await ai('gpt-4', 'One-time question', { cache: false });
+```
+
+## Configuration Options
+
+### Global Configuration
+
+```typescript
+import { configure } from 'cost-katana';
+
+await configure({
+  apiKey: 'dak_your_key',    // Cost Katana key
+  projectId: 'your_project', // Project ID
+  cortex: true,              // Enable optimization
+  cache: true,               // Enable caching
+  firewall: true,            // Enable security
+  providers: [
+    { name: 'openai', apiKey: 'sk-...' },
+    { name: 'anthropic', apiKey: 'sk-ant-...' }
+  ]
+});
+```
+
+### Per-Request Options
+
+```typescript
+import { ai } from 'cost-katana';
+
+const response = await ai('gpt-4', 'Your prompt', {
+  systemMessage: 'You are a helpful assistant',
+  temperature: 0.7,     // Creativity (0-2)
+  maxTokens: 500,       // Response length
+  cache: true,          // Use caching
+  cortex: true          // Use optimization
+});
 ```
 
 ## Features
 
 ### 1. Smart Caching
+- Automatic cache key generation
+- Configurable TTL (default: 7 days)
+- User-scoped caching available
+- Zero-cost cached responses
 
-Reduce costs by caching responses with configurable TTL and user scoping.
+### 2. Cortex Optimization
+- 70-95% token reduction
+- Maintains response quality
+- Automatic semantic preservation
+- Real-time analytics
 
-```typescript
-// Basic caching
-const response = await gateway.openai(request, {
-  cache: true
-});
-
-// Advanced caching
-const response = await gateway.openai(request, {
-  cache: {
-    ttl: 3600,           // 1 hour
-    userScope: 'user_123', // User-specific cache
-    bucketMaxSize: 5     // Store 5 different responses
-  }
-});
-```
-
-### 2. Smart Retries
-
-Automatic retry with exponential backoff for transient failures.
-
-```typescript
-const response = await gateway.openai(request, {
-  retry: {
-    count: 5,         // Max 5 attempts
-    factor: 2.5,      // Aggressive backoff
-    minTimeout: 2000, // Start with 2 seconds
-    maxTimeout: 30000 // Cap at 30 seconds
-  }
-});
-```
-
-### 3. Workflow Tracking
-
-Group related requests to understand end-to-end costs.
-
-```typescript
-const workflowId = `workflow-${Date.now()}`;
-
-// Step 1
-await gateway.openai(request1, {
-  workflow: {
-    workflowId,
-    workflowName: 'DataProcessing',
-    workflowStep: '/extract'
-  }
-});
-
-// Step 2
-await gateway.openai(request2, {
-  workflow: {
-    workflowId,
-    workflowName: 'DataProcessing',
-    workflowStep: '/analyze'
-  }
-});
-
-// Get workflow details
-const details = await gateway.getWorkflowDetails(workflowId);
-```
+### 3. Auto-Retry
+- Exponential backoff
+- Automatic provider failover
+- Configurable retry limits
+- Transient error handling
 
 ### 4. Cost Attribution
+- Automatic project tracking
+- Real-time cost calculation
+- Dashboard integration
+- Usage analytics
 
-Add custom properties for detailed cost tracking.
+### 5. Security
+- Prompt firewall (optional)
+- PII detection and protection
+- Rate limiting
+- API key encryption
+
+## Real-World Examples
+
+### Customer Support Bot
 
 ```typescript
-const response = await gateway.openai(request, {
-  properties: {
-    feature: 'chat-bot',
-    user: 'john-doe',
-    priority: 'high',
-    environment: 'production'
-  },
-  budgetId: 'project-abc-123'
+import { chat } from 'cost-katana';
+
+const support = chat('gpt-3.5-turbo', {
+  systemMessage: 'You are a helpful customer support agent.'
+});
+
+async function handleCustomer(userId: string, message: string) {
+  const response = await support.send(message);
+  
+  console.log(`Response: ${response}`);
+  console.log(`Session cost: $${support.totalCost}`);
+  
+  return response;
+}
+```
+
+### Content Generator
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function generateBlogPost(topic: string) {
+  const post = await ai('gpt-4', 
+    `Write a comprehensive blog post about ${topic}`,
+    {
+      cortex: true,     // 70-95% savings on long content
+      maxTokens: 2000,
+      cache: true       // Cache for repeated topics
+    }
+  );
+  
+  return {
+    content: post.text,
+    cost: post.cost,
+    wordCount: post.text.split(' ').length
+  };
+}
+```
+
+### Code Assistant
+
+```typescript
+import { chat } from 'cost-katana';
+
+const codeAssistant = chat('claude-3-sonnet', {
+  systemMessage: 'You are an expert programmer. Provide concise, working code.'
+});
+
+async function reviewCode(code: string) {
+  const review = await codeAssistant.send(
+    `Review this code and suggest improvements:\n\n${code}`
+  );
+  
+  return review;
+}
+
+async function fixBug(code: string, error: string) {
+  const fix = await codeAssistant.send(
+    `Fix this bug:\nCode: ${code}\nError: ${error}`
+  );
+  
+  return fix;
+}
+
+// Total cost for entire session
+console.log(`Total cost: $${codeAssistant.totalCost}`);
+```
+
+## Dashboard Integration
+
+All usage is automatically tracked in your dashboard at [costkatana.com](https://costkatana.com):
+
+- Real-time cost tracking
+- Usage by model
+- Daily/weekly/monthly analytics
+- Optimization recommendations
+- Budget alerts
+- Team usage breakdown
+
+```typescript
+import { ai } from 'cost-katana';
+
+// Every request is tracked
+const response = await ai('gpt-4', 'Hello');
+
+// View at: https://costkatana.com/dashboard
+// No additional code needed!
+```
+
+## Error Handling
+
+```typescript
+import { ai } from 'cost-katana';
+
+try {
+  const response = await ai('gpt-4', 'Hello');
+} catch (error) {
+  // Helpful error messages with solutions
+  console.error(error.message);
+  
+  /*
+  Example error:
+  ❌ No API keys found!
+  
+  Please set up Cost Katana:
+    export COST_KATANA_KEY="dak_your_key"
+    Get your key: https://costkatana.com/settings
+  
+  Or use provider keys directly:
+    export OPENAI_API_KEY="sk-..."
+  */
+}
+```
+
+## Best Practices
+
+### 1. Enable Caching for FAQ/Common Queries
+```typescript
+const response = await ai('gpt-3.5-turbo', 'FAQ answer', {
+  cache: true
 });
 ```
 
-### 5. Privacy Controls
-
-Omit sensitive data from logs.
-
+### 2. Use Cortex for Long Content
 ```typescript
-const response = await gateway.openai(request, {
-  omitRequest: true,  // Don't log request content
-  omitResponse: true, // Don't log response content
-  security: true      // Enable additional security scanning
+const response = await ai('gpt-4', 'Long article generation', {
+  cortex: true,
+  maxTokens: 2000
 });
 ```
 
-## API Reference
-
-### Gateway Client Methods
-
-#### `openai(request, options?)`
-
-Make OpenAI-compatible requests.
-
+### 3. Choose Appropriate Models
 ```typescript
+// Simple tasks - cheap model
+await ai('gpt-3.5-turbo', 'Simple question');
+
+// Complex tasks - powerful model
+await ai('gpt-4', 'Complex analysis');
+```
+
+### 4. Use Chat Sessions for Conversations
+```typescript
+const session = chat('gpt-4');
+// Reuse session for related queries
+await session.send('Question 1');
+await session.send('Follow-up 2');
+```
+
+### 5. Monitor Costs
+```typescript
+const session = chat('gpt-4');
+await session.send('Message');
+
+console.log(`Cost so far: $${session.totalCost}`);
+
+// Check dashboard for detailed analytics
+// https://costkatana.com/dashboard
+```
+
+## Migration from Old API
+
+### Before (Complex)
+```typescript
+import { createGatewayClientFromEnv } from 'ai-cost-tracker';
+
+const gateway = createGatewayClientFromEnv({
+  enableCache: true,
+  enableRetries: true
+});
+
 const response = await gateway.openai({
   model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'Hello!' }],
-  max_tokens: 100
+  messages: [{ role: 'user', content: 'Hello' }],
+  max_tokens: 50
 }, {
-  targetUrl: 'https://api.openai.com',
   cache: true,
   retry: { count: 3 }
 });
 ```
 
-#### `anthropic(request, options?)`
-
-Make Anthropic-compatible requests.
-
+### After (Simple)
 ```typescript
-const response = await gateway.anthropic({
-  model: 'claude-3-haiku-20240307',
-  max_tokens: 100,
-  messages: [{ role: 'user', content: 'Hello!' }]
-}, {
-  targetUrl: 'https://api.anthropic.com'
-});
-```
+import { ai } from 'cost-katana';
 
-#### `googleAI(model, request, options?)`
-
-Make Google AI-compatible requests.
-
-```typescript
-const response = await gateway.googleAI('gemini-pro', {
-  contents: [{
-    parts: [{ text: 'Hello!' }]
-  }]
-}, {
-  targetUrl: 'https://generativelanguage.googleapis.com'
-});
-```
-
-#### `cohere(request, options?)`
-
-Make Cohere-compatible requests.
-
-```typescript
-const response = await gateway.cohere({
-  model: 'command',
-  prompt: 'Hello!',
-  max_tokens: 100
-}, {
-  targetUrl: 'https://api.cohere.ai'
-});
-```
-
-#### `makeRequest(endpoint, data, options?)`
-
-Make generic requests to any endpoint.
-
-```typescript
-const response = await gateway.makeRequest('/v1/chat/completions', {
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'Hello!' }]
-}, {
-  targetUrl: 'https://api.openai.com',
+const response = await ai('gpt-4o-mini', 'Hello', {
   cache: true
 });
 ```
 
-### Management Methods
-
-#### `getStats()`
-
-Get gateway performance statistics.
-
-```typescript
-const stats = await gateway.getStats();
-console.log('Total Requests:', stats.totalRequests);
-console.log('Cache Hit Rate:', stats.cacheHitRate + '%');
-console.log('Success Rate:', stats.successRate + '%');
-```
-
-#### `getCacheStats()`
-
-Get detailed cache statistics.
-
-```typescript
-const cacheStats = await gateway.getCacheStats();
-console.log('Cache Size:', cacheStats.singleResponseCache.size);
-console.log('Bucket Cache Size:', cacheStats.bucketCache.size);
-```
-
-#### `clearCache(options?)`
-
-Clear cache entries.
-
-```typescript
-// Clear all cache
-await gateway.clearCache();
-
-// Clear expired entries only
-await gateway.clearCache({ expired: true });
-
-// Clear user-specific cache
-await gateway.clearCache({ userScope: 'user_123' });
-```
-
-#### `getWorkflows(options?)`
-
-Get workflow summaries.
-
-```typescript
-const workflows = await gateway.getWorkflows({
-  startDate: new Date('2024-01-01'),
-  endDate: new Date('2024-01-31'),
-  workflowName: 'DataProcessing',
-  limit: 100
-});
-```
-
-#### `getWorkflowDetails(workflowId)`
-
-Get detailed workflow information.
-
-```typescript
-const details = await gateway.getWorkflowDetails('workflow-123');
-console.log('Total Cost:', details.totalCost);
-console.log('Request Count:', details.requests.length);
-```
-
-#### `exportWorkflows(options?)`
-
-Export workflow data as CSV.
-
-```typescript
-const csv = await gateway.exportWorkflows({
-  startDate: new Date('2024-01-01'),
-  endDate: new Date('2024-01-31')
-});
-```
-
-#### `healthCheck()`
-
-Check gateway health.
-
-```typescript
-const health = await gateway.healthCheck();
-console.log('Status:', health.status);
-```
-
-## Examples
-
-### Basic Request with Caching
-
-```typescript
-import { createGatewayClientFromEnv } from 'ai-cost-tracker';
-
-const gateway = createGatewayClientFromEnv();
-
-// First request - cache MISS
-const response1 = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'What is 2+2?' }]
-}, { cache: true });
-
-console.log('First request:', response1.metadata.cacheStatus); // MISS
-
-// Second identical request - cache HIT
-const response2 = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'What is 2+2?' }]
-}, { cache: true });
-
-console.log('Second request:', response2.metadata.cacheStatus); // HIT
-```
-
-### Multi-Step Workflow
-
-```typescript
-const workflowId = `analysis-${Date.now()}`;
-
-// Step 1: Extract data
-const extractResponse = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'Extract key points from this text...' }]
-}, {
-  workflow: {
-    workflowId,
-    workflowName: 'DocumentAnalysis',
-    workflowStep: '/extract'
-  },
-  properties: {
-    document_type: 'research_paper',
-    priority: 'high'
-  }
-});
-
-// Step 2: Analyze extracted data
-const analyzeResponse = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [
-    { role: 'user', content: 'Extract key points from this text...' },
-    { role: 'assistant', content: extractResponse.data.choices[0].message.content },
-    { role: 'user', content: 'Now analyze these key points...' }
-  ]
-}, {
-  workflow: {
-    workflowId,
-    workflowName: 'DocumentAnalysis',
-    workflowStep: '/analyze'
-  }
-});
-
-// Step 3: Generate summary
-const summaryResponse = await gateway.openai({
-  model: 'gpt-4o-mini',
-  messages: [
-    { role: 'user', content: 'Create a summary based on this analysis...' }
-  ]
-}, {
-  workflow: {
-    workflowId,
-    workflowName: 'DocumentAnalysis',
-    workflowStep: '/summarize'
-  }
-});
-
-// Get workflow analytics
-const workflowDetails = await gateway.getWorkflowDetails(workflowId);
-console.log('Workflow completed:');
-console.log('- Total Cost:', workflowDetails.totalCost);
-console.log('- Total Requests:', workflowDetails.requests.length);
-console.log('- Duration:', workflowDetails.duration + 'ms');
-```
-
-### Error Handling with Retries
-
-```typescript
-try {
-  const response = await gateway.openai({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: 'Hello!' }]
-  }, {
-    retry: {
-      count: 5,
-      factor: 2,
-      minTimeout: 1000,
-      maxTimeout: 30000
-    }
-  });
-
-  console.log('Success after', response.metadata.retryAttempts, 'retries');
-  
-} catch (error) {
-  console.error('Request failed after all retries:', error);
-}
-```
-
-### Response Variety with Bucket Caching
-
-```typescript
-// Generate multiple creative responses for the same prompt
-const responses = [];
-
-for (let i = 0; i < 5; i++) {
-  const response = await gateway.openai({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: 'Tell me a creative story idea' }],
-    temperature: 0.8
-  }, {
-    cache: {
-      bucketMaxSize: 5, // Store up to 5 different responses
-      ttl: 3600        // Cache for 1 hour
-    }
-  });
-  
-  responses.push(response.data.choices[0].message.content);
-}
-
-// Each response will be different due to bucket caching
-console.log('Generated', responses.length, 'unique responses');
-```
-
-## Best Practices
-
-### 1. Cache Configuration
-
-- Use appropriate TTL values based on content freshness requirements
-- Use user scoping for personalized content
-- Use bucket caching for creative tasks requiring variety
-- Clear expired cache regularly in production
-
-### 2. Retry Configuration
-
-- Use conservative retry settings for rate-limited APIs
-- Increase retry attempts for critical workflows
-- Use longer timeouts for complex requests
-- Monitor retry rates to identify provider issues
-
-### 3. Workflow Organization
-
-- Use descriptive workflow names and steps
-- Group related requests logically
-- Include relevant properties for cost attribution
-- Export workflow data regularly for analysis
-
-### 4. Performance Optimization
-
-- Enable caching for repeated requests
-- Use appropriate retry settings to avoid unnecessary delays
-- Monitor gateway statistics to identify bottlenecks
-- Use workflow tracking to optimize multi-step processes
-
-### 5. Security
-
-- Use `omitRequest` and `omitResponse` for sensitive data
-- Implement proper API key management
-- Use user scoping to prevent data leakage
-- Enable security scanning for production environments
-
-### 6. Cost Management
-
-- Use custom properties for detailed cost attribution
-- Set budget IDs for project-based tracking
-- Monitor workflow costs to identify expensive operations
-- Use caching to reduce redundant API calls
-
-## Error Handling
-
-The gateway client throws standard JavaScript errors. Common error types:
-
-- **Authentication Error**: Invalid API key
-- **Network Error**: Connection issues
-- **Rate Limit Error**: Too many requests
-- **Validation Error**: Invalid request parameters
-- **Timeout Error**: Request timeout exceeded
-
-```typescript
-try {
-  const response = await gateway.openai(request);
-} catch (error) {
-  if (error.response?.status === 401) {
-    console.error('Authentication failed');
-  } else if (error.response?.status === 429) {
-    console.error('Rate limit exceeded');
-  } else if (error.code === 'ECONNRESET') {
-    console.error('Network connection error');
-  } else {
-    console.error('Unexpected error:', error.message);
-  }
-}
-```
-
 ## Support
 
-For issues and questions:
-
-- GitHub Issues: [ai-cost-optimizer-core/issues](https://github.com/Hypothesize-Tech/costkatana-core/issues)
-- Documentation: [costkatana.com/docs](https://costkatana.com/docs)
-- Email: support@costkatana.com
+- **Documentation**: https://docs.costkatana.com
+- **Dashboard**: https://costkatana.com
+- **GitHub**: https://github.com/Hypothesize-Tech/costkatana-core
+- **Email**: support@costkatana.com

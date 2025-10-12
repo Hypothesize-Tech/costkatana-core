@@ -1,51 +1,149 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to Cost Katana will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.0.0] - 2025-01-XX
 
-## [1.0.0] - 2024-01-01
+### 🚀 Major Release: Complete Simplification
+
+This is a **major breaking release** that completely redesigns Cost Katana to be the simplest AI SDK available.
+
+### ✨ New Features
+
+#### Ultra-Simple API
+- **`ai()` function**: Just `await ai('gpt-4', 'Hello')` - that's it!
+- **`chat()` function**: Multi-turn conversations with automatic cost tracking
+- **`configure()` function**: Optional one-time configuration
+
+#### Auto-Configuration
+- Automatically detects API keys from multiple environment variable names
+- Works with Cost Katana keys OR direct provider keys
+- Intelligent provider detection from model names
+- Zero setup required if env vars are set
+
+#### Smart Defaults
+- Automatic cost tracking by default
+- Intelligent caching enabled
+- Auto-failover to alternative providers
+- Smart error messages with actionable steps
+
+### 💥 Breaking Changes
+
+#### Package Name
+- **Old**: `ai-cost-tracker`
+- **New**: `cost-katana`
+
+**Migration**: Uninstall the old package and install the new one:
+```bash
+npm uninstall ai-cost-tracker
+npm install cost-katana
+```
+
+#### API Changes
+**Before (v1.x - Complex)**:
+```typescript
+import AICostTracker, { AIProvider } from 'ai-cost-tracker';
+
+const tracker = await AICostTracker.create({
+  providers: [
+    { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY }
+  ],
+  optimization: {
+    enablePromptOptimization: true,
+    enableModelSuggestions: true,
+    enableCachingSuggestions: true
+  },
+  tracking: { enableAutoTracking: true }
+});
+
+const response = await tracker.makeRequest({
+  model: 'gpt-3.5-turbo',
+  messages: [{ role: 'user', content: 'Hello' }],
+  maxTokens: 150
+});
+```
+
+**After (v2.0 - Simple)**:
+```typescript
+import { ai } from 'cost-katana';
+
+const response = await ai('gpt-3.5-turbo', 'Hello');
+console.log(response.text);
+console.log(`Cost: $${response.cost}`);
+```
+
+### 📚 Documentation
+
+- **Completely rewritten README**: Focus on simplicity and quick wins
+- **New examples**: Real-world use cases with simple API
+- **Migration guide**: Help existing users upgrade
+- **Framework integration**: Examples for Next.js, Express, etc.
+
+### 🗑️ Removed
+
+- Old complex examples (20+ files removed)
+- Verbose configuration patterns
+- Unnecessary abstraction layers
+
+### 🎯 What Stays
+
+All advanced features are still available for power users:
+- Gateway functionality
+- Cortex optimization
+- Distributed tracing
+- Firewall protection
+- Proxy keys
+- Failover
+- Feedback tracking
+
+**Access via**:
+```typescript
+import AICostTracker from 'cost-katana/advanced';
+```
+
+### 📦 Examples
+
+New streamlined examples:
+- `simple-usage.ts` - Basic patterns
+- `chat-bot.ts` - Interactive conversations
+- `cost-comparison.ts` - Compare models
+- `framework-integration.ts` - Framework examples
+
+### 🐛 Bug Fixes
+
+- Fixed CortexConfig type compatibility
+- Improved error messages
+- Better environment variable detection
+
+---
+
+## [1.5.12] - 2024-XX-XX
 
 ### Added
-- Initial release of AI Cost Tracker
-- Multi-provider support (OpenAI, AWS Bedrock, Anthropic, Google, Cohere)
-- Real-time cost estimation before API calls
-- Automatic usage tracking with configurable storage options
-- AI-powered prompt optimization using AWS Bedrock
-- Comprehensive usage analytics and reporting
-- Cost alerts with configurable thresholds
-- Export functionality (JSON, CSV)
-- Token counting utilities
-- Batching and caching suggestions
-- Model comparison and downgrade recommendations
-- Custom pricing support
-- TypeScript support with full type definitions
-- Extensive documentation and examples
+- User feedback and value tracking
+- Flexible authentication methods
+- Enhanced failover capabilities
 
-### Features
-- **Providers**: OpenAI, AWS Bedrock, Anthropic, Google, Cohere
-- **Storage Options**: Memory, File, Custom implementations
-- **Optimization**: Prompt optimization, model suggestions, batching, caching
-- **Analytics**: Usage over time, cost by provider, top expensive prompts
-- **Alerts**: Cost and token threshold monitoring
-- **Export**: JSON and CSV formats
+### Fixed
+- Token calculation accuracy
+- Cache hit rate improvements
 
-### Security
-- No API keys logged or transmitted
-- Configurable data retention policies
-- Support for custom secure storage
+---
 
-## [Unreleased]
+## [1.5.0] - 2024-XX-XX
 
-### Planned
-- Additional provider support (Azure OpenAI, Hugging Face)
-- GraphQL API for analytics
-- Web dashboard interface
-- Slack and Discord integrations
-- Advanced caching strategies
-- Team collaboration features
-- Budget management tools
-- API rate limit handling
-- Streaming support optimization
-- Plugin system for extensibility
+### Added
+- Cortex meta-language support
+- AI Gateway with caching
+- Distributed tracing
+- Prompt firewall
+
+---
+
+## [1.0.0] - 2024-XX-XX
+
+### Initial Release
+- Multi-provider support
+- Cost tracking
+- Basic optimization
+- Usage analytics

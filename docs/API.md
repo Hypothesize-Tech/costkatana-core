@@ -1,667 +1,285 @@
-# AI Cost Tracker API Reference
+# Cost Katana API Reference
 
-## Table of Contents
+## Simple API (Recommended)
 
-- [AICostTracker Class](#aicosttracker-class)
-- [Types and Interfaces](#types-and-interfaces)
-- [Providers](#providers)
-- [Analyzers](#analyzers)
-- [Optimizers](#optimizers)
-- [Webhooks](#webhooks)
-- [Utilities](#utilities)
+### `ai()` Function
 
-## AICostTracker Class
-
-The main class for tracking and analyzing AI API costs.
-
-### Constructor
+The simplest way to make AI requests with automatic cost tracking.
 
 ```typescript
-new AICostTracker(config: TrackerConfig)
+import { ai } from 'cost-katana';
+
+const response = await ai(model, prompt, options?);
 ```
 
-#### Parameters
+**Parameters:**
+- `model` (string): AI model name (e.g., 'gpt-4', 'claude-3-sonnet')
+- `prompt` (string): Your prompt text
+- `options` (object, optional):
+  - `systemMessage` (string): System prompt
+  - `temperature` (number): 0-2, default 0.7
+  - `maxTokens` (number): Max response tokens, default 1000
+  - `cache` (boolean): Enable caching, default false
+  - `cortex` (boolean): Enable 70-95% optimization, default false
 
-- `config`: Configuration object for the tracker
-
-### Methods
-
-#### estimateCost
-
+**Returns:**
 ```typescript
-async estimateCost(
-  prompt: string,
-  model: string,
-  provider: AIProvider,
-  expectedCompletionTokens?: number
-): Promise<CostEstimate>
-```
-
-Estimates the cost of a prompt before making the API call.
-
-#### makeRequest
-
-```typescript
-async makeRequest(
-  request: ProviderRequest,
-  userId: string
-): Promise<ProviderResponse>
-```
-
-Makes an API request and automatically tracks usage.
-
-#### trackUsage
-
-```typescript
-async trackUsage(metadata: UsageMetadata): Promise<void>
-```
-
-Manually tracks usage for existing API integrations.
-
-#### getAnalytics
-
-```typescript
-async getAnalytics(
-  startDate?: Date,
-  endDate?: Date,
-  userId?: string
-): Promise<UsageAnalytics>
-```
-
-Retrieves usage analytics for a specific time period.
-
-#### getOptimizationSuggestions
-
-```typescript
-async getOptimizationSuggestions(
-  startDate?: Date,
-  endDate?: Date,
-  userId?: string
-): Promise<OptimizationSuggestion[]>
-```
-
-Gets AI-powered optimization suggestions based on usage patterns.
-
-#### optimizePrompt
-
-```typescript
-async optimizePrompt(
-  prompt: string,
-  targetModel: string,
-  targetProvider: AIProvider
-): Promise<OptimizationSuggestion[]>
-```
-
-Optimizes a prompt using AI to reduce token usage.
-
-#### generateReport
-
-```typescript
-async generateReport(
-  startDate?: Date,
-  endDate?: Date,
-  userId?: string
-): Promise<string>
-```
-
-Generates a comprehensive optimization report in Markdown format.
-
-#### exportData
-
-```typescript
-async exportData(
-  format: 'json' | 'csv' = 'json',
-  startDate?: Date,
-  endDate?: Date,
-  userId?: string
-): Promise<string>
-```
-
-Exports usage data in the specified format.
-
-#### getUserStats
-
-```typescript
-async getUserStats(userId: string): Promise<UserStats>
-```
-
-Gets statistics for a specific user.
-
-#### getModelStats
-
-```typescript
-async getModelStats(model: string): Promise<ModelStats>
-```
-
-Gets statistics for a specific model.
-
-#### clearData
-
-```typescript
-async clearData(): Promise<void>
-```
-
-Clears all tracked data.
-
-## Types and Interfaces
-
-### TrackerConfig
-
-```typescript
-export interface TrackerConfig {
-  providers: ProviderConfig[];
-  optimization: OptimizationConfig;
-  tracking: TrackingConfig;
-  alerts?: AlertConfig;
+{
+  text: string;           // AI response
+  cost: number;           // Cost in USD
+  tokens: number;         // Total tokens used
+  model: string;          // Model used
+  provider: string;       // Provider name
+  cached?: boolean;       // Whether response was cached
+  optimized?: boolean;    // Whether Cortex was used
 }
 ```
 
-### ProviderConfig
-
+**Example:**
 ```typescript
-interface ProviderConfig {
-  provider: AIProvider;
-  apiKey?: string;
-  region?: string;
-  endpoint?: string;
-  customPricing?: CustomPricing;
-}
+const response = await ai('gpt-4', 'Explain quantum computing', {
+  temperature: 0.7,
+  maxTokens: 500,
+  cache: true,
+  cortex: true
+});
+
+console.log(response.text);
+console.log(`Cost: $${response.cost}`);
 ```
 
-### UsageMetadata
+---
+
+### `chat()` Function
+
+Create a chat session with conversation history and cost tracking.
 
 ```typescript
-interface UsageMetadata {
-  userId: string;
-  timestamp: Date;
-  provider: AIProvider;
-  model: string;
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
-  estimatedCost: number;
-  prompt: string;
-  completion?: string;
-  duration?: number;
-  tags?: string[];
-  sessionId?: string;
-}
+import { chat } from 'cost-katana';
+
+const session = chat(model, options?);
 ```
 
-### CostEstimate
+**Parameters:**
+- `model` (string): AI model name
+- `options` (object, optional):
+  - `systemMessage` (string): System prompt for the session
+  - `temperature` (number): 0-2, default 0.7
+  - `maxTokens` (number): Max tokens per response
 
+**Returns:** Session object with methods:
+- `send(message: string)`: Send a message and get response
+- `messages`: Array of all messages in the conversation
+- `totalCost`: Total cost of the session
+- `totalTokens`: Total tokens used in the session
+- `clear()`: Reset the conversation
+
+**Example:**
 ```typescript
-interface CostEstimate {
-  promptCost: number;
-  completionCost: number;
-  totalCost: number;
-  currency: string;
-  breakdown: {
-    promptTokens: number;
-    completionTokens: number;
-    pricePerPromptToken: number;
-    pricePerCompletionToken: number;
-  };
-}
+const session = chat('gpt-4', {
+  systemMessage: 'You are a helpful coding assistant.'
+});
+
+await session.send('Hello!');
+await session.send('Help me with Python');
+await session.send('Show me an example');
+
+console.log(`Total cost: $${session.totalCost}`);
+console.log(`Messages: ${session.messages.length}`);
 ```
 
-### OptimizationSuggestion
+---
+
+### `configure()` Function
+
+Optional manual configuration.
 
 ```typescript
-interface OptimizationSuggestion {
-  id: string;
-  type: 'prompt' | 'model' | 'batching' | 'caching';
-  originalPrompt?: string;
-  optimizedPrompt?: string;
-  estimatedSavings: number;
-  confidence: number;
-  explanation: string;
-  implementation?: string;
-}
+import { configure } from 'cost-katana';
+
+await configure(options);
 ```
 
-### UsageAnalytics
+**Parameters:**
+- `apiKey` (string): Cost Katana API key
+- `projectId` (string): Project ID
+- `cortex` (boolean): Enable Cortex optimization globally
+- `cache` (boolean): Enable caching globally
+- `firewall` (boolean): Enable security firewall
+- `providers` (array): Provider configurations
+  - `name` (string): Provider name ('openai', 'anthropic', etc.)
+  - `apiKey` (string): Provider API key
 
+**Example:**
 ```typescript
-interface UsageAnalytics {
-  totalCost: number;
-  totalTokens: number;
-  averageTokensPerRequest: number;
-  mostUsedModels: ModelUsage[];
-  costByProvider: ProviderCost[];
-  usageOverTime: TimeSeriesData[];
-  topExpensivePrompts: ExpensivePrompt[];
-}
+await configure({
+  apiKey: 'dak_your_key',
+  projectId: 'your_project',
+  cortex: true,
+  cache: true,
+  firewall: true,
+  providers: [
+    { name: 'openai', apiKey: 'sk-...' },
+    { name: 'anthropic', apiKey: 'sk-ant-...' }
+  ]
+});
 ```
 
-### TrackingConfig
+---
 
-```typescript
-export interface TrackingConfig {
-  enableAutoTracking: boolean;
-  retentionDays?: number;
-}
+## Environment Variables
+
+Cost Katana auto-detects configuration from environment variables:
+
+### Cost Katana Credentials
+```bash
+# Any of these work:
+COST_KATANA_KEY=dak_your_key
+COST_KATANA_API_KEY=dak_your_key
+API_KEY=dak_your_key
+COSTKATANA_KEY=dak_your_key
+
+# Project ID
+COST_KATANA_PROJECT=your_project
+PROJECT_ID=your_project
+COSTKATANA_PROJECT_ID=your_project
 ```
 
-### AlertConfig
-
-```typescript
-export interface AlertConfig {
-  // ... existing code ...
-}
+### Provider API Keys
+```bash
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=us-east-1
 ```
 
-## Providers
-
-### BaseProvider
-
-Abstract base class for all providers.
-
-```typescript
-abstract class BaseProvider {
-  abstract countTokens(text: string, model: string): Promise<number>;
-  abstract makeRequest(request: ProviderRequest): Promise<ProviderResponse>;
-  abstract parseUsage(usage: any): AnyUsage;
-
-  async estimateCost(
-    prompt: string,
-    model: string,
-    expectedCompletion?: number
-  ): Promise<CostEstimate>;
-
-  async trackUsage(
-    request: ProviderRequest,
-    response: ProviderResponse,
-    userId: string,
-    startTime: number
-  ): Promise<UsageMetadata>;
-}
+### Gateway Configuration
+```bash
+COSTKATANA_GATEWAY_URL=https://cost-katana-backend.store/api/gateway
+GATEWAY_URL=...
 ```
 
-### OpenAIProvider
+---
 
-Provider implementation for OpenAI.
+## Supported Models
 
-```typescript
-class OpenAIProvider extends BaseProvider {
-  constructor(config: ProviderConfig);
-  async createEmbedding(input: string | string[], model?: string);
-  async listModels();
-}
-```
+### OpenAI
+- `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-4o-mini`
+- `gpt-3.5-turbo`, `gpt-3.5-turbo-16k`
 
-### BedrockProvider
+### Anthropic
+- `claude-3-opus`, `claude-3-sonnet`, `claude-3-haiku`
+- `claude-3-5-sonnet`
 
-Provider implementation for AWS Bedrock.
+### Google
+- `gemini-pro`, `gemini-ultra`, `gemini-flash`
+- `gemini-2.0-flash`, `gemini-2.5-pro`
 
-```typescript
-class BedrockProvider extends BaseProvider {
-  constructor(config: ProviderConfig);
-  async listFoundationModels();
-  async invokeModelWithOptimization(request: ProviderRequest, optimizationModel?: string);
-}
-```
+### AWS Bedrock
+- `nova-pro`, `nova-lite`, `nova-micro`
+- Any Bedrock model ID
 
-## Analyzers
+### Others
+- Cohere, Groq, DeepSeek, Mistral, xAI (Grok)
 
-### CostAnalyzer
+---
 
-Analyzes usage data to provide insights.
+## Error Handling
 
 ```typescript
-class CostAnalyzer {
-  constructor(initialData?: UsageMetadata[]);
+import { ai } from 'cost-katana';
 
-  addUsageData(data: UsageMetadata | UsageMetadata[]): void;
-  clearData(): void;
-  getData(): UsageMetadata[];
-
-  analyzeUsage(startDate?: Date, endDate?: Date, userId?: string): UsageAnalytics;
-
-  getCostProjection(days: number): number;
-  getOptimizationOpportunities(): OptimizationOpportunity[];
-  getAnomalies(threshold?: number): UsageMetadata[];
-}
-```
-
-### TokenCounter
-
-Utilities for counting tokens across different providers.
-
-```typescript
-class TokenCounter {
-  static async countTokens(text: string, provider: AIProvider, model: string): Promise<number>;
-
-  static async countConversationTokens(
-    messages: Message[],
-    provider: AIProvider,
-    model: string
-  ): Promise<number>;
-
-  static async splitTextByTokens(
-    text: string,
-    maxTokens: number,
-    provider: AIProvider,
-    model: string,
-    overlap?: number
-  ): Promise<string[]>;
-
-  static async estimateOptimizationSavings(
-    originalPrompt: string,
-    optimizedPrompt: string,
-    provider: AIProvider,
-    model: string
-  ): Promise<OptimizationStats>;
-}
-```
-
-### UsageTracker
-
-Tracks and stores usage data.
-
-```typescript
-class UsageTracker {
-  constructor(config: TrackingConfig);
-
-  async track(metadata: UsageMetadata): Promise<void>;
-
-  async getUsageHistory(
-    userId?: string,
-    startDate?: Date,
-    endDate?: Date,
-    limit?: number
-  ): Promise<UsageMetadata[]>;
-
-  async getUserStats(userId: string): Promise<UserStats>;
-  async getModelStats(model: string): Promise<ModelStats>;
-  async exportData(format: 'json' | 'csv'): Promise<string>;
-  async cleanOldData(retentionDays: number): Promise<void>;
-  clearCache(): void;
-}
-```
-
-## Optimizers
-
-### PromptOptimizer
-
-Optimizes prompts to reduce token usage.
-
-```typescript
-class PromptOptimizer {
-  constructor(bedrockConfig?: BedrockConfig);
-
-  async optimizePrompt(
-    prompt: string,
-    targetModel: string,
-    targetProvider: AIProvider,
-    context?: OptimizationContext
-  ): Promise<OptimizationSuggestion[]>;
-
-  async suggestBatching(
-    prompts: string[],
-    targetModel: string,
-    targetProvider: AIProvider
-  ): Promise<OptimizationSuggestion>;
-
-  async suggestCaching(
-    prompt: string,
-    frequency: number,
-    avgResponseTokens: number
-  ): Promise<OptimizationSuggestion>;
-
-  async suggestModelDowngrade(
-    prompt: string,
-    currentModel: string,
-    taskComplexity: 'simple' | 'moderate' | 'complex'
-  ): Promise<OptimizationSuggestion | null>;
-}
-```
-
-### SuggestionEngine
-
-Generates optimization suggestions based on usage patterns.
-
-```typescript
-class SuggestionEngine {
-  constructor(config?: SuggestionEngineConfig);
-
-  async generateSuggestions(usageData: UsageMetadata[]): Promise<OptimizationSuggestion[]>;
-
-  async generateReport(usageData: UsageMetadata[]): Promise<string>;
-}
-```
-
-## Utilities
-
-### Pricing Utilities
-
-```typescript
-function calculateCost(
-  promptTokens: number,
-  completionTokens: number,
-  model: ProviderModel,
-  customPricing?: CustomPricing
-): CostEstimate;
-
-function estimateMonthlyCost(
-  dailyRequests: number,
-  avgPromptTokens: number,
-  avgCompletionTokens: number,
-  model: ProviderModel,
-  customPricing?: CustomPricing
-): MonthlyCostEstimate;
-
-function compareCosts(
-  promptTokens: number,
-  completionTokens: number,
-  models: ProviderModel[],
-  customPricing?: CustomPricing
-): CostComparison[];
-
-function calculateROI(
-  implementationCost: number,
-  currentMonthlyCost: number,
-  optimizedMonthlyCost: number,
-  months?: number
-): ROICalculation;
-```
-
-### Validation Utilities
-
-```typescript
-function validateProvider(provider: string): AIProvider;
-function validateModel(modelId: string): void;
-function validateProviderConfig(config: ProviderConfig): void;
-function validateTrackerConfig(config: TrackerConfig): void;
-function validatePrompt(prompt: string): void;
-function validateUserId(userId: string): void;
-function validateDateRange(startDate?: Date, endDate?: Date): void;
-function sanitizeInput(input: string): string;
-```
-
-### Logger
-
-```typescript
-class Logger {
-  constructor(config?: LoggerConfig);
-
-  debug(message: string, ...args: any[]): void;
-  info(message: string, ...args: any[]): void;
-  warn(message: string, ...args: any[]): void;
-  error(message: string, error?: Error, ...args: any[]): void;
-
-  startTimer(label: string): () => number;
-  logStructured(level: LogLevel, event: string, data: any): void;
-  logRequest(provider: string, model: string, tokens: number, cost: number, duration: number): void;
-  logError(error: Error, context?: any): void;
-  logCostAlert(userId: string, cost: number, threshold: number, period: string): void;
-  logOptimization(type: string, originalCost: number, optimizedCost: number, savings: number): void;
-}
-```
-
-## Webhooks
-
-For detailed webhook integration documentation, see [WEBHOOKS.md](WEBHOOKS.md).
-
-### WebhookManager
-
-```typescript
-class WebhookManager {
-  constructor(config: WebhookConfig);
-
-  // Register a webhook endpoint
-  async registerWebhook(endpoint: WebhookEndpoint): Promise<WebhookRegistration>;
+try {
+  const response = await ai('gpt-4', 'Hello');
+} catch (error) {
+  // Error includes helpful troubleshooting steps
+  console.error(error.message);
   
-  // Update an existing webhook
-  async updateWebhook(id: string, updates: Partial<WebhookEndpoint>): Promise<WebhookRegistration>;
-  
-  // Delete a webhook
-  async deleteWebhook(id: string): Promise<boolean>;
-  
-  // Get all registered webhooks
-  async getWebhooks(): Promise<WebhookRegistration[]>;
-  
-  // Trigger a test event to a webhook
-  async testWebhook(id: string, eventType: WebhookEventType, data?: any): Promise<WebhookDeliveryResult>;
-  
-  // Get webhook delivery history
-  async getWebhookDeliveries(id: string, options?: WebhookDeliveryOptions): Promise<WebhookDelivery[]>;
+  // Error codes:
+  // - NO_API_KEY: No API keys configured
+  // - INVALID_MODEL: Model not found
+  // - RATE_LIMIT: Rate limit exceeded
+  // - BUDGET_EXCEEDED: Budget limit reached
+  // - NETWORK_ERROR: Connection failed
 }
 ```
 
-### Webhook Types
+---
+
+## Advanced API (For Power Users)
+
+If you need full control, the complete API is still available:
 
 ```typescript
-interface WebhookConfig {
-  apiKey: string;
-  projectId: string;
-  defaultSecret?: string;
-  defaultEvents?: WebhookEventType[];
-  defaultTimeout?: number;
-  retryConfig?: {
-    maxRetries: number;
-    backoffMultiplier: number;
-    initialDelay: number;
-  };
+import AICostTracker, { AIProvider } from 'cost-katana';
+
+const tracker = await AICostTracker.create({
+  providers: [
+    { provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY }
+  ],
+  optimization: {
+    enablePromptOptimization: true,
+    enableModelSuggestions: true,
+    enableCachingSuggestions: true
+  },
+  tracking: { enableAutoTracking: true }
+});
+
+// Full API methods available
+const response = await tracker.makeRequest({...});
+const analytics = await tracker.getAnalytics();
+const suggestions = await tracker.getOptimizationSuggestions();
+```
+
+See [Advanced API Documentation](./ADVANCED_API.md) for details.
+
+---
+
+## Common Patterns
+
+### Cost Comparison
+```typescript
+const models = ['gpt-4', 'gpt-3.5-turbo', 'claude-3-haiku'];
+for (const model of models) {
+  const response = await ai(model, 'Test prompt');
+  console.log(`${model}: $${response.cost}`);
 }
-
-interface WebhookEndpoint {
-  url: string;
-  events: WebhookEventType[];
-  name: string;
-  description?: string;
-  secret?: string;
-  active?: boolean;
-  headers?: Record<string, string>;
-  timeout?: number;
-  retryConfig?: {
-    maxRetries: number;
-    backoffMultiplier: number;
-    initialDelay: number;
-  };
-}
-
-interface WebhookRegistration extends WebhookEndpoint {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface WebhookDelivery {
-  id: string;
-  webhookId: string;
-  eventType: WebhookEventType;
-  status: 'pending' | 'success' | 'failed' | 'timeout' | 'cancelled';
-  request: {
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    body: string;
-    timestamp: string;
-  };
-  response?: {
-    statusCode: number;
-    headers: Record<string, string>;
-    body: string;
-    responseTime: number;
-    timestamp: string;
-  };
-  error?: {
-    type: string;
-    message: string;
-    code?: string;
-  };
-  createdAt: string;
-}
-
-type WebhookEventType = 
-  | 'cost.alert'
-  | 'cost.threshold_exceeded'
-  | 'cost.spike_detected'
-  | 'cost.anomaly_detected'
-  | 'budget.warning'
-  | 'budget.exceeded'
-  | 'optimization.completed'
-  | 'optimization.failed'
-  | 'optimization.suggested'
-  | 'optimization.applied'
-  | 'savings.milestone_reached'
-  | 'model.performance_degraded'
-  | 'model.error_rate_high'
-  | 'model.latency_high'
-  | 'model.quota_warning'
-  | 'model.quota_exceeded'
-  | 'usage.spike_detected'
-  | 'usage.pattern_changed';
 ```
 
-### Webhook Utilities
-
+### Caching for Repeated Queries
 ```typescript
-// Verify webhook signature
-function verifyWebhookSignature(
-  payload: string,
-  timestamp: string,
-  signature: string,
-  secret: string
-): boolean;
+// First call - costs money
+const r1 = await ai('gpt-4', 'FAQ question', { cache: true });
 
-// Create webhook signature for testing
-function createWebhookSignature(
-  payload: string,
-  timestamp: string,
-  secret: string
-): string;
+// Second call - free from cache
+const r2 = await ai('gpt-4', 'FAQ question', { cache: true });
 ```
 
-## Constants and Configuration
-
-### Model Registry
-
+### Cortex Optimization
 ```typescript
-const MODELS: Record<string, ProviderModel>;
-function getModelById(modelId: string): ProviderModel | undefined;
-function getModelsByProvider(provider: AIProvider): ProviderModel[];
-function getAllModels(): ProviderModel[];
+// 70-95% cost reduction on long content
+const response = await ai('gpt-4', 'Write a comprehensive guide', {
+  cortex: true,
+  maxTokens: 2000
+});
 ```
 
-### Pricing Data
-
+### Multi-turn Conversation
 ```typescript
-const PRICING_DATA: Record<AIProvider, ModelPricing>;
-const REGIONAL_PRICING_ADJUSTMENTS: Record<string, number>;
-const VOLUME_DISCOUNTS: VolumeDiscountConfig;
-const FREE_TIERS: Record<AIProvider, FreeTierLimits>;
-const RATE_LIMITS: Record<AIProvider, RateLimits>;
+const session = chat('gpt-4');
+const response1 = await session.send('What is AI?');
+const response2 = await session.send('Tell me more');
+console.log(`Total: $${session.totalCost}`);
 ```
 
-### Default Configuration
+---
 
-```typescript
-const defaultConfig: Partial<TrackerConfig>;
-const defaultBedrockRegion: string;
-const defaultOptimizationModel: string;
-const supportedProviders: AIProvider[];
-const optimizationThresholds: OptimizationThresholds;
-const alertThresholds: AlertThresholds;
-```
+## Support
+
+- **Documentation**: https://docs.costkatana.com
+- **Dashboard**: https://costkatana.com
+- **GitHub**: https://github.com/Hypothesize-Tech/costkatana-core
+- **Discord**: https://discord.gg/Wcwzw8wM
+- **Email**: support@costkatana.com

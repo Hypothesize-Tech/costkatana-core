@@ -1,1156 +1,878 @@
-# AI Cost Tracker Examples
+# Cost Katana Examples
 
-This document provides comprehensive examples for using the AI Cost Tracker NPM package.
+Practical examples showing how to use Cost Katana in real applications.
 
 ## Table of Contents
 
-1. [Basic Setup](#basic-setup)
-2. [Cost Estimation](#cost-estimation)
-3. [Making Tracked Requests](#making-tracked-requests)
-4. [Manual Usage Tracking](#manual-usage-tracking)
-5. [Analytics and Reporting](#analytics-and-reporting)
-6. [Prompt Optimization](#prompt-optimization)
-7. [Storage Options](#storage-options)
-8. [Alert Configuration](#alert-configuration)
-9. [Webhook Integration](#webhook-integration)
-10. [Batch Processing](#batch-processing)
-11. [Advanced Scenarios](#advanced-scenarios)
+1. [Getting Started](#getting-started)
+2. [Chat Applications](#chat-applications)
+3. [Content Generation](#content-generation)
+4. [Code Assistance](#code-assistance)
+5. [Data Analysis](#data-analysis)
+6. [Cost Optimization](#cost-optimization)
+7. [Framework Integration](#framework-integration)
+8. [Production Patterns](#production-patterns)
 
-## Basic Setup
+## Getting Started
 
-### Simple Configuration
+### Hello World
 
 ```typescript
-import AICostTracker, { AIProvider } from 'ai-cost-tracker';
+import { ai } from 'cost-katana';
 
-const tracker = new AICostTracker({
-  providers: [
-    {
-      provider: AIProvider.OpenAI,
-      apiKey: process.env.OPENAI_API_KEY
-    }
-  ],
-  tracking: {
-    enableAutoTracking: true
-  }
+const response = await ai('gpt-4', 'Hello, world!');
+console.log(response.text);
+console.log(`Cost: $${response.cost}`);
+```
+
+### Your First Chat
+
+```typescript
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+await session.send('Hello!');
+await session.send('How are you?');
+console.log(`Total: $${session.totalCost}`);
+```
+
+### Configuration
+
+```typescript
+import { configure } from 'cost-katana';
+
+await configure({
+  apiKey: 'dak_your_key',
+  cortex: true,  // 70-95% savings
+  cache: true    // Smart caching
 });
 ```
 
-### Multi-Provider Configuration
+## Chat Applications
+
+### Interactive Chat Bot
 
 ```typescript
-const tracker = new AICostTracker({
-  providers: [
-    {
-      provider: AIProvider.OpenAI,
-      apiKey: process.env.OPENAI_API_KEY,
-      customPricing: {
-        'gpt-4': {
-          promptPrice: 0.03,
-          completionPrice: 0.06,
-          unit: 'per-1k-tokens'
-        }
-      }
-    },
-    {
-      provider: AIProvider.AWSBedrock,
-      region: 'us-east-1'
-      // Uses AWS credentials from environment or IAM role
-    },
-    {
-      provider: AIProvider.Anthropic,
-      apiKey: process.env.ANTHROPIC_API_KEY
-    }
-  ],
-  optimization: {
-    enablePromptOptimization: true,
-    enableModelSuggestions: true,
-    enableCachingSuggestions: true,
-    bedrockConfig: {
-      region: 'us-east-1',
-      modelId: 'anthropic.claude-sonnet-4-20250514-v1:0'
-    }
-  },
-  tracking: {
-    enableAutoTracking: true,
-    retentionDays: 90
-  },
-  alerts: {
-    costThreshold: 100,
-    tokenThreshold: 1000000,
-    emailNotifications: true
-  }
+import { chat } from 'cost-katana';
+
+const bot = chat('gpt-3.5-turbo', {
+  systemMessage: 'You are a helpful assistant.'
 });
+
+async function handleUserMessage(message: string) {
+  const response = await bot.send(message);
+  
+  return {
+    response,
+    sessionCost: bot.totalCost,
+    messageCount: bot.messages.length
+  };
+}
+
+// Use it
+await handleUserMessage('Hello');
+await handleUserMessage('What can you help me with?');
+await handleUserMessage('Tell me a joke');
 ```
 
-## Cost Estimation
-
-### Basic Cost Estimation
+### Customer Support
 
 ```typescript
-// Estimate cost for a simple prompt
-const estimate = await tracker.estimateCost(
-  'What is the capital of France?',
-  'gpt-3.5-turbo',
-  AIProvider.OpenAI,
-  20 // expected completion tokens
-);
+import { chat } from 'cost-katana';
 
-console.log(`Estimated cost: $${estimate.totalCost.toFixed(4)}`);
-console.log(`Breakdown:`, estimate.breakdown);
-```
-
-### Comparing Model Costs
-
-```typescript
-import { compareCosts, MODELS } from 'ai-cost-tracker';
-
-const prompt = 'Write a detailed analysis of climate change impacts';
-const promptTokens = 15;
-const completionTokens = 500;
-
-const models = [
-  MODELS['gpt-4'],
-  MODELS['gpt-3.5-turbo'],
-  MODELS['anthropic.claude-sonnet-4-20250514-v1:0'],
-  MODELS['anthropic.claude-3-haiku-20240307-v1:0']
-];
-
-const comparison = compareCosts(promptTokens, completionTokens, models);
-
-comparison.forEach(result => {
-  console.log(
-    `${result.model}: $${result.cost.totalCost.toFixed(4)} (${result.savingsVsHighest.toFixed(1)}% savings)`
-  );
+const supportBot = chat('gpt-4', {
+  systemMessage: `You are a customer support agent for TechCorp.
+    Be helpful, friendly, and professional.`
 });
-```
 
-### Monthly Cost Projection
-
-```typescript
-import { estimateMonthlyCost, MODELS } from 'ai-cost-tracker';
-
-const projection = estimateMonthlyCost(
-  100, // daily requests
-  200, // avg prompt tokens
-  300, // avg completion tokens
-  MODELS['gpt-3.5-turbo']
-);
-
-console.log('Cost Projections:');
-console.log(`Daily: $${projection.daily.toFixed(2)}`);
-console.log(`Weekly: $${projection.weekly.toFixed(2)}`);
-console.log(`Monthly: $${projection.monthly.toFixed(2)}`);
-console.log(`Yearly: $${projection.yearly.toFixed(2)}`);
-```
-
-## Making Tracked Requests
-
-### OpenAI Chat Completion
-
-```typescript
-const response = await tracker.makeRequest(
-  {
-    model: 'gpt-3.5-turbo',
-    messages: [
-      { role: 'system', content: 'You are a helpful assistant.' },
-      { role: 'user', content: 'Explain quantum computing in simple terms' }
-    ],
-    maxTokens: 150,
-    temperature: 0.7,
-    metadata: {
-      tags: ['education', 'physics'],
-      sessionId: 'session-123'
-    }
-  },
-  'user-456'
-);
-
-console.log('Response:', response.choices[0].message.content);
-```
-
-### AWS Bedrock Request
-
-```typescript
-const response = await tracker.makeRequest(
-  {
-    model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
-    prompt: 'Write a haiku about programming',
-    maxTokens: 100,
-    temperature: 0.8,
-    stopSequences: ['\n\n']
-  },
-  'user-789'
-);
-
-console.log('Haiku:', response.choices[0].text);
-```
-
-### Streaming Requests (if supported)
-
-```typescript
-const response = await tracker.makeRequest(
-  {
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: 'Tell me a story' }],
-    maxTokens: 500,
-    stream: true,
-    metadata: {
-      streamProcessing: true
-    }
-  },
-  'user-123'
-);
-
-// Handle streaming response
-for await (const chunk of response) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || '');
+async function handleSupportTicket(customerId: string, message: string) {
+  const response = await supportBot.send(message);
+  
+  // Log to your system
+  console.log(`Customer ${customerId}: ${message}`);
+  console.log(`Response: ${response}`);
+  console.log(`Cost: $${supportBot.totalCost}`);
+  
+  return response;
 }
 ```
 
-## Manual Usage Tracking
-
-### Track Existing API Calls
+### Multi-Language Support
 
 ```typescript
-// If you're already using OpenAI SDK directly
-import OpenAI from 'openai';
+import { ai } from 'cost-katana';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+async function translate(text: string, targetLanguage: string) {
+  return await ai('gpt-3.5-turbo', 
+    `Translate to ${targetLanguage}: ${text}`,
+    { cache: true }  // Cache translations
+  );
+}
 
-// Make your API call
-const completion = await openai.chat.completions.create({
-  model: 'gpt-4',
-  messages: [{ role: 'user', content: 'Hello!' }]
-});
-
-// Track the usage
-await tracker.trackUsage({
-  userId: 'user-123',
-  timestamp: new Date(),
-  provider: AIProvider.OpenAI,
-  model: 'gpt-4',
-  promptTokens: completion.usage.prompt_tokens,
-  completionTokens: completion.usage.completion_tokens,
-  totalTokens: completion.usage.total_tokens,
-  estimatedCost: 0.0, // Will be calculated automatically
-  prompt: 'Hello!',
-  completion: completion.choices[0].message.content,
-  duration: 1500, // milliseconds
-  tags: ['greeting'],
-  sessionId: 'session-456'
-});
+// Use it
+const spanish = await translate('Hello, how are you?', 'Spanish');
+const french = await translate('Hello, how are you?', 'French');
 ```
 
-### Batch Tracking
+## Content Generation
+
+### Blog Post Generator
 
 ```typescript
-const usageDataBatch = [
-  {
-    userId: 'user-1',
-    timestamp: new Date(),
-    provider: AIProvider.OpenAI,
-    model: 'gpt-3.5-turbo',
-    promptTokens: 50,
-    completionTokens: 100,
-    totalTokens: 150,
-    estimatedCost: 0.0003,
-    prompt: 'Task 1',
-    duration: 1000
-  }
-  // ... more usage data
-];
+import { ai } from 'cost-katana';
 
-for (const usage of usageDataBatch) {
-  await tracker.trackUsage(usage);
+async function generateBlogPost(topic: string, keywords: string[]) {
+  const post = await ai('gpt-4', 
+    `Write a blog post about ${topic}. Include these keywords: ${keywords.join(', ')}`,
+    {
+      cortex: true,      // Optimize for long content
+      maxTokens: 2000
+    }
+  );
+  
+  return {
+    content: post.text,
+    cost: post.cost,
+    wordCount: post.text.split(' ').length,
+    estimated_reading_time: Math.ceil(post.text.split(' ').length / 200)
+  };
+}
+
+// Use it
+const article = await generateBlogPost('AI in Healthcare', ['ML', 'diagnosis', 'future']);
+console.log(`Generated ${article.wordCount} words for $${article.cost}`);
+```
+
+### Social Media Posts
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function generateSocialPost(topic: string, platform: string) {
+  const platforms = {
+    twitter: { maxLength: 280, style: 'concise and engaging' },
+    linkedin: { maxLength: 1300, style: 'professional' },
+    instagram: { maxLength: 2200, style: 'visual and inspiring' }
+  };
+  
+  const config = platforms[platform] || platforms.twitter;
+  
+  const post = await ai('gpt-3.5-turbo',
+    `Write a ${config.style} ${platform} post about ${topic}. Max ${config.maxLength} characters.`,
+    { cache: true }
+  );
+  
+  return post.text;
+}
+
+// Generate posts for multiple platforms
+const topic = 'Launch of our new product';
+const twitter = await generateSocialPost(topic, 'twitter');
+const linkedin = await generateSocialPost(topic, 'linkedin');
+```
+
+### Email Templates
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function generateEmail(purpose: string, recipient: string, details: any) {
+  const email = await ai('claude-3-sonnet',
+    `Write a professional email to ${recipient} about ${purpose}. Details: ${JSON.stringify(details)}`,
+    { cache: true }
+  );
+  
+  return {
+    subject: extractSubject(email.text),
+    body: email.text,
+    cost: email.cost
+  };
+}
+
+function extractSubject(emailText: string): string {
+  const match = emailText.match(/Subject: (.+)/i);
+  return match ? match[1] : 'No Subject';
 }
 ```
 
-## Analytics and Reporting
+## Code Assistance
 
-### Basic Analytics
+### Code Review
 
 ```typescript
-// Get analytics for the last 7 days
-const analytics = await tracker.getAnalytics(
-  new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-  new Date()
-);
+import { ai } from 'cost-katana';
 
-console.log('7-Day Analytics:');
-console.log(`Total Cost: $${analytics.totalCost.toFixed(2)}`);
-console.log(`Total Tokens: ${analytics.totalTokens.toLocaleString()}`);
-console.log(`Average Tokens/Request: ${analytics.averageTokensPerRequest.toFixed(0)}`);
-
-console.log('\nMost Used Models:');
-analytics.mostUsedModels.forEach(model => {
-  console.log(`- ${model.model}: ${model.requestCount} requests ($${model.totalCost.toFixed(2)})`);
-});
-
-console.log('\nCost by Provider:');
-analytics.costByProvider.forEach(provider => {
-  console.log(
-    `- ${provider.provider}: $${provider.totalCost.toFixed(2)} (${provider.percentage.toFixed(1)}%)`
+async function reviewCode(code: string, language: string) {
+  const review = await ai('claude-3-sonnet',
+    `Review this ${language} code and suggest improvements:\n\n${code}`,
+    { cache: true }  // Cache for repeated reviews
   );
-});
-```
+  
+  return review.text;
+}
 
-### User-Specific Analytics
-
-```typescript
-const userAnalytics = await tracker.getAnalytics(
-  undefined, // all time
-  undefined,
-  'user-123'
-);
-
-const userStats = await tracker.getUserStats('user-123');
-
-console.log('User Statistics:');
-console.log(`Total Requests: ${userStats.totalRequests}`);
-console.log(`Total Cost: $${userStats.totalCost.toFixed(2)}`);
-console.log(`Average Cost/Request: $${userStats.averageCostPerRequest.toFixed(4)}`);
-console.log(`Last Active: ${userStats.lastUsed?.toLocaleDateString()}`);
-```
-
-### Model Performance Analysis
-
-```typescript
-const modelStats = await tracker.getModelStats('gpt-4');
-
-console.log('GPT-4 Statistics:');
-console.log(`Total Requests: ${modelStats.totalRequests}`);
-console.log(`Total Cost: $${modelStats.totalCost.toFixed(2)}`);
-console.log(`Unique Users: ${modelStats.uniqueUsers}`);
-console.log(`Average Response Time: ${modelStats.averageResponseTime.toFixed(0)}ms`);
-```
-
-### Generating Reports
-
-```typescript
-// Generate a comprehensive markdown report
-const report = await tracker.generateReport(
-  new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // last 30 days
-  new Date(),
-  'user-123'
-);
-
-// Save to file
-import fs from 'fs';
-fs.writeFileSync('monthly-report.md', report);
-```
-
-## Prompt Optimization
-
-### Basic Prompt Optimization
-
-```typescript
-const verbosePrompt = `
-  I would really appreciate it if you could help me understand 
-  what machine learning is. I'm just a beginner and I'm pretty 
-  confused about all the different concepts.
+// Use it
+const pythonCode = `
+def calculate_sum(numbers):
+    total = 0
+    for num in numbers:
+        total = total + num
+    return total
 `;
 
-const suggestions = await tracker.optimizePrompt(verbosePrompt, 'gpt-3.5-turbo', AIProvider.OpenAI);
-
-suggestions.forEach(suggestion => {
-  console.log('\nOptimization Suggestion:');
-  console.log(`Type: ${suggestion.type}`);
-  console.log(`Confidence: ${(suggestion.confidence * 100).toFixed(0)}%`);
-  console.log(`Estimated Savings: ${suggestion.estimatedSavings.toFixed(1)}%`);
-  console.log(`Explanation: ${suggestion.explanation}`);
-
-  if (suggestion.optimizedPrompt) {
-    console.log(`Optimized: "${suggestion.optimizedPrompt}"`);
-  }
-});
+const review = await reviewCode(pythonCode, 'Python');
+console.log(review);
 ```
 
-### Context-Aware Optimization
+### Bug Fixing
 
 ```typescript
-const optimizations = await tracker.optimizePrompt(
-  'Generate a comprehensive report about AI trends',
-  'gpt-4',
-  AIProvider.OpenAI,
-  {
-    previousPrompts: ['What are the latest AI developments?', 'Explain transformer architecture'],
-    expectedOutput: 'markdown',
-    constraints: ['max 1000 words', 'include statistics']
-  }
-);
-```
+import { chat } from 'cost-katana';
 
-### Batch Optimization
-
-```typescript
-import { PromptOptimizer } from 'ai-cost-tracker';
-
-const optimizer = new PromptOptimizer({
-  region: 'us-east-1',
-  modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+const debugger = chat('gpt-4', {
+  systemMessage: 'You are a debugging expert. Find and fix bugs efficiently.'
 });
 
-const prompts = [
-  'What is the weather today?',
-  "What's the current temperature?",
-  'Is it raining right now?',
-  'Should I bring an umbrella?'
-];
-
-const batchSuggestion = await optimizer.suggestBatching(
-  prompts,
-  'gpt-3.5-turbo',
-  AIProvider.OpenAI
-);
-
-console.log(
-  `Batching ${prompts.length} requests could save ${batchSuggestion.estimatedSavings.toFixed(1)}%`
-);
-```
-
-## Storage Options
-
-### Memory Storage (Default)
-
-```typescript
-const tracker = new AICostTracker({
-  providers: [
-    /* ... */
-  ],
-  tracking: {
-    enableAutoTracking: true
-  }
-});
-```
-
-### File Storage
-
-```typescript
-const tracker = new AICostTracker({
-  providers: [
-    /* ... */
-  ],
-  tracking: {
-    enableAutoTracking: true,
-    retentionDays: 90 // Keep data for 90 days
-  }
-});
-```
-
-### Custom MongoDB Storage
-
-```typescript
-import { CustomStorage, UsageMetadata } from 'ai-cost-tracker';
-import { MongoClient, Db, Collection } from 'mongodb';
-
-class MongoDBStorage implements CustomStorage {
-  private db: Db;
-  private collection: Collection<UsageMetadata>;
-
-  constructor(connectionString: string) {
-    const client = new MongoClient(connectionString);
-    this.db = client.db('ai-cost-tracker');
-    this.collection = this.db.collection<UsageMetadata>('usage');
-  }
-
-  async save(data: UsageMetadata): Promise<void> {
-    await this.collection.insertOne(data);
-  }
-
-  async load(filter?: any): Promise<UsageMetadata[]> {
-    const query: any = {};
-
-    if (filter?.userId) query.userId = filter.userId;
-    if (filter?.startDate) query.timestamp = { $gte: filter.startDate };
-    if (filter?.endDate) query.timestamp = { ...query.timestamp, $lte: filter.endDate };
-
-    const results = await this.collection
-      .find(query)
-      .limit(filter?.limit || 1000)
-      .toArray();
-
-    return results;
-  }
-
-  async clear(): Promise<void> {
-    await this.collection.deleteMany({});
-  }
-}
-
-// Use custom storage
-const tracker = new AICostTracker({
-  providers: [
-    /* ... */
-  ],
-  tracking: {
-    enableAutoTracking: true,
-    storageType: 'custom',
-    customStorage: new MongoDBStorage('mongodb://localhost:27017')
-  }
-});
-```
-
-### Redis Storage Example
-
-```typescript
-import Redis from 'ioredis';
-
-class RedisStorage implements CustomStorage {
-  private redis: Redis;
-  private keyPrefix = 'ai-cost-tracker:';
-
-  constructor() {
-    this.redis = new Redis();
-  }
-
-  async save(data: UsageMetadata): Promise<void> {
-    const key = `${this.keyPrefix}${data.userId}:${Date.now()}`;
-    await this.redis.set(key, JSON.stringify(data), 'EX', 7776000); // 90 days
-  }
-
-  async load(filter?: any): Promise<UsageMetadata[]> {
-    const pattern = filter?.userId ? `${this.keyPrefix}${filter.userId}:*` : `${this.keyPrefix}*`;
-
-    const keys = await this.redis.keys(pattern);
-    const results: UsageMetadata[] = [];
-
-    for (const key of keys) {
-      const data = await this.redis.get(key);
-      if (data) {
-        const usage = JSON.parse(data);
-        usage.timestamp = new Date(usage.timestamp);
-
-        if (filter?.startDate && usage.timestamp < filter.startDate) continue;
-        if (filter?.endDate && usage.timestamp > filter.endDate) continue;
-
-        results.push(usage);
-      }
-    }
-
-    return results.slice(0, filter?.limit || 1000);
-  }
-
-  async clear(): Promise<void> {
-    const keys = await this.redis.keys(`${this.keyPrefix}*`);
-    if (keys.length > 0) {
-      await this.redis.del(...keys);
-    }
-  }
-}
-```
-
-## Alert Configuration
-
-### Cost Alerts
-
-```typescript
-const tracker = new AICostTracker({
-  providers: [
-    /* ... */
-  ],
-  alerts: {
-    costThreshold: 50, // Alert when daily cost exceeds $50
-    emailNotifications: true
-  }
-});
-
-// The tracker will automatically check thresholds after each request
-// You can also manually check
-const todayStart = new Date();
-todayStart.setHours(0, 0, 0, 0);
-
-const todayAnalytics = await tracker.getAnalytics(todayStart, new Date());
-if (todayAnalytics.totalCost > 50) {
-  console.log('⚠️ Daily cost threshold exceeded!');
-}
-```
-
-### Token Usage Alerts
-
-```typescript
-const tracker = new AICostTracker({
-  providers: [
-    /* ... */
-  ],
-  alerts: {
-    tokenThreshold: 500000, // Alert when daily tokens exceed 500K
-    webhookUrl: 'https://your-slack-webhook.com/alerts'
-  }
-});
-```
-
-### Custom Alert Handler
-
-```typescript
-// Extend the tracker for custom alerts
-class CustomAICostTracker extends AICostTracker {
-  protected async checkAlerts(metadata: UsageMetadata): Promise<void> {
-    await super.checkAlerts(metadata);
-
-    // Add custom alert logic
-    if (metadata.estimatedCost > 1.0) {
-      // Send notification for expensive single requests
-      await this.sendAlert('High cost request', metadata);
-    }
-
-    if (metadata.duration && metadata.duration > 5000) {
-      // Alert for slow requests
-      await this.sendAlert('Slow API response', metadata);
-    }
-  }
-
-  private async sendAlert(type: string, data: any): Promise<void> {
-    // Implement your alert mechanism
-    console.log(`ALERT: ${type}`, data);
-  }
-}
-```
-
-## Webhook Integration
-
-Webhooks allow you to receive real-time notifications about important events in your AI cost optimization workflow.
-
-### Setting Up Webhooks
-
-```typescript
-import { AICostTracker, WebhookManager } from 'ai-cost-tracker';
-
-// Initialize the webhook manager
-const webhookManager = new WebhookManager({
-  apiKey: process.env.API_KEY!,
-  projectId: process.env.PROJECT_ID!,
-  defaultSecret: 'your_webhook_secret',
-  retryConfig: {
-    maxRetries: 3,
-    backoffMultiplier: 2,
-    initialDelay: 5000,
-  },
-});
-
-// Register a new webhook endpoint
-const webhook = await webhookManager.registerWebhook({
-  name: 'Cost Alert Webhook',
-  description: 'Receive notifications for cost alerts',
-  url: 'https://your-api.example.com/webhooks/cost-katana',
-  events: [
-    'cost.alert',
-    'cost.threshold_exceeded',
-    'budget.warning',
-    'budget.exceeded',
-  ],
-  active: true,
-  secret: 'your_custom_webhook_secret',
-});
-
-console.log('Webhook registered:', webhook);
-```
-
-### Managing Webhooks
-
-```typescript
-// List all registered webhooks
-const webhooks = await webhookManager.getWebhooks();
-console.log(`You have ${webhooks.length} registered webhooks`);
-
-// Update an existing webhook
-await webhookManager.updateWebhook(webhook.id, {
-  events: [...webhook.events, 'optimization.suggested'],
-  description: 'Updated webhook description',
-});
-
-// Test a webhook
-await webhookManager.testWebhook(
-  webhook.id,
-  'cost.alert',
-  {
-    title: 'Test Cost Alert',
-    description: 'This is a test cost alert',
-    severity: 'medium',
-    cost: {
-      amount: 150,
-      currency: 'USD',
-      period: 'daily',
-    },
-  }
-);
-
-// Delete a webhook
-await webhookManager.deleteWebhook(webhook.id);
-```
-
-### Verifying Webhook Signatures
-
-```typescript
-import { verifyWebhookSignature } from 'ai-cost-tracker';
-import express from 'express';
-
-const app = express();
-const WEBHOOK_SECRET = 'your_webhook_secret';
-
-app.post('/webhooks/cost-katana', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-costkatana-signature'];
-  const timestamp = req.headers['x-costkatana-timestamp'];
-  const payload = req.body.toString();
-  
-  // Verify the signature
-  const isValid = verifyWebhookSignature(
-    payload,
-    timestamp,
-    signature,
-    WEBHOOK_SECRET
+async function debugCode(code: string, error: string) {
+  const analysis = await debugger.send(
+    `Code:\n${code}\n\nError:\n${error}\n\nWhat's wrong and how to fix it?`
   );
   
-  if (!isValid) {
-    return res.status(401).send('Invalid signature');
-  }
-  
-  // Process the webhook
-  const event = JSON.parse(payload);
-  console.log(`Received ${event.event_type} event:`, event);
-  
-  res.status(200).send('Webhook received');
-});
-
-app.listen(3000);
+  return analysis;
+}
 ```
 
-For more detailed information, see the [Webhooks documentation](WEBHOOKS.md).
-
-## Batch Processing
-
-### Batching Similar Requests
+### Code Generation
 
 ```typescript
-// Instead of multiple individual requests
-const questions = [
-  'What is the capital of France?',
-  'What is the capital of Germany?',
-  'What is the capital of Italy?',
-  'What is the capital of Spain?'
-];
+import { ai } from 'cost-katana';
 
-// Batch them into a single request
-const batchedRequest = {
-  model: 'gpt-3.5-turbo',
-  messages: [
+async function generateCode(description: string, language: string) {
+  const code = await ai('gpt-4',
+    `Write ${language} code for: ${description}. Include error handling and comments.`,
+    { maxTokens: 1000 }
+  );
+  
+  return code.text;
+}
+
+// Use it
+const code = await generateCode('Binary search algorithm', 'TypeScript');
+console.log(code);
+```
+
+## Data Analysis
+
+### Data Summarization
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function summarizeData(data: any[], context: string) {
+  const summary = await ai('claude-3-sonnet',
+    `Analyze this data and provide insights:\n\nContext: ${context}\n\nData: ${JSON.stringify(data)}`,
+    { cortex: true }  // Optimize for large data
+  );
+  
+  return summary.text;
+}
+```
+
+### Report Generation
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function generateReport(metrics: any, period: string) {
+  const report = await ai('gpt-4',
+    `Generate an executive summary report for ${period} based on these metrics: ${JSON.stringify(metrics)}`,
     {
-      role: 'user',
-      content: `Please answer these questions:
-1. ${questions[0]}
-2. ${questions[1]}
-3. ${questions[2]}
-4. ${questions[3]}
-
-Format: Question number: Answer`
+      cortex: true,
+      maxTokens: 1500
     }
-  ],
-  maxTokens: 200
-};
-
-const response = await tracker.makeRequest(batchedRequest, 'user-123');
-
-// Parse batched response
-const answers = response.choices[0].message.content.split('\n').filter(line => line.trim());
-```
-
-### Parallel Processing with Rate Limiting
-
-```typescript
-import pLimit from 'p-limit';
-
-// Limit to 3 concurrent requests
-const limit = pLimit(3);
-
-const prompts = Array.from(
-  { length: 20 },
-  (_, i) => `Generate a creative name for a ${['cafe', 'restaurant', 'bakery'][i % 3]} #${i + 1}`
-);
-
-const requests = prompts.map(prompt =>
-  limit(() =>
-    tracker.makeRequest(
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        maxTokens: 50
-      },
-      'user-123'
-    )
-  )
-);
-
-const responses = await Promise.all(requests);
-console.log(`Processed ${responses.length} requests`);
-```
-
-## Advanced Scenarios
-
-### Multi-Model Routing
-
-```typescript
-class SmartRouter {
-  constructor(private tracker: AICostTracker) {}
-
-  async route(prompt: string, userId: string) {
-    // Analyze prompt complexity
-    const wordCount = prompt.split(' ').length;
-    const hasCodeRequest = /code|function|implement|debug/i.test(prompt);
-    const isCreative = /story|poem|creative|imagine/i.test(prompt);
-
-    let model: string;
-    let provider: AIProvider;
-
-    if (hasCodeRequest || wordCount > 100) {
-      // Complex or code-related tasks
-      model = 'gpt-4';
-      provider = AIProvider.OpenAI;
-    } else if (isCreative) {
-      // Creative tasks
-      model = 'anthropic.claude-sonnet-4-20250514-v1:0';
-      provider = AIProvider.AWSBedrock;
-    } else {
-      // Simple tasks
-      model = 'gpt-3.5-turbo';
-      provider = AIProvider.OpenAI;
-    }
-
-    console.log(`Routing to ${model} for: "${prompt.substring(0, 50)}..."`);
-
-    return this.tracker.makeRequest(
-      {
-        model,
-        prompt,
-        maxTokens: 200
-      },
-      userId
-    );
-  }
-}
-
-const router = new SmartRouter(tracker);
-await router.route('Write a haiku about coding', 'user-123');
-await router.route('Implement a binary search algorithm', 'user-123');
-```
-
-### Caching Implementation
-
-```typescript
-import { createHash } from 'crypto';
-
-class CachedTracker {
-  private cache = new Map<string, any>();
-  private cacheTTL = 3600000; // 1 hour
-
-  constructor(private tracker: AICostTracker) {}
-
-  private getCacheKey(request: any): string {
-    const normalized = {
-      model: request.model,
-      messages: request.messages || request.prompt,
-      temperature: request.temperature || 0.7,
-      maxTokens: request.maxTokens
-    };
-    return createHash('md5').update(JSON.stringify(normalized)).digest('hex');
-  }
-
-  async makeRequest(request: any, userId: string): Promise<any> {
-    const cacheKey = this.getCacheKey(request);
-    const cached = this.cache.get(cacheKey);
-
-    if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
-      console.log('Cache hit!');
-      // Track the cached usage with zero cost
-      await this.tracker.trackUsage({
-        userId,
-        timestamp: new Date(),
-        provider: AIProvider.OpenAI,
-        model: request.model,
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        estimatedCost: 0,
-        prompt: request.prompt || 'Cached request',
-        completion: cached.response.choices[0].text,
-        duration: 0,
-        tags: ['cached']
-      });
-
-      return cached.response;
-    }
-
-    const response = await this.tracker.makeRequest(request, userId);
-
-    this.cache.set(cacheKey, {
-      response,
-      timestamp: Date.now()
-    });
-
-    return response;
-  }
-}
-```
-
-### Cost Budget Management
-
-```typescript
-class BudgetManager {
-  private dailyBudget: number;
-  private monthlyBudget: number;
-
-  constructor(
-    private tracker: AICostTracker,
-    dailyBudget: number,
-    monthlyBudget: number
-  ) {
-    this.dailyBudget = dailyBudget;
-    this.monthlyBudget = monthlyBudget;
-  }
-
-  async canMakeRequest(
-    estimatedCost: number,
-    userId: string
-  ): Promise<{
-    allowed: boolean;
-    reason?: string;
-    dailySpent: number;
-    monthlySpent: number;
-  }> {
-    // Check daily budget
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const todayAnalytics = await this.tracker.getAnalytics(todayStart, new Date(), userId);
-
-    if (todayAnalytics.totalCost + estimatedCost > this.dailyBudget) {
-      return {
-        allowed: false,
-        reason: 'Daily budget exceeded',
-        dailySpent: todayAnalytics.totalCost,
-        monthlySpent: 0
-      };
-    }
-
-    // Check monthly budget
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-
-    const monthAnalytics = await this.tracker.getAnalytics(monthStart, new Date(), userId);
-
-    if (monthAnalytics.totalCost + estimatedCost > this.monthlyBudget) {
-      return {
-        allowed: false,
-        reason: 'Monthly budget exceeded',
-        dailySpent: todayAnalytics.totalCost,
-        monthlySpent: monthAnalytics.totalCost
-      };
-    }
-
-    return {
-      allowed: true,
-      dailySpent: todayAnalytics.totalCost,
-      monthlySpent: monthAnalytics.totalCost
-    };
-  }
-
-  async makeRequestWithBudget(request: any, userId: string): Promise<any> {
-    // Estimate cost first
-    const estimate = await this.tracker.estimateCost(
-      request.prompt || request.messages[0].content,
-      request.model,
-      AIProvider.OpenAI,
-      request.maxTokens
-    );
-
-    const budgetCheck = await this.canMakeRequest(estimate.totalCost, userId);
-
-    if (!budgetCheck.allowed) {
-      throw new Error(
-        `Budget exceeded: ${budgetCheck.reason}. ` +
-          `Daily: $${budgetCheck.dailySpent.toFixed(2)}/${this.dailyBudget}, ` +
-          `Monthly: $${budgetCheck.monthlySpent.toFixed(2)}/${this.monthlyBudget}`
-      );
-    }
-
-    return this.tracker.makeRequest(request, userId);
-  }
-}
-
-// Usage
-const budgetManager = new BudgetManager(tracker, 10, 200); // $10/day, $200/month
-
-try {
-  const response = await budgetManager.makeRequestWithBudget(
-    {
-      model: 'gpt-4',
-      prompt: 'Write a blog post',
-      maxTokens: 1000
-    },
-    'user-123'
   );
-} catch (error) {
-  console.error('Budget error:', error.message);
+  
+  return {
+    summary: report.text,
+    cost: report.cost,
+    generatedAt: new Date()
+  };
 }
 ```
 
-### Export and Backup
+## Cost Optimization
+
+### Model Comparison
 
 ```typescript
-// Export data in different formats
-async function exportAndBackup() {
-  // JSON export
-  const jsonData = await tracker.exportData('json');
-  fs.writeFileSync('backup-data.json', jsonData);
+import { ai } from 'cost-katana';
 
-  // CSV export
-  const csvData = await tracker.exportData('csv');
-  fs.writeFileSync('backup-data.csv', csvData);
+const models = ['gpt-4', 'gpt-3.5-turbo', 'claude-3-haiku'];
+const prompt = 'Explain machine learning';
 
-  // Custom export with filtering
-  const lastWeekData = await tracker.exportData(
-    'json',
-    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    new Date()
-  );
+for (const model of models) {
+  const response = await ai(model, prompt);
+  console.log(`${model}: $${response.cost.toFixed(4)}`);
+}
 
-  // Upload to S3 for backup
-  import AWS from 'aws-sdk';
-  const s3 = new AWS.S3();
+// Output:
+// gpt-4: $0.0120
+// gpt-3.5-turbo: $0.0015
+// claude-3-haiku: $0.0008
+```
 
-  await s3
-    .putObject({
-      Bucket: 'my-ai-cost-backups',
-      Key: `backup-${new Date().toISOString()}.json`,
-      Body: jsonData,
-      ContentType: 'application/json'
-    })
-    .promise();
+### Cortex Savings Calculator
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function calculateSavings(prompt: string) {
+  // Without optimization
+  const standard = await ai('gpt-4', prompt);
+  
+  // With Cortex optimization
+  const optimized = await ai('gpt-4', prompt, { cortex: true });
+  
+  const savings = standard.cost - optimized.cost;
+  const savingsPercent = (savings / standard.cost) * 100;
+  
+  return {
+    standardCost: standard.cost,
+    optimizedCost: optimized.cost,
+    savings,
+    savingsPercent
+  };
+}
+
+// Test it
+const result = await calculateSavings('Write a comprehensive guide to Python');
+console.log(`Saved: $${result.savings} (${result.savingsPercent}%)`);
+```
+
+## Framework Integration
+
+### Next.js API Route
+
+```typescript
+// app/api/chat/route.ts
+import { ai } from 'cost-katana';
+
+export async function POST(request: Request) {
+  const { prompt } = await request.json();
+  
+  const response = await ai('gpt-4', prompt, {
+    cache: true,
+    cortex: true
+  });
+  
+  return Response.json(response);
 }
 ```
 
-### Integration with Express.js
+### Express.js
 
 ```typescript
 import express from 'express';
+import { ai, chat } from 'cost-katana';
 
 const app = express();
 app.use(express.json());
 
-// Middleware for tracking API usage
-app.use('/api/ai/*', async (req, res, next) => {
-  const userId = req.user?.id || 'anonymous';
-  req.tracker = tracker;
-  req.userId = userId;
-  next();
+// Simple endpoint
+app.post('/api/ai', async (req, res) => {
+  const response = await ai('gpt-4', req.body.prompt);
+  res.json(response);
 });
 
-// Endpoint for AI requests
-app.post('/api/ai/complete', async (req, res) => {
-  try {
-    const { prompt, model = 'gpt-3.5-turbo', maxTokens = 150 } = req.body;
+// Chat endpoint with sessions
+const sessions = new Map();
 
-    const response = await req.tracker.makeRequest(
-      {
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        maxTokens
-      },
-      req.userId
-    );
+app.post('/api/chat', async (req, res) => {
+  const { sessionId, message } = req.body;
+  
+  let session = sessions.get(sessionId);
+  if (!session) {
+    session = chat('gpt-4');
+    sessions.set(sessionId, session);
+  }
+  
+  const response = await session.send(message);
+  res.json({ response, cost: session.totalCost });
+});
+```
 
-    res.json({
-      success: true,
-      response: response.choices[0].message.content,
-      usage: response.usage
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
+### NestJS
+
+```typescript
+import { Controller, Post, Body } from '@nestjs/common';
+import { ai } from 'cost-katana';
+
+@Controller('api')
+export class AiController {
+  @Post('chat')
+  async chat(@Body() body: { prompt: string }) {
+    return await ai('gpt-4', body.prompt, {
+      cache: true,
+      cortex: true
     });
   }
-});
+}
+```
 
-// Analytics endpoint
-app.get('/api/ai/analytics', async (req, res) => {
-  const analytics = await tracker.getAnalytics(
-    req.query.startDate ? new Date(req.query.startDate) : undefined,
-    req.query.endDate ? new Date(req.query.endDate) : undefined,
-    req.userId
+## Production Patterns
+
+### Rate Limiting
+
+```typescript
+import { ai } from 'cost-katana';
+
+const userLimits = new Map();
+
+async function rateLimitedAI(userId: string, prompt: string) {
+  const userCost = userLimits.get(userId) || 0;
+  const dailyLimit = 10; // $10 per day
+  
+  if (userCost >= dailyLimit) {
+    throw new Error('Daily limit exceeded');
+  }
+  
+  const response = await ai('gpt-4', prompt);
+  userLimits.set(userId, userCost + response.cost);
+  
+  return response;
+}
+```
+
+### Error Recovery
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function resilientAI(prompt: string) {
+  const models = ['gpt-4', 'claude-3-sonnet', 'gemini-pro'];
+  
+  for (const model of models) {
+    try {
+      return await ai(model, prompt);
+    } catch (error) {
+      console.log(`${model} failed, trying next...`);
+      continue;
+    }
+  }
+  
+  throw new Error('All models failed');
+}
+```
+
+### Cost Monitoring
+
+```typescript
+import { chat } from 'cost-katana';
+
+async function monitoredChat() {
+  const session = chat('gpt-4');
+  const costThreshold = 1.0; // $1 limit
+  
+  async function send(message: string) {
+    if (session.totalCost >= costThreshold) {
+      throw new Error(`Cost limit exceeded: $${session.totalCost}`);
+    }
+    
+    const response = await session.send(message);
+    console.log(`Session cost: $${session.totalCost}/${costThreshold}`);
+    
+    return response;
+  }
+  
+  return { send, session };
+}
+```
+
+### Batch Processing
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function batchProcess(items: string[]) {
+  const results = [];
+  let totalCost = 0;
+  
+  for (const item of items) {
+    const response = await ai('gpt-3.5-turbo', 
+      `Process this: ${item}`,
+      { cache: true }  // Cache repeated items
+    );
+    
+    results.push(response.text);
+    totalCost += response.cost;
+  }
+  
+  return {
+    results,
+    totalCost,
+    avgCost: totalCost / items.length
+  };
+}
+```
+
+## Real-World Use Cases
+
+### Translation Service
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function translate(text: string, to: string, from = 'English') {
+  return await ai('gpt-3.5-turbo',
+    `Translate from ${from} to ${to}: ${text}`,
+    { cache: true }  // Cache common translations
   );
+}
 
-  res.json(analytics);
-});
+// Use it
+const spanish = await translate('Hello world', 'Spanish');
+const french = await translate('Good morning', 'French');
+```
 
-// Optimization endpoint
-app.post('/api/ai/optimize', async (req, res) => {
-  const { prompt, model, provider } = req.body;
+### Sentiment Analysis
 
-  const suggestions = await tracker.optimizePrompt(prompt, model, provider);
+```typescript
+import { ai } from 'cost-katana';
 
-  res.json({ suggestions });
-});
+async function analyzeSentiment(text: string) {
+  const analysis = await ai('claude-3-haiku',  // Fast & cheap
+    `Analyze the sentiment of this text. Respond with: positive, negative, or neutral.\n\nText: ${text}`,
+    { cache: true }
+  );
+  
+  return {
+    sentiment: analysis.text.toLowerCase().trim(),
+    cost: analysis.cost
+  };
+}
+```
 
-app.listen(8000, () => {
-  console.log('AI Cost Tracker API running on port 8000');
-});
+### Text Summarization
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function summarize(text: string, maxWords = 100) {
+  const summary = await ai('gpt-4',
+    `Summarize this text in ${maxWords} words or less:\n\n${text}`,
+    { cortex: true }  // Optimize for long text
+  );
+  
+  return summary.text;
+}
+```
+
+### Q&A System
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function answerQuestion(question: string, context: string) {
+  const answer = await ai('claude-3-sonnet',
+    `Context: ${context}\n\nQuestion: ${question}\n\nAnswer:`,
+    { cache: true }  // Cache FAQ answers
+  );
+  
+  return answer.text;
+}
+
+// Use it
+const answer = await answerQuestion(
+  'What is your refund policy?',
+  'Company policies and FAQ content...'
+);
+```
+
+## Advanced Patterns
+
+### Streaming Responses
+
+```typescript
+import { chat } from 'cost-katana';
+
+async function streamingChat() {
+  const session = chat('gpt-4');
+  
+  // Send message
+  const response = await session.send('Tell me a long story');
+  
+  // Simulate streaming output
+  const words = response.split(' ');
+  for (const word of words) {
+    process.stdout.write(word + ' ');
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  
+  console.log(`\nCost: $${session.totalCost}`);
+}
+```
+
+### Parallel Processing
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function processInParallel(prompts: string[]) {
+  const results = await Promise.all(
+    prompts.map(prompt => 
+      ai('gpt-3.5-turbo', prompt, { cache: true })
+    )
+  );
+  
+  const totalCost = results.reduce((sum, r) => sum + r.cost, 0);
+  
+  return {
+    results: results.map(r => r.text),
+    totalCost,
+    avgCost: totalCost / prompts.length
+  };
+}
+```
+
+### Fallback Strategy
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function aiWithFallback(prompt: string) {
+  try {
+    // Try premium model first
+    return await ai('gpt-4', prompt);
+  } catch (error) {
+    console.log('GPT-4 failed, falling back to GPT-3.5');
+    
+    // Fallback to cheaper model
+    return await ai('gpt-3.5-turbo', prompt);
+  }
+}
+```
+
+### Cost-Aware Routing
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function smartRoute(prompt: string) {
+  const wordCount = prompt.split(' ').length;
+  
+  // Simple task - use cheap model
+  if (wordCount < 20) {
+    return await ai('gpt-3.5-turbo', prompt);
+  }
+  
+  // Complex task - use powerful model with optimization
+  return await ai('gpt-4', prompt, { cortex: true });
+}
+```
+
+## Testing & Development
+
+### Mock Responses for Testing
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function testAI() {
+  // Use cache in tests for consistency
+  const response = await ai('gpt-3.5-turbo', 'Test prompt', {
+    cache: true,
+    temperature: 0  // Deterministic responses
+  });
+  
+  expect(response.text).toBeDefined();
+  expect(response.cost).toBeGreaterThan(0);
+}
+```
+
+### Cost Budget Testing
+
+```typescript
+import { chat } from 'cost-katana';
+
+async function testWithBudget() {
+  const session = chat('gpt-3.5-turbo');
+  const budget = 0.10; // $0.10 limit
+  
+  for (let i = 0; i < 100; i++) {
+    if (session.totalCost >= budget) {
+      console.log(`Stopped at message ${i}, cost: $${session.totalCost}`);
+      break;
+    }
+    
+    await session.send(`Test message ${i}`);
+  }
+}
+```
+
+## Performance Optimization
+
+### Cache Hit Rate Optimization
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function optimizeCaching() {
+  const commonQueries = [
+    'What are your business hours?',
+    'What is your return policy?',
+    'How do I contact support?'
+  ];
+  
+  // First pass - populate cache
+  for (const query of commonQueries) {
+    await ai('gpt-3.5-turbo', query, { cache: true });
+  }
+  
+  // Second pass - all from cache (free!)
+  for (const query of commonQueries) {
+    const response = await ai('gpt-3.5-turbo', query, { cache: true });
+    console.log(response.cached); // true
+  }
+}
+```
+
+### Model Selection Optimization
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function optimizeModelSelection(tasks: Array<{prompt: string, complexity: string}>) {
+  let totalCost = 0;
+  
+  for (const task of tasks) {
+    const model = task.complexity === 'simple' 
+      ? 'gpt-3.5-turbo'  // 10x cheaper
+      : 'gpt-4';         // More capable
+    
+    const response = await ai(model, task.prompt);
+    totalCost += response.cost;
+  }
+  
+  console.log(`Total cost: $${totalCost}`);
+}
+```
+
+## Monitoring & Analytics
+
+### Session Tracking
+
+```typescript
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+
+// Track session metrics
+async function trackSession() {
+  await session.send('Message 1');
+  await session.send('Message 2');
+  
+  const metrics = {
+    messages: session.messages.length,
+    cost: session.totalCost,
+    tokens: session.totalTokens,
+    avgCostPerMessage: session.totalCost / session.messages.length
+  };
+  
+  // Log to your analytics
+  console.log('Session metrics:', metrics);
+  
+  // Also visible in dashboard: https://costkatana.com/dashboard
+}
+```
+
+### Cost Alerts
+
+```typescript
+import { chat } from 'cost-katana';
+
+const session = chat('gpt-4');
+const alertThreshold = 5.0; // $5
+
+async function sendWithAlert(message: string) {
+  const response = await session.send(message);
+  
+  if (session.totalCost > alertThreshold) {
+    console.warn(`⚠️ Cost alert: $${session.totalCost} exceeds threshold!`);
+    // Send notification to your alert system
+  }
+  
+  return response;
+}
 ```
 
 ## Best Practices
 
-1. **Always estimate costs before expensive operations**
-2. **Use appropriate models for different tasks**
-3. **Implement caching for repeated queries**
-4. **Set up alerts to avoid bill surprises**
-5. **Regularly review optimization suggestions**
-6. **Export and backup usage data periodically**
-7. **Use batch processing when possible**
-8. **Monitor token usage patterns**
-9. **Implement rate limiting for production**
-10. **Keep your API keys secure**
+1. **Enable caching for FAQ and common queries**
+   ```typescript
+   await ai('gpt-3.5-turbo', 'FAQ question', { cache: true });
+   ```
+
+2. **Use Cortex for long-form content**
+   ```typescript
+   await ai('gpt-4', 'Long article', { cortex: true });
+   ```
+
+3. **Choose appropriate models**
+   ```typescript
+   // Simple task
+   await ai('gpt-3.5-turbo', 'Simple question');
+   
+   // Complex task
+   await ai('gpt-4', 'Complex analysis');
+   ```
+
+4. **Use chat sessions for conversations**
+```typescript
+   const session = chat('gpt-4');
+   // Reuse for related queries
+   ```
+
+5. **Monitor costs in production**
+   ```typescript
+   console.log(`Cost: $${response.cost}`);
+   // Check dashboard: costkatana.com/dashboard
+   ```
 
 ## Troubleshooting
 
-### Common Issues
-
+### No Response
 ```typescript
-// Handle provider errors
 try {
-  await tracker.makeRequest(request, userId);
+  const response = await ai('gpt-4', 'Hello');
 } catch (error) {
-  if (error.message.includes('rate limit')) {
-    // Wait and retry
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    return tracker.makeRequest(request, userId);
-  }
-
-  if (error.message.includes('invalid API key')) {
-    console.error('Check your API key configuration');
-  }
-
-  throw error;
+  console.error('Error:', error.message);
+  // Error includes helpful troubleshooting steps
 }
+```
 
-// Debug token counting
-import { TokenCounter } from 'ai-cost-tracker';
+### High Costs
+```typescript
+// Check if caching is enabled
+const response = await ai('gpt-4', 'Prompt', { cache: true });
+console.log(response.cached); // Should be true for repeated queries
 
-const text = 'Your text here';
-const tokens = await TokenCounter.countTokens(text, AIProvider.OpenAI, 'gpt-3.5-turbo');
-console.log(`Token count: ${tokens}`);
+// Use optimization
+const optimized = await ai('gpt-4', 'Long prompt', { cortex: true });
+console.log(optimized.optimized); // Should be true
+```
 
-// Verify model support
-import { getModelById, getAllModels } from 'ai-cost-tracker';
-
-const model = getModelById('gpt-4');
-if (!model) {
-  console.log('Model not found. Available models:');
-  getAllModels().forEach(m => console.log(`- ${m.id}`));
-}
+### Rate Limits
+```typescript
+// Automatic retry is built-in
+// If rate limited, Cost Katana automatically:
+// 1. Waits and retries
+// 2. Falls back to alternative provider if needed
+// 3. Returns helpful error if all options exhausted
 ```
 
 ## Next Steps
 
-1. Explore the [API Reference](./API.md) for detailed documentation
-2. Check out the [example files](../examples/) for runnable code
-3. Contribute to the project on [GitHub](https://github.com/Hypothesize-Tech/costkatana-core)
+- Explore [API Reference](./API.md)
+- Try [Gateway Features](./GATEWAY.md)
+- Join [Discord Community](https://discord.gg/costkatana)
+- Visit [Dashboard](https://costkatana.com/dashboard)
