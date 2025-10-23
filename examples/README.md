@@ -9,7 +9,7 @@ Simple, practical examples showing how to use Cost Katana.
 npm install
 
 # Set your API key (choose one)
-export COST_KATANA_KEY="dak_your_key"
+export COST_KATANA_API_KEY="dak_your_key"
 # OR
 export OPENAI_API_KEY="sk-..."
 

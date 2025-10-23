@@ -148,7 +148,7 @@ const response = await ai('gpt-4', 'Hello');
 
 ```bash
 # Option 1: Cost Katana (Recommended - all features)
-COST_KATANA_KEY=dak_your_key_here
+COST_KATANA_API_KEY=dak_your_key_here
 
 # Option 2: Direct provider keys (limited features)
 OPENAI_API_KEY=sk-...
@@ -446,7 +446,7 @@ await configure({ firewall: true });
 
 ```bash
 # Set Cost Katana key (recommended)
-export COST_KATANA_KEY="dak_your_key"
+export COST_KATANA_API_KEY="dak_your_key"
 
 # Or set provider keys directly
 export OPENAI_API_KEY="sk-..."

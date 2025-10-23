@@ -134,7 +134,7 @@ Cost Katana auto-detects configuration from environment variables:
 ### Cost Katana Credentials
 ```bash
 # Any of these work:
-COST_KATANA_KEY=dak_your_key
+COST_KATANA_API_KEY=dak_your_key
 COST_KATANA_API_KEY=dak_your_key
 API_KEY=dak_your_key
 COSTKATANA_KEY=dak_your_key

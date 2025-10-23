@@ -1753,7 +1753,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
   try {
     // Try multiple API key sources
     const apiKey = 
-      process.env.COST_KATANA_KEY ||
+      process.env.COST_KATANA_API_KEY ||
       process.env.COST_KATANA_API_KEY ||
       process.env.API_KEY ||
       process.env.COSTKATANA_KEY;
@@ -1778,7 +1778,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
           `\n❌ No API keys found!\n\n` +
           `Please set up Cost Katana for the best experience:\n\n` +
           `  Option 1: Cost Katana (Recommended)\n` +
-          `    export COST_KATANA_KEY="dak_your_key"\n` +
+          `    export COST_KATANA_API_KEY="dak_your_key"\n` +
           `    export PROJECT_ID="your_project_id"\n` +
           `    Get your keys at: https://costkatana.com/settings/api-keys\n\n` +
           `  Option 2: Direct Provider Keys\n` +
@@ -2137,7 +2137,7 @@ export async function configure(options: {
   // Set environment variables if provided
   if (options.apiKey) {
     process.env.API_KEY = options.apiKey;
-    process.env.COST_KATANA_KEY = options.apiKey;
+    process.env.COST_KATANA_API_KEY = options.apiKey;
   }
   
   if (options.projectId) {

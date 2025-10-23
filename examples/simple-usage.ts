@@ -152,7 +152,7 @@ async function manualConfigurationExample() {
   
   // Configure with specific settings
   await configure({
-    apiKey: process.env.COST_KATANA_KEY,
+    apiKey: process.env.COST_KATANA_API_KEY,
     projectId: process.env.PROJECT_ID,
     providers: [
       { name: 'openai', apiKey: process.env.OPENAI_API_KEY },
@@ -179,7 +179,7 @@ async function runAllExamples() {
   try {
     // Check if we have any API keys configured
     const hasKeys = 
-      process.env.COST_KATANA_KEY || 
+      process.env.COST_KATANA_API_KEY || 
       process.env.API_KEY ||
       process.env.OPENAI_API_KEY ||
       process.env.ANTHROPIC_API_KEY;
@@ -188,7 +188,7 @@ async function runAllExamples() {
       console.log('⚠️  No API keys found in environment!\n');
       console.log('To run these examples, you need to set up API keys:\n');
       console.log('Option 1: Cost Katana (Recommended - includes all features)');
-      console.log('  export COST_KATANA_KEY="dak_your_key"');
+      console.log('  export COST_KATANA_API_KEY="dak_your_key"');
       console.log('  export PROJECT_ID="your_project_id"');
       console.log('  Get your keys at: https://costkatana.com/settings\n');
       console.log('Option 2: Direct provider keys (Limited features)');
@@ -205,7 +205,7 @@ async function runAllExamples() {
     await errorHandlingExample();
     
     // Only run manual config if we have the keys
-    if (process.env.COST_KATANA_KEY && process.env.PROJECT_ID) {
+    if (process.env.COST_KATANA_API_KEY && process.env.PROJECT_ID) {
       await manualConfigurationExample();
     }
     

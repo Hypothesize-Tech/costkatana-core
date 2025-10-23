@@ -303,7 +303,7 @@ try {
   ❌ No API keys found!
   
   Please set up Cost Katana:
-    export COST_KATANA_KEY="dak_your_key"
+    export COST_KATANA_API_KEY="dak_your_key"
     Get your key: https://costkatana.com/settings
   
   Or use provider keys directly:
