@@ -68,11 +68,11 @@ console.log(`Total cost: $${session.totalCost}`);
 - ✅ Production-ready code with full error handling
 
 **Popular examples:**
-- [Cost Tracking](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/1-cost-tracking) - Track costs across all providers
-- [Webhooks](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/10-webhooks) - Real-time notifications
-- [Workflows](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/13-workflows) - Multi-step AI orchestration
-- [Semantic Caching](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/14-cache) - 30-40% cost reduction
-- [OpenTelemetry](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/11-observability) - Distributed tracing
+- [Cost Tracking](https://github.com/Hypothesize-Tech/costkatana-examples/tree/master/1-cost-tracking) - Track costs across all providers
+- [Webhooks](https://github.com/Hypothesize-Tech/costkatana-examples/tree/master/10-webhooks) - Real-time notifications
+- [Workflows](https://github.com/Hypothesize-Tech/costkatana-examples/tree/master/13-workflows) - Multi-step AI orchestration
+- [Semantic Caching](https://github.com/Hypothesize-Tech/costkatana-examples/tree/master/14-cache) - 30-40% cost reduction
+- [OpenTelemetry](https://github.com/Hypothesize-Tech/costkatana-examples/tree/master/11-observability) - Distributed tracing
 
 ---
 
