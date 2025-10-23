@@ -556,7 +556,7 @@ const response = await ai('gpt-4', 'Hello');
 - **Documentation**: [docs.costkatana.com](https://docs.costkatana.com)
 - **GitHub**: [github.com/cost-katana](https://github.com/cost-katana)
 - **Email**: support@costkatana.com
-- **Discord**: [discord.gg/costkatana](https://discord.gg/Wcwzw8wM)
+- **Discord**: [discord.gg/costkatana](https://discord.gg/D8nDArmKbY)
 
 ## License
 

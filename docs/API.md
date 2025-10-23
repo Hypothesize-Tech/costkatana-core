@@ -281,5 +281,5 @@ console.log(`Total: $${session.totalCost}`);
 - **Documentation**: https://docs.costkatana.com
 - **Dashboard**: https://costkatana.com
 - **GitHub**: https://github.com/Hypothesize-Tech/costkatana-core
-- **Discord**: https://discord.gg/Wcwzw8wM
+- **Discord**: https://discord.gg/D8nDArmKbY
 - **Email**: support@costkatana.com

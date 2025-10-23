@@ -271,7 +271,7 @@ import AICostTracker from 'cost-katana';
 
 ### Need help?
 - Documentation: https://docs.costkatana.com
-- Discord: https://discord.gg/Wcwzw8wM
+- Discord: https://discord.gg/D8nDArmKbY
 - Email: support@costkatana.com
 
 ## Why Upgrade?
@@ -296,6 +296,6 @@ import AICostTracker from 'cost-katana';
 
 We'd love to hear about your upgrade experience!
 - GitHub: https://github.com/cost-katana/core/issues
-- Discord: https://discord.gg/Wcwzw8wM
+- Discord: https://discord.gg/D8nDArmKbY
 
 Thank you for using Cost Katana! 🥷
