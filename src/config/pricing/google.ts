@@ -1,7 +1,7 @@
 import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 
 export const GOOGLE_PRICING: ModelPricingConfig[] = [
-  // Gemini 2.5 Pro
+  // === Gemini 2.5 Models (Latest) ===
   {
     modelId: 'gemini-2.5-pro',
     modelName: 'Gemini 2.5 Pro',
@@ -10,13 +10,12 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 10.0, // <= 200k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 2000000,
-    capabilities: ['text', 'multimodal', 'reasoning', 'coding'],
+    capabilities: ['text', 'multimodal', 'reasoning', 'coding', 'complex-problems'],
     category: 'multimodal',
     isLatest: true,
     notes:
-      'State-of-the-art multipurpose model, excels at coding and complex reasoning. $2.50/$15.00 for prompts > 200k tokens'
+      'Our most advanced reasoning Gemini model, made to solve complex problems. Best for multimodal understanding, coding (web development), and complex prompts. $2.50/$15.00 for prompts > 200k tokens'
   },
-  // Gemini 2.5 Flash
   {
     modelId: 'gemini-2.5-flash',
     modelName: 'Gemini 2.5 Flash',
@@ -25,12 +24,12 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 2.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking'],
+    capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking', 'live-api'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'First hybrid reasoning model with 1M context and thinking budgets. Audio input: $1.00'
+    notes:
+      "Our best model in terms of price-performance, offering well-rounded capabilities. Support for Live API included for some endpoints. See the model's thinking process as part of the response. Audio input: $1.00"
   },
-  // Gemini 2.5 Flash-Lite Preview
   {
     modelId: 'gemini-2.5-flash-lite-preview',
     modelName: 'Gemini 2.5 Flash-Lite Preview',
@@ -39,12 +38,46 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking'],
+    capabilities: [
+      'text',
+      'image',
+      'video',
+      'multimodal',
+      'reasoning',
+      'thinking',
+      'high-throughput'
+    ],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Smallest and most cost effective model for at-scale usage. Audio input: $0.50'
+    notes:
+      'Our most cost effective model that supports high throughput tasks. The fastest model in the 2.5 line. Features 1M token context window and multimodal input. Outperforms 2.0 Flash on most evaluation benchmarks. Audio input: $0.50'
   },
-  // Gemini 2.5 Flash Native Audio
+  {
+    modelId: 'gemini-2.5-flash-audio',
+    modelName: 'Gemini 2.5 Flash Audio',
+    provider: 'Google AI',
+    inputPrice: 1.0, // audio input
+    outputPrice: 2.5, // text output
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['audio', 'multimodal', 'audio-input'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'Gemini 2.5 Flash with audio input capabilities'
+  },
+  {
+    modelId: 'gemini-2.5-flash-lite-audio-preview',
+    modelName: 'Gemini 2.5 Flash-Lite Audio Preview',
+    provider: 'Google AI',
+    inputPrice: 0.5, // audio input
+    outputPrice: 0.4, // text output
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['audio', 'multimodal', 'audio-input', 'high-throughput'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'Gemini 2.5 Flash-Lite with audio input capabilities'
+  },
   {
     modelId: 'gemini-2.5-flash-native-audio',
     modelName: 'Gemini 2.5 Flash Native Audio',
@@ -59,7 +92,19 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     notes:
       'Native audio model optimized for higher quality audio outputs. Audio/video input: $3.00, Audio output: $12.00'
   },
-  // Gemini 2.5 Flash Preview TTS
+  {
+    modelId: 'gemini-2.5-flash-native-audio-output',
+    modelName: 'Gemini 2.5 Flash Native Audio Output',
+    provider: 'Google AI',
+    inputPrice: 3.0, // audio/video input
+    outputPrice: 12.0, // audio output
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['audio', 'multimodal', 'native-audio', 'audio-output'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'Native audio model with audio output capabilities'
+  },
   {
     modelId: 'gemini-2.5-flash-preview-tts',
     modelName: 'Gemini 2.5 Flash Preview TTS',
@@ -73,7 +118,6 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     isLatest: true,
     notes: '2.5 Flash TTS model optimized for price-performant, low-latency speech generation'
   },
-  // Gemini 2.5 Pro Preview TTS
   {
     modelId: 'gemini-2.5-pro-preview-tts',
     modelName: 'Gemini 2.5 Pro Preview TTS',
@@ -87,7 +131,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     isLatest: true,
     notes: '2.5 Pro TTS model optimized for powerful, low-latency speech generation'
   },
-  // Gemini 2.0 Flash
+
+  // === Gemini 2.0 Models ===
   {
     modelId: 'gemini-2.0-flash',
     modelName: 'Gemini 2.0 Flash',
@@ -96,12 +141,12 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'image', 'video', 'multimodal', 'agents'],
+    capabilities: ['text', 'image', 'video', 'multimodal', 'agents', 'next-generation'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
+    notes:
+      'Our newest multimodal model, with next generation features and improved capabilities. Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
   },
-  // Gemini 2.0 Flash-Lite
   {
     modelId: 'gemini-2.0-flash-lite',
     modelName: 'Gemini 2.0 Flash-Lite',
@@ -110,12 +155,27 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.3,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'multimodal'],
+    capabilities: ['text', 'multimodal', 'cost-efficient', 'low-latency'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Smallest and most cost effective model, built for at scale usage'
+    notes:
+      'A Gemini 2.0 Flash model optimized for cost efficiency and low latency. Smallest and most cost effective model, built for at scale usage'
   },
-  // Gemini 1.5 Flash
+  {
+    modelId: 'gemini-2.0-flash-audio',
+    modelName: 'Gemini 2.0 Flash Audio',
+    provider: 'Google AI',
+    inputPrice: 0.7, // audio input
+    outputPrice: 0.4, // text output
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['audio', 'multimodal', 'audio-input'],
+    category: 'audio',
+    isLatest: false,
+    notes: 'Gemini 2.0 Flash with audio input capabilities'
+  },
+
+  // === Gemini 1.5 Models ===
   {
     modelId: 'gemini-1.5-flash',
     modelName: 'Gemini 1.5 Flash',
@@ -130,7 +190,19 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     notes:
       'Fastest multimodal model for diverse, repetitive tasks. $0.15/$0.60 for prompts > 128k tokens'
   },
-  // Gemini 1.5 Flash-8B
+  {
+    modelId: 'gemini-1.5-flash-large-context',
+    modelName: 'Gemini 1.5 Flash Large Context',
+    provider: 'Google AI',
+    inputPrice: 0.15, // > 128k tokens
+    outputPrice: 0.6, // > 128k tokens
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['text', 'image', 'video', 'multimodal', 'large-context'],
+    category: 'multimodal',
+    isLatest: false,
+    notes: 'Gemini 1.5 Flash with large context pricing (>128k tokens)'
+  },
   {
     modelId: 'gemini-1.5-flash-8b',
     modelName: 'Gemini 1.5 Flash-8B',
@@ -139,12 +211,24 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.15, // <= 128k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'image', 'video', 'multimodal'],
+    capabilities: ['text', 'image', 'video', 'multimodal', 'efficient'],
     category: 'multimodal',
     isLatest: false,
     notes: 'Smallest model for lower intelligence use cases. $0.075/$0.30 for prompts > 128k tokens'
   },
-  // Gemini 1.5 Pro
+  {
+    modelId: 'gemini-1.5-flash-8b-large-context',
+    modelName: 'Gemini 1.5 Flash-8B Large Context',
+    provider: 'Google AI',
+    inputPrice: 0.075, // > 128k tokens
+    outputPrice: 0.3, // > 128k tokens
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['text', 'image', 'video', 'multimodal', 'efficient', 'large-context'],
+    category: 'multimodal',
+    isLatest: false,
+    notes: 'Gemini 1.5 Flash-8B with large context pricing (>128k tokens)'
+  },
   {
     modelId: 'gemini-1.5-pro',
     modelName: 'Gemini 1.5 Pro',
@@ -159,35 +243,21 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     notes:
       'Highest intelligence Gemini 1.5 series model with 2M context. $2.50/$10.00 for prompts > 128k tokens'
   },
-  // Text Embedding 004
   {
-    modelId: 'text-embedding-004',
-    modelName: 'Text Embedding 004',
+    modelId: 'gemini-1.5-pro-large-context',
+    modelName: 'Gemini 1.5 Pro Large Context',
     provider: 'Google AI',
-    inputPrice: 0.0, // Free tier only
-    outputPrice: 0.0, // Free tier only
+    inputPrice: 2.5, // > 128k tokens
+    outputPrice: 10.0, // > 128k tokens
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 2048,
-    capabilities: ['embedding'],
-    category: 'embedding',
-    isLatest: true,
-    notes: 'State-of-the-art text embedding model (free tier only)'
-  },
-  // Gemma 3
-  {
-    modelId: 'gemma-3',
-    modelName: 'Gemma 3',
-    provider: 'Google AI',
-    inputPrice: 0.0, // Free tier only
-    outputPrice: 0.0, // Free tier only
-    unit: PricingUnit.Per1MTokens,
-    contextWindow: 8192,
-    capabilities: ['text', 'open-source'],
+    contextWindow: 2000000,
+    capabilities: ['text', 'code', 'reasoning', 'multimodal', 'large-context'],
     category: 'text',
-    isLatest: true,
-    notes: 'Lightweight, state-of-the-art open model (free tier only)'
+    isLatest: false,
+    notes: 'Gemini 1.5 Pro with large context pricing (>128k tokens)'
   },
-  // Gemma 3n
+
+  // === Gemma Models (Open Source) ===
   {
     modelId: 'gemma-3n',
     modelName: 'Gemma 3n',
@@ -196,40 +266,323 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.0, // Free tier only
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
-    capabilities: ['text', 'open-source', 'mobile-optimized'],
+    capabilities: ['text', 'open-source', 'multimodal', '140-languages', 'mobile-optimized'],
     category: 'text',
     isLatest: true,
-    notes: 'Open model built for efficient performance on everyday devices (free tier only)'
+    notes:
+      'The latest open models, designed for efficient execution on low-resource devices, capable of multimodal input (text, image, video, audio), and trained with data in over 140 spoken languages. Open model built for efficient performance on everyday devices (free tier only)'
   },
-  // Imagen 4 Preview
   {
-    modelId: 'imagen-4-preview',
-    modelName: 'Imagen 4 Preview',
+    modelId: 'gemma-3',
+    modelName: 'Gemma 3',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'open-source', 'multimodal', '140-languages', 'wide-variety-tasks'],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'The third generation of our open models, featuring the ability to solve a wide variety of tasks with text and image input, support for over 140 languages, and long 128K context window (free tier only)'
+  },
+  {
+    modelId: 'gemma-2',
+    modelName: 'Gemma 2',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'text-generation', 'summarization', 'extraction'],
+    category: 'text',
+    isLatest: false,
+    notes:
+      'The second generation of our open models featuring text generation, summarization, and extraction (free tier only)'
+  },
+  {
+    modelId: 'gemma',
+    modelName: 'Gemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: [
+      'text',
+      'open-source',
+      'text-generation',
+      'summarization',
+      'extraction',
+      'lightweight'
+    ],
+    category: 'text',
+    isLatest: false,
+    notes:
+      'A small-sized, lightweight open model supporting text generation, summarization, and extraction (free tier only)'
+  },
+
+  // === Specialized Gemma Models ===
+  {
+    modelId: 'shieldgemma-2',
+    modelName: 'ShieldGemma 2',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'safety-evaluation', 'instruction-tuned'],
+    category: 'safety',
+    isLatest: true,
+    notes:
+      'Instruction tuned models for evaluating the safety of text and images against a set of defined safety policies (free tier only)'
+  },
+  {
+    modelId: 'paligemma',
+    modelName: 'PaliGemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'vision-language', 'siglip', 'gemma'],
+    category: 'vision-language',
+    isLatest: true,
+    notes: 'Our open vision-language model that combines SigLIP and Gemma (free tier only)'
+  },
+  {
+    modelId: 'codegemma',
+    modelName: 'CodeGemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: [
+      'text',
+      'open-source',
+      'coding',
+      'fill-in-middle',
+      'code-generation',
+      'mathematical-reasoning'
+    ],
+    category: 'coding',
+    isLatest: true,
+    notes:
+      'Powerful, lightweight open model that can perform a variety of coding tasks like fill-in-the-middle code completion, code generation, natural language understanding, mathematical reasoning, and instruction following (free tier only)'
+  },
+  {
+    modelId: 'txgemma',
+    modelName: 'TxGemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: [
+      'text',
+      'open-source',
+      'therapeutic',
+      'predictions',
+      'classifications',
+      'efficient-training'
+    ],
+    category: 'therapeutic',
+    isLatest: true,
+    notes:
+      'Generates predictions, classifications or text based on therapeutic related data and can be used to efficiently build AI models for therapeutic-related tasks with less data and less compute (free tier only)'
+  },
+  {
+    modelId: 'medgemma',
+    modelName: 'MedGemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'medical', 'medical-comprehension', 'variants'],
+    category: 'medical',
+    isLatest: true,
+    notes:
+      'Collection of Gemma 3 variants that are trained for performance on medical text and image comprehension (free tier only)'
+  },
+  {
+    modelId: 'medsiglip',
+    modelName: 'MedSigLIP',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'medical', 'medical-images', 'embedding-space'],
+    category: 'medical',
+    isLatest: true,
+    notes:
+      'SigLIP variant that is trained to encode medical images and text into a common embedding space (free tier only)'
+  },
+  {
+    modelId: 't5gemma',
+    modelName: 'T5Gemma',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['text', 'open-source', 'encoder-decoder', 'research', 'lightweight', 'powerful'],
+    category: 'research',
+    isLatest: true,
+    notes:
+      'A family of lightweight yet powerful encoder-decoder research models from Google (free tier only)'
+  },
+
+  // === Embeddings Models ===
+  {
+    modelId: 'text-embedding-004',
+    modelName: 'Text Embedding 004',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2048,
+    capabilities: ['embedding', 'semantic-search', 'classification', 'clustering'],
+    category: 'embedding',
+    isLatest: true,
+    notes:
+      'State-of-the-art text embedding model for semantic search, classification, clustering, and similar tasks (free tier only)'
+  },
+  {
+    modelId: 'multimodal-embeddings',
+    modelName: 'Multimodal Embeddings',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2048,
+    capabilities: ['embedding', 'multimodal', 'image-classification', 'image-search'],
+    category: 'embedding',
+    isLatest: true,
+    notes:
+      'Generates vectors based on images, which can be used for downstream tasks like image classification, image search, and more (free tier only)'
+  },
+
+  // === Imagen Models (Image Generation) ===
+  {
+    modelId: 'imagen-4-generation',
+    modelName: 'Imagen 4 for Generation',
     provider: 'Google AI',
     inputPrice: 0.04, // Standard
     outputPrice: 0.04, // Standard
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['image-generation'],
+    capabilities: ['image-generation', 'text-to-image', 'higher-quality'],
     category: 'image',
     isLatest: true,
-    notes: 'Latest image generation model with better text rendering. Ultra: $0.06 per image'
+    notes:
+      'Use text prompts to generate novel images with higher quality than our previous image generation models'
   },
-  // Imagen 3
   {
-    modelId: 'imagen-3',
-    modelName: 'Imagen 3',
+    modelId: 'imagen-4-fast-generation',
+    modelName: 'Imagen 4 for Fast Generation',
+    provider: 'Google AI',
+    inputPrice: 0.04, // Standard
+    outputPrice: 0.04, // Standard
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['image-generation', 'text-to-image', 'higher-quality', 'lower-latency'],
+    category: 'image',
+    isLatest: true,
+    notes:
+      'Use text prompts to generate novel images with higher quality and lower latency than our previous image generation models'
+  },
+  {
+    modelId: 'imagen-4-ultra-generation',
+    modelName: 'Imagen 4 for Ultra Generation',
+    provider: 'Google AI',
+    inputPrice: 0.06, // Ultra
+    outputPrice: 0.06, // Ultra
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'image-generation',
+      'text-to-image',
+      'higher-quality',
+      'better-prompt-adherence'
+    ],
+    category: 'image',
+    isLatest: true,
+    notes:
+      'Use text prompts to generate novel images with higher quality and better prompt adherence than our previous image generation models'
+  },
+  {
+    modelId: 'imagen-3-generation',
+    modelName: 'Imagen 3 for Generation',
     provider: 'Google AI',
     inputPrice: 0.03,
     outputPrice: 0.03,
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['image-generation'],
+    capabilities: ['image-generation', 'text-to-image'],
     category: 'image',
     isLatest: false,
-    notes: 'State-of-the-art image generation model'
+    notes: 'Use text prompts to generate novel images'
   },
-  // Veo 2
+  {
+    modelId: 'imagen-3-editing-customization',
+    modelName: 'Imagen 3 for Editing and Customization',
+    provider: 'Google AI',
+    inputPrice: 0.03,
+    outputPrice: 0.03,
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'image-generation',
+      'text-to-image',
+      'image-editing',
+      'customization',
+      'mask-editing'
+    ],
+    category: 'image',
+    isLatest: false,
+    notes:
+      'Use text prompts to edit existing input images, or parts of an image with a mask or generate new images based upon the context provided by input reference images'
+  },
+  {
+    modelId: 'imagen-3-fast-generation',
+    modelName: 'Imagen 3 for Fast Generation',
+    provider: 'Google AI',
+    inputPrice: 0.03,
+    outputPrice: 0.03,
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['image-generation', 'text-to-image', 'lower-latency'],
+    category: 'image',
+    isLatest: false,
+    notes:
+      'Use text prompts to generate novel images with lower latency than our other image generation models'
+  },
+  {
+    modelId: 'imagen-captioning-vqa',
+    modelName: 'Imagen for Captioning & VQA',
+    provider: 'Google AI',
+    inputPrice: 0.03,
+    outputPrice: 0.03,
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'image-generation',
+      'text-to-image',
+      'image-editing',
+      'mask-editing',
+      'captioning',
+      'vqa'
+    ],
+    category: 'image',
+    isLatest: false,
+    notes:
+      'Use text prompts to generate novel images, edit existing ones, edit parts of an image with a mask and more'
+  },
+
+  // === Veo Models (Video Generation) ===
   {
     modelId: 'veo-2',
     modelName: 'Veo 2',
@@ -238,12 +591,104 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.35, // per second
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['video-generation'],
+    capabilities: ['video-generation', 'text-to-video', 'image-to-video', 'higher-quality'],
     category: 'video',
     isLatest: true,
-    notes: 'State-of-the-art video generation model (priced per second)'
+    notes:
+      'Use text prompts and images to generate novel videos with higher quality than our previous video generation model (priced per second)'
   },
-  // Legacy models for backward compatibility
+  {
+    modelId: 'veo-3',
+    modelName: 'Veo 3',
+    provider: 'Google AI',
+    inputPrice: 0.35, // per second
+    outputPrice: 0.35, // per second
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['video-generation', 'text-to-video', 'image-to-video', 'higher-quality'],
+    category: 'video',
+    isLatest: true,
+    notes:
+      'Use text prompts and images to generate novel videos with higher quality than our previous video generation model (priced per second)'
+  },
+  {
+    modelId: 'veo-3-fast',
+    modelName: 'Veo 3 Fast',
+    provider: 'Google AI',
+    inputPrice: 0.35, // per second
+    outputPrice: 0.35, // per second
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'video-generation',
+      'text-to-video',
+      'image-to-video',
+      'higher-quality',
+      'lower-latency'
+    ],
+    category: 'video',
+    isLatest: true,
+    notes:
+      'Use text prompts and images to generate novel videos with higher quality and lower latency than our previous video generation model (priced per second)'
+  },
+
+  // === Preview Models ===
+  {
+    modelId: 'virtual-try-on',
+    modelName: 'Virtual Try-On',
+    provider: 'Google AI',
+    inputPrice: 0.0, // Free tier only
+    outputPrice: 0.0, // Free tier only
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: ['image-generation', 'virtual-try-on', 'clothing'],
+    category: 'image',
+    isLatest: true,
+    notes: 'Generate images of people wearing clothing products (preview model, free tier only)'
+  },
+  {
+    modelId: 'veo-3-preview',
+    modelName: 'Veo 3 Preview',
+    provider: 'Google AI',
+    inputPrice: 0.35, // per second
+    outputPrice: 0.35, // per second
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'video-generation',
+      'text-to-video',
+      'image-to-video',
+      'higher-quality',
+      'preview'
+    ],
+    category: 'video',
+    isLatest: true,
+    notes:
+      'Use text prompts and images to generate novel videos with higher quality than our previous video generation model (preview model, priced per second)'
+  },
+  {
+    modelId: 'veo-3-fast-preview',
+    modelName: 'Veo 3 Fast Preview',
+    provider: 'Google AI',
+    inputPrice: 0.35, // per second
+    outputPrice: 0.35, // per second
+    unit: PricingUnit.PerRequest,
+    contextWindow: 0,
+    capabilities: [
+      'video-generation',
+      'text-to-video',
+      'image-to-video',
+      'higher-quality',
+      'lower-latency',
+      'preview'
+    ],
+    category: 'video',
+    isLatest: true,
+    notes:
+      'Use text prompts and images to generate novel videos with higher quality and lower latency than our previous video generation model (preview model, priced per second)'
+  },
+
+  // === Legacy Models for Backward Compatibility ===
   {
     modelId: 'gemini-1.0-pro',
     modelName: 'Gemini 1.0 Pro',
@@ -255,6 +700,19 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'analysis'],
     category: 'text',
     isLatest: false,
-    notes: 'Earlier generation Gemini model'
+    notes: 'Earlier generation Gemini model (legacy)'
+  },
+  {
+    modelId: 'gemini-1.0-pro-vision',
+    modelName: 'Gemini 1.0 Pro Vision',
+    provider: 'Google AI',
+    inputPrice: 0.5,
+    outputPrice: 1.5,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['text', 'vision', 'multimodal'],
+    category: 'text',
+    isLatest: false,
+    notes: 'Earlier generation Gemini model with vision capabilities (legacy)'
   }
 ];

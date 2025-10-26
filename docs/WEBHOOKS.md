@@ -2,331 +2,428 @@
 
 ## Overview
 
-The Cost Katana webhook system allows you to receive real-time notifications about important events in your AI cost optimization workflow. Webhooks enable you to build integrations that respond to events as they happen, rather than requiring you to poll for updates.
+Cost Katana webhooks notify you about important events in real-time. Perfect for monitoring costs, tracking usage, and automating responses.
+
+## Quick Start
+
+### Using Simple API
+
+```typescript
+import { ai, configure } from 'cost-katana';
+
+// Configure webhook endpoint
+await configure({
+  apiKey: 'dak_your_key',
+  webhookUrl: 'https://your-api.com/webhooks/costkatana'
+});
+
+// Use normally - webhooks fire automatically
+await ai('gpt-4', 'Expensive request');
+// Webhook fires if cost threshold exceeded
+```
 
 ## Supported Events
 
-The webhook system supports a wide range of event types across different categories:
-
-### Cost & Budget Events
-- `cost.alert`: General cost alerts
-- `cost.threshold_exceeded`: Cost threshold has been exceeded
-- `cost.spike_detected`: Unusual spike in costs detected
-- `cost.anomaly_detected`: Anomalous cost pattern detected
-- `budget.warning`: Budget is approaching its limit
-- `budget.exceeded`: Budget has been exceeded
+### Cost Events
+- `cost.alert` - Cost alert triggered
+- `cost.threshold_exceeded` - Threshold exceeded
+- `cost.spike_detected` - Unusual cost spike
+- `budget.warning` - Approaching budget limit
+- `budget.exceeded` - Budget limit exceeded
 
 ### Optimization Events
-- `optimization.completed`: An optimization process has completed
-- `optimization.failed`: An optimization process has failed
-- `optimization.suggested`: New optimization suggestions available
-- `optimization.applied`: Optimizations have been applied
-- `savings.milestone_reached`: A savings milestone has been reached
-
-### Model & Performance Events
-- `model.performance_degraded`: Model performance has degraded
-- `model.error_rate_high`: Model error rate is higher than normal
-- `model.latency_high`: Model response time is higher than normal
-- `model.quota_warning`: Approaching model usage quota limits
-- `model.quota_exceeded`: Model usage quota has been exceeded
+- `optimization.completed` - Optimization finished
+- `optimization.suggested` - New suggestions available
+- `savings.milestone_reached` - Savings milestone hit
 
 ### Usage Events
-- `usage.spike_detected`: Unusual spike in usage detected
-- `usage.pattern_changed`: Usage pattern has changed significantly
-- `token.limit_warning`: Approaching token usage limits
-- `token.limit_exceeded`: Token usage limits exceeded
-- `api.rate_limit_warning`: Approaching API rate limits
-
-### Experiment & Training Events
-- `experiment.started`: An experiment has started
-- `experiment.completed`: An experiment has completed
-- `experiment.failed`: An experiment has failed
-- `training.started`: A training process has started
-- `training.completed`: A training process has completed
-- `training.failed`: A training process has failed
-
-### Workflow Events
-- `workflow.started`: A workflow has started
-- `workflow.completed`: A workflow has completed
-- `workflow.failed`: A workflow has failed
-- `workflow.step_completed`: A workflow step has completed
-
-### Security & Compliance Events
-- `security.alert`: Security-related alert
-- `compliance.violation`: Compliance violation detected
-- `data.privacy_alert`: Data privacy alert
-- `moderation.blocked`: Content moderation has blocked content
-
-### System Events
-- `system.error`: System error occurred
-- `service.degradation`: Service degradation detected
-- `maintenance.scheduled`: Maintenance has been scheduled
-
-### Agent Events
-- `agent.task_completed`: Agent task completed
-- `agent.task_failed`: Agent task failed
-- `agent.insight_generated`: Agent has generated an insight
-
-### Quality Events
-- `quality.degraded`: Quality metrics have degraded
-- `quality.improved`: Quality metrics have improved
-- `quality.threshold_violated`: Quality threshold has been violated
+- `usage.spike_detected` - Usage spike detected
+- `usage.pattern_changed` - Pattern change detected
 
 ## Webhook Payload
 
-Each webhook delivery includes a JSON payload with information about the event. Here's an example payload:
-
 ```json
 {
-  "event_id": "evt_123456789",
+  "event_id": "evt_123",
   "event_type": "cost.alert",
-  "occurred_at": "2025-08-12T05:00:29.500Z",
+  "occurred_at": "2025-01-15T10:30:00Z",
   "severity": "high",
-  "title": "Monthly cost threshold exceeded",
-  "description": "Your monthly AI cost has exceeded the configured threshold of $500.",
-  "resource": {
-    "type": "project",
-    "id": "proj_abcdef123",
-    "name": "Production API"
-  },
+  "title": "Cost threshold exceeded",
+  "description": "Monthly cost exceeded $500",
   "metrics": {
     "current": 550,
     "threshold": 500,
-    "change": 50,
-    "changePercentage": 10,
     "unit": "USD"
   },
   "cost": {
     "amount": 550,
     "currency": "USD",
-    "period": "monthly",
-    "breakdown": {
-      "gpt-4": 300,
-      "claude-3-opus": 200,
-      "embedding": 50
-    }
-  },
-  "user": {
-    "id": "user_123456",
-    "name": "John Doe",
-    "email": "john.doe@example.com"
-  },
-  "project": {
-    "id": "proj_abcdef123",
-    "name": "Production API"
-  },
-  "costkatana": {
-    "version": "2.0.0",
-    "environment": "production"
+    "period": "monthly"
   }
 }
 ```
 
-## Security
+## Setting Up Webhooks
 
-### Authentication
+### Express.js Endpoint
 
-Webhooks support multiple authentication methods:
-
-1. **None**: No authentication (not recommended for production)
-2. **Basic Auth**: Username and password authentication
-3. **Bearer Token**: JWT or other token-based authentication
-4. **Custom Header**: Custom header for authentication
-5. **OAuth2**: OAuth 2.0 authentication (client credentials flow)
-
-### Signature Verification
-
-All webhook payloads are signed using HMAC-SHA256. The signature is included in the `X-CostKatana-Signature` header with the format `sha256=<signature>`. To verify the signature:
-
-1. Retrieve your webhook secret from the dashboard
-2. Extract the timestamp from the `X-CostKatana-Timestamp` header
-3. Concatenate the timestamp and the raw request body with a period: `${timestamp}.${rawBody}`
-4. Compute an HMAC-SHA256 signature using your webhook secret
-5. Compare your signature to the one in the `X-CostKatana-Signature` header
-
-Example verification code (Node.js):
-
-```javascript
-const crypto = require('crypto');
-
-function verifySignature(payload, timestamp, signature, secret) {
-  const signaturePayload = `${timestamp}.${payload}`;
-  const expectedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(signaturePayload)
-    .digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(`sha256=${expectedSignature}`),
-    Buffer.from(signature)
-  );
-}
-```
-
-## Best Practices
-
-1. **Respond quickly**: Your webhook endpoint should respond with a 2xx status code as quickly as possible, ideally within 5 seconds.
-
-2. **Process asynchronously**: Handle the webhook payload processing asynchronously after sending the response.
-
-3. **Implement retries**: Implement retry logic in your webhook consumer to handle temporary failures.
-
-4. **Verify signatures**: Always verify webhook signatures to ensure the webhook is coming from Cost Katana.
-
-5. **Handle idempotency**: Use the `event_id` to ensure you don't process the same event multiple times.
-
-6. **Monitor deliveries**: Use the webhook dashboard to monitor successful and failed deliveries.
-
-## Integration Examples
-
-### Node.js Express Example
-
-```javascript
-const express = require('express');
-const crypto = require('crypto');
-const bodyParser = require('body-parser');
+```typescript
+import express from 'express';
+import { verifyWebhookSignature } from 'cost-katana';
 
 const app = express();
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+app.use(express.json());
 
-// Use raw body parser to get the raw request body for signature verification
-app.use(bodyParser.json({
-  verify: (req, res, buf) => {
-    req.rawBody = buf;
-  }
-}));
-
-app.post('/webhook', (req, res) => {
-  // Get the signature and timestamp from headers
+app.post('/webhooks/costkatana', (req, res) => {
   const signature = req.headers['x-costkatana-signature'];
   const timestamp = req.headers['x-costkatana-timestamp'];
+  const payload = JSON.stringify(req.body);
   
-  // Verify the signature
-  const isValid = verifySignature(
-    req.rawBody.toString(),
+  // Verify signature
+  const isValid = verifyWebhookSignature(
+    payload,
     timestamp,
     signature,
-    WEBHOOK_SECRET
+    process.env.WEBHOOK_SECRET
   );
   
   if (!isValid) {
     return res.status(401).send('Invalid signature');
   }
   
-  // Process the webhook
   const event = req.body;
-  console.log(`Received ${event.event_type} event:`, event);
   
-  // Handle different event types
+  // Handle events
   switch (event.event_type) {
     case 'cost.alert':
-      // Handle cost alert
+      console.log('Cost alert:', event.description);
+      // Send Slack notification
       break;
-    case 'optimization.completed':
-      // Handle optimization completed
+      
+    case 'budget.exceeded':
+      console.log('Budget exceeded:', event.metrics);
+      // Send email alert
       break;
-    // ... handle other event types
+      
+    case 'optimization.suggested':
+      console.log('Optimization available:', event.description);
+      // Log suggestion
+      break;
   }
   
-  // Respond quickly
-  res.status(200).send('Webhook received');
-  
-  // Process asynchronously
-  processWebhookAsync(event).catch(console.error);
+  res.status(200).send('OK');
 });
 
-function verifySignature(payload, timestamp, signature, secret) {
+app.listen(3000);
+```
+
+### Next.js API Route
+
+```typescript
+// app/api/webhooks/costkatana/route.ts
+import { verifyWebhookSignature } from 'cost-katana';
+
+export async function POST(request: Request) {
+  const signature = request.headers.get('x-costkatana-signature');
+  const timestamp = request.headers.get('x-costkatana-timestamp');
+  const body = await request.text();
+  
+  const isValid = verifyWebhookSignature(
+    body,
+    timestamp,
+    signature,
+    process.env.WEBHOOK_SECRET!
+  );
+  
+  if (!isValid) {
+    return Response.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+  
+  const event = JSON.parse(body);
+  
+  // Handle event
+  console.log('Webhook received:', event.event_type);
+  
+  return Response.json({ received: true });
+}
+```
+
+## Event Handling Examples
+
+### Cost Alerts
+
+```typescript
+app.post('/webhooks/costkatana', (req, res) => {
+  const event = req.body;
+  
+  if (event.event_type === 'cost.alert') {
+    // Send Slack notification
+    sendSlackMessage({
+      channel: '#cost-alerts',
+      text: `🚨 ${event.title}: $${event.cost.amount}`,
+      details: event.description
+    });
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+### Budget Warnings
+
+```typescript
+app.post('/webhooks/costkatana', (req, res) => {
+  const event = req.body;
+  
+  if (event.event_type === 'budget.warning') {
+    const percentage = (event.metrics.current / event.metrics.threshold) * 100;
+    
+    console.log(`⚠️ Budget at ${percentage}%`);
+    
+    // Take action
+    if (percentage > 90) {
+      // Disable non-critical AI features
+      disableOptionalAIFeatures();
+    }
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+### Optimization Suggestions
+
+```typescript
+app.post('/webhooks/costkatana', (req, res) => {
+  const event = req.body;
+  
+  if (event.event_type === 'optimization.suggested') {
+    // Log optimization opportunity
+    console.log('💡 Optimization available:');
+    console.log(event.description);
+    console.log(`Potential savings: $${event.metrics.estimated_savings}`);
+    
+    // Auto-apply if savings > $10/month
+    if (event.metrics.estimated_savings > 10) {
+      applyOptimization(event.optimization_id);
+    }
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+## Security
+
+### Signature Verification
+
+All webhooks include a cryptographic signature:
+
+```typescript
+import crypto from 'crypto';
+
+function verifyWebhookSignature(
+  payload: string,
+  timestamp: string,
+  signature: string,
+  secret: string
+): boolean {
   const signaturePayload = `${timestamp}.${payload}`;
-  const expectedSignature = crypto
+  const expected = crypto
     .createHmac('sha256', secret)
     .update(signaturePayload)
     .digest('hex');
   
-  return `sha256=${expectedSignature}` === signature;
+  return `sha256=${expected}` === signature;
+}
+```
+
+### Best Practices
+
+1. **Always verify signatures**
+   ```typescript
+   if (!verifyWebhookSignature(...)) {
+     return res.status(401).send('Invalid');
+   }
+   ```
+
+2. **Respond quickly (< 5 seconds)**
+   ```typescript
+   res.status(200).send('OK');
+   processWebhookAsync(event); // Process in background
+   ```
+
+3. **Handle duplicates with event_id**
+   ```typescript
+   const processed = new Set();
+   
+   if (processed.has(event.event_id)) {
+     return res.status(200).send('Already processed');
+   }
+   
+   processed.add(event.event_id);
+   ```
+
+4. **Implement retry logic**
+   ```typescript
+   async function processWebhook(event: any) {
+     const maxRetries = 3;
+     
+     for (let i = 0; i < maxRetries; i++) {
+       try {
+         await handleEvent(event);
+         return;
+       } catch (error) {
+         if (i === maxRetries - 1) throw error;
+         await sleep(1000 * Math.pow(2, i));
+       }
+     }
+   }
+   ```
+
+## Integration Examples
+
+### Slack Notifications
+
+```typescript
+import { ai } from 'cost-katana';
+
+async function sendToSlack(message: string) {
+  await fetch(process.env.SLACK_WEBHOOK_URL, {
+    method: 'POST',
+    body: JSON.stringify({ text: message })
+  });
 }
 
-async function processWebhookAsync(event) {
-  // Process the webhook asynchronously
-  // This could involve updating a database, sending notifications, etc.
+// In your webhook handler
+if (event.event_type === 'cost.alert') {
+  await sendToSlack(
+    `🚨 Cost Alert: ${event.description}\nAmount: $${event.cost.amount}`
+  );
 }
+```
 
-app.listen(3000, () => {
-  console.log('Webhook server listening on port 3000');
+### Email Notifications
+
+```typescript
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransporter({...});
+
+// In webhook handler
+if (event.event_type === 'budget.exceeded') {
+  await transporter.sendMail({
+    to: 'admin@company.com',
+    subject: '⚠️ AI Budget Exceeded',
+    text: `Your AI budget has been exceeded.\nCurrent: $${event.cost.amount}\nLimit: $${event.metrics.threshold}`
+  });
+}
+```
+
+### Database Logging
+
+```typescript
+import { db } from './database';
+
+// Log all webhook events
+app.post('/webhooks/costkatana', async (req, res) => {
+  const event = req.body;
+  
+  await db.webhookEvents.insert({
+    eventId: event.event_id,
+    eventType: event.event_type,
+    severity: event.severity,
+    timestamp: event.occurred_at,
+    data: event
+  });
+  
+  res.status(200).send('OK');
 });
 ```
 
-### Python Flask Example
+## Testing Webhooks
 
-```python
-import hmac
-import hashlib
-import time
-from flask import Flask, request, jsonify
+### Local Testing with ngrok
 
-app = Flask(__name__)
-WEBHOOK_SECRET = "your_webhook_secret"
+```bash
+# Install ngrok
+npm install -g ngrok
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    # Get the signature and timestamp from headers
-    signature = request.headers.get('X-CostKatana-Signature')
-    timestamp = request.headers.get('X-CostKatana-Timestamp')
-    
-    # Get the raw request body
-    payload = request.data.decode('utf-8')
-    
-    # Verify the signature
-    if not verify_signature(payload, timestamp, signature, WEBHOOK_SECRET):
-        return jsonify({"error": "Invalid signature"}), 401
-    
-    # Parse the JSON payload
-    event = request.json
-    print(f"Received {event['event_type']} event:", event)
-    
-    # Handle different event types
-    if event['event_type'] == 'cost.alert':
-        # Handle cost alert
-        pass
-    elif event['event_type'] == 'optimization.completed':
-        # Handle optimization completed
-        pass
-    # ... handle other event types
-    
-    # Respond quickly
-    return jsonify({"status": "success"}), 200
+# Start your local server
+node server.js
 
-def verify_signature(payload, timestamp, signature, secret):
-    signature_payload = f"{timestamp}.{payload}"
-    expected_signature = hmac.new(
-        secret.encode(),
-        signature_payload.encode(),
-        hashlib.sha256
-    ).hexdigest()
-    
-    return f"sha256={expected_signature}" == signature
+# Expose it
+ngrok http 3000
 
-if __name__ == '__main__':
-    app.run(port=3000)
+# Use the ngrok URL in Cost Katana dashboard
+# https://abc123.ngrok.io/webhooks/costkatana
+```
+
+### Test Payload
+
+```typescript
+// Send test webhook
+const testPayload = {
+  event_id: 'test_123',
+  event_type: 'cost.alert',
+  occurred_at: new Date().toISOString(),
+  severity: 'medium',
+  title: 'Test Alert',
+  description: 'This is a test',
+  cost: { amount: 100, currency: 'USD' }
+};
+
+await fetch('http://localhost:3000/webhooks/costkatana', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(testPayload)
+});
 ```
 
 ## Troubleshooting
 
-### Common Issues
+### Webhook Not Receiving Events
 
-1. **Webhook delivery failing**: Check your endpoint's response status code. Only 2xx responses are considered successful.
+1. **Check endpoint is accessible**
+   ```bash
+   curl -X POST https://your-api.com/webhooks/costkatana \
+     -H "Content-Type: application/json" \
+     -d '{"test": true}'
+   ```
 
-2. **Invalid signature errors**: Ensure you're using the correct webhook secret and that you're calculating the signature correctly.
+2. **Verify webhook is active in dashboard**
+   - Visit https://costkatana.com/settings/webhooks
+   - Check webhook status is "Active"
 
-3. **Timeout errors**: Your endpoint is taking too long to respond. Aim to respond within 5 seconds.
+3. **Check event subscriptions**
+   - Ensure you're subscribed to the events you want
 
-4. **Missing events**: Check that you've subscribed to the correct event types.
+### Signature Verification Failing
 
-### Testing Webhooks
+1. **Use raw body for verification**
+   ```typescript
+   app.use(express.json({
+     verify: (req, res, buf) => {
+       req.rawBody = buf.toString();
+     }
+   }));
+   ```
 
-You can use the webhook testing tool in the dashboard to send test events to your endpoint. This is useful for verifying that your endpoint is correctly configured.
+2. **Check secret matches**
+   - Verify webhook secret in dashboard
+   - Ensure secret is correct in your code
 
-Alternatively, you can use a tool like [webhook.site](https://webhook.site/) to create a temporary endpoint for testing.
+### Missing Events
 
-## API Reference
+Check your event subscriptions and filters:
+```typescript
+// Make sure you're subscribed to the events
+// Visit: https://costkatana.com/settings/webhooks
+```
 
-For programmatic webhook management, refer to the [API documentation](API.md#webhooks).
+## Support
+
+- **Documentation**: https://docs.costkatana.com/webhooks
+- **Dashboard**: https://costkatana.com/settings/webhooks
+- **GitHub**: https://github.com/Hypothesize-Tech/costkatana-core
+- **Email**: support@costkatana.com

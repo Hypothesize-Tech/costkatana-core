@@ -16,22 +16,22 @@ export interface TraceClientConfig {
    * Cost Katana API endpoint
    */
   apiUrl?: string;
-  
+
   /**
    * API key for authentication
    */
   apiKey: string;
-  
+
   /**
    * Project ID
    */
   projectId: string;
-  
+
   /**
    * Custom headers to include in requests
    */
   headers?: Record<string, string>;
-  
+
   /**
    * Request timeout in milliseconds
    */
@@ -40,22 +40,22 @@ export interface TraceClientConfig {
 
 /**
  * Client for sending trace data to Cost Katana
- * 
+ *
  * @example
  * ```typescript
  * import { TraceClient } from 'ai-cost-tracker/trace';
- * 
+ *
  * const traceClient = new TraceClient({
  *   apiKey: process.env.API_KEY,
  *   projectId: process.env.PROJECT_ID
  * });
- * 
+ *
  * // Start a span
  * const { traceId } = await traceClient.startSpan({
  *   name: 'process-request',
  *   type: 'http'
  * });
- * 
+ *
  * // End the span
  * await traceClient.endSpan(traceId, {
  *   status: 'ok',
@@ -65,7 +65,7 @@ export interface TraceClientConfig {
  */
 export class TraceClient implements TraceService {
   private config: Required<TraceClientConfig>;
-  
+
   constructor(config: TraceClientConfig) {
     this.config = {
       apiUrl: config.apiUrl || 'https://cost-katana-backend.store',
@@ -74,56 +74,52 @@ export class TraceClient implements TraceService {
       headers: config.headers || {},
       timeout: config.timeout || 30000
     };
-    
+
     if (!this.config.apiKey) {
       throw new Error('API key is required for TraceClient');
     }
-    
+
     if (!this.config.projectId) {
       throw new Error('Project ID is required for TraceClient');
     }
   }
-  
-  private async request(
-    method: string,
-    path: string,
-    body?: any
-  ): Promise<any> {
+
+  private async request(method: string, path: string, body?: any): Promise<any> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
-    
+
     try {
       const response = await fetch(`${this.config.apiUrl}${path}`, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
           'X-Project-ID': this.config.projectId,
           ...this.config.headers
         },
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         const error = await response.json().catch(() => ({ message: response.statusText }));
         throw new Error(`Trace API error: ${error.message || response.statusText}`);
       }
-      
+
       return response.json();
     } catch (error: any) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
         throw new Error('Trace API request timeout');
       }
-      
+
       throw error;
     }
   }
-  
+
   async startSpan(input: StartSpanInput): Promise<{ traceId: string; sessionId: string }> {
     try {
       const response = await this.request('POST', '/v1/traces/start', input);
@@ -140,7 +136,7 @@ export class TraceClient implements TraceService {
       };
     }
   }
-  
+
   async endSpan(traceId: string, input: EndSpanInput): Promise<void> {
     try {
       await this.request('POST', `/v1/traces/${traceId}/end`, input);
@@ -149,7 +145,7 @@ export class TraceClient implements TraceService {
       // Fail silently to prevent breaking the application
     }
   }
-  
+
   async recordMessage(input: RecordMessageInput): Promise<void> {
     try {
       await this.request('POST', '/v1/traces/messages', input);
@@ -158,17 +154,17 @@ export class TraceClient implements TraceService {
       // Fail silently
     }
   }
-  
+
   async getSessionGraph(sessionId: string): Promise<SessionGraph> {
     const response = await this.request('GET', `/v1/sessions/${sessionId}/graph`);
     return response;
   }
-  
+
   async getSessionDetails(sessionId: string): Promise<SessionDetails> {
     const response = await this.request('GET', `/v1/sessions/${sessionId}/details`);
     return response;
   }
-  
+
   /**
    * List sessions with optional filters
    */
@@ -186,7 +182,7 @@ export class TraceClient implements TraceService {
     pages: number;
   }> {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       if (params.userId) queryParams.append('userId', params.userId);
       if (params.label) queryParams.append('label', params.label);
@@ -195,18 +191,15 @@ export class TraceClient implements TraceService {
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.limit) queryParams.append('limit', params.limit.toString());
     }
-    
+
     const response = await this.request('GET', `/v1/sessions?${queryParams}`);
     return response;
   }
-  
+
   /**
    * Get session summary statistics
    */
-  async getSessionsSummary(params?: {
-    from?: Date;
-    to?: Date;
-  }): Promise<{
+  async getSessionsSummary(params?: { from?: Date; to?: Date }): Promise<{
     totalSessions: number;
     activeSessions: number;
     totalCost: number;
@@ -214,20 +207,22 @@ export class TraceClient implements TraceService {
     errorRate: number;
   }> {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       if (params.from) queryParams.append('from', params.from.toISOString());
       if (params.to) queryParams.append('to', params.to.toISOString());
     }
-    
+
     const response = await this.request('GET', `/v1/sessions/summary?${queryParams}`);
     return response;
   }
-  
+
   /**
    * Batch ingest multiple trace spans
    */
-  async ingestBatch(spans: Array<StartSpanInput & EndSpanInput & { traceId: string }>): Promise<void> {
+  async ingestBatch(
+    spans: Array<StartSpanInput & EndSpanInput & { traceId: string }>
+  ): Promise<void> {
     try {
       await this.request('POST', '/v1/traces/ingest', { spans });
     } catch (error) {

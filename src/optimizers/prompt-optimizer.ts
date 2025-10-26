@@ -22,7 +22,7 @@ export class PromptOptimizer {
   private config: OptimizationConfig;
 
   constructor(config?: OptimizationConfig, bedrockConfig?: BedrockConfig) {
-    this.optimizationModel = bedrockConfig?.modelId || 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+    this.optimizationModel = bedrockConfig?.modelId || 'anthropic.claude-sonnet-4-20250514-v1:0';
 
     // Initialize default config with all features
     this.config = {

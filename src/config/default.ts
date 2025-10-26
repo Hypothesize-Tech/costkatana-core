@@ -32,7 +32,7 @@ export const defaultConfig: Partial<TrackerConfig> = {
 
 export const defaultBedrockRegion = 'us-east-1';
 
-export const defaultOptimizationModel = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+export const defaultOptimizationModel = 'anthropic.claude-sonnet-4-20250514-v1:0';
 
 export const supportedProviders = [
   AIProvider.OpenAI,
@@ -45,6 +45,7 @@ export const supportedProviders = [
   AIProvider.Groq,
   AIProvider.Mistral,
   AIProvider.XAI,
+  AIProvider.Meta,
   AIProvider.HuggingFace,
   AIProvider.Ollama,
   AIProvider.Replicate,
@@ -62,6 +63,7 @@ export const providerEndpoints: Record<AIProvider, string> = {
   [AIProvider.Groq]: 'https://api.groq.com/openai/v1',
   [AIProvider.Mistral]: 'https://api.mistral.ai/v1',
   [AIProvider.XAI]: 'https://api.x.ai/v1',
+  [AIProvider.Meta]: 'https://api.llama.meta.com/v1',
   [AIProvider.HuggingFace]: 'https://api-inference.huggingface.co/v1',
   [AIProvider.Ollama]: 'http://localhost:11434/v1',
   [AIProvider.Replicate]: 'https://api.replicate.com/v1',

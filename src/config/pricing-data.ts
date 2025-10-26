@@ -30,7 +30,8 @@ import { GOOGLE_PRICING } from './pricing/google';
 import { DEEPSEEK_PRICING } from './pricing/deepseek';
 import { MISTRAL_PRICING } from './pricing/mistral';
 import { COHERE_PRICING } from './pricing/cohere';
-import { GROQ_PRICING } from './pricing/groq';
+import { GROK_PRICING } from './pricing/grok';
+import { META_PRICING } from './pricing/meta';
 import { AWS_BEDROCK_PRICING } from './pricing/aws-bedrock';
 
 // Fresh pricing data organized by provider - July 2025
@@ -42,7 +43,8 @@ export const PRICING_CONFIG: Record<string, ModelPricingConfig[]> = {
   DeepSeek: DEEPSEEK_PRICING,
   'Mistral AI': MISTRAL_PRICING,
   Cohere: COHERE_PRICING,
-  Groq: GROQ_PRICING,
+  Groq: GROK_PRICING,
+  Meta: META_PRICING,
   'AWS Bedrock': AWS_BEDROCK_PRICING
 };
 

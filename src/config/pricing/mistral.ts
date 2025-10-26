@@ -3,43 +3,128 @@ import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 export const MISTRAL_PRICING: ModelPricingConfig[] = [
   // Premier Models
   {
-    modelId: 'mistral-medium-latest',
-    modelName: 'Mistral Medium 3',
+    modelId: 'mistral-medium-2508',
+    modelName: 'Mistral Medium 3.1',
     provider: 'Mistral AI',
     inputPrice: 0.4,
     outputPrice: 2.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['text', 'analysis', 'reasoning', 'enterprise'],
-    category: 'text',
+    capabilities: ['text', 'multimodal', 'vision', 'analysis', 'reasoning', 'enterprise'],
+    category: 'multimodal',
     isLatest: true,
-    notes: 'State-of-the-art performance. Simplified enterprise deployments. Cost-efficient.'
+    notes:
+      'Our frontier-class multimodal model released August 2025. Improving tone and performance.'
   },
   {
-    modelId: 'magistral-medium-latest',
-    modelName: 'Magistral Medium (Preview)',
+    modelId: 'mistral-medium-latest',
+    modelName: 'Mistral Medium 3.1',
+    provider: 'Mistral AI',
+    inputPrice: 0.4,
+    outputPrice: 2.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multimodal', 'vision', 'analysis', 'reasoning', 'enterprise'],
+    category: 'multimodal',
+    isLatest: true,
+    notes:
+      'Our frontier-class multimodal model released August 2025. Improving tone and performance.'
+  },
+  {
+    modelId: 'magistral-medium-2507',
+    modelName: 'Magistral Medium 1.1',
     provider: 'Mistral AI',
     inputPrice: 2.0,
     outputPrice: 5.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 40000,
     capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
     category: 'reasoning',
     isLatest: true,
-    notes: 'Thinking model excelling in domain-specific, transparent, and multilingual reasoning.'
+    notes: 'Our frontier-class reasoning model released July 2025.'
   },
   {
-    modelId: 'codestral-latest',
-    modelName: 'Codestral',
+    modelId: 'magistral-medium-latest',
+    modelName: 'Magistral Medium 1.1',
+    provider: 'Mistral AI',
+    inputPrice: 2.0,
+    outputPrice: 5.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 40000,
+    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
+    category: 'reasoning',
+    isLatest: true,
+    notes: 'Our frontier-class reasoning model released July 2025.'
+  },
+  {
+    modelId: 'codestral-2508',
+    modelName: 'Codestral 2508',
     provider: 'Mistral AI',
     inputPrice: 0.3,
     outputPrice: 0.9,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 32000,
-    capabilities: ['code', 'programming', 'multilingual-code'],
+    contextWindow: 256000,
+    capabilities: [
+      'code',
+      'programming',
+      'multilingual-code',
+      'fill-in-middle',
+      'code-correction',
+      'test-generation'
+    ],
     category: 'code',
     isLatest: true,
-    notes: 'Lightweight, fast, and proficient in over 80 programming languages.'
+    notes:
+      'Our cutting-edge language model for coding released end of July 2025, specializes in low-latency, high-frequency tasks.'
+  },
+  {
+    modelId: 'codestral-latest',
+    modelName: 'Codestral 2508',
+    provider: 'Mistral AI',
+    inputPrice: 0.3,
+    outputPrice: 0.9,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 256000,
+    capabilities: [
+      'code',
+      'programming',
+      'multilingual-code',
+      'fill-in-middle',
+      'code-correction',
+      'test-generation'
+    ],
+    category: 'code',
+    isLatest: true,
+    notes:
+      'Our cutting-edge language model for coding released end of July 2025, specializes in low-latency, high-frequency tasks.'
+  },
+  {
+    modelId: 'voxtral-mini-2507',
+    modelName: 'Voxtral Mini Transcribe',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 0,
+    capabilities: ['audio', 'transcription', 'efficient'],
+    category: 'audio',
+    isLatest: true,
+    notes:
+      'An efficient audio input model, fine-tuned and optimized for transcription purposes only.'
+  },
+  {
+    modelId: 'voxtral-mini-latest',
+    modelName: 'Voxtral Mini Transcribe',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 0,
+    capabilities: ['audio', 'transcription', 'efficient'],
+    category: 'audio',
+    isLatest: true,
+    notes:
+      'An efficient audio input model, fine-tuned and optimized for transcription purposes only.'
   },
   {
     modelId: 'devstral-medium-2507',
@@ -49,49 +134,205 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 2.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['code', 'agents', 'advanced-coding'],
+    capabilities: [
+      'code',
+      'agents',
+      'advanced-coding',
+      'codebase-exploration',
+      'multi-file-editing'
+    ],
     category: 'code',
     isLatest: true,
-    notes: 'Enhanced model for advanced coding agents.'
+    notes:
+      'An enterprise grade text model that excels at using tools to explore codebases, editing multiple files and power software engineering agents.'
+  },
+  {
+    modelId: 'devstral-medium-latest',
+    modelName: 'Devstral Medium',
+    provider: 'Mistral AI',
+    inputPrice: 0.4,
+    outputPrice: 2.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: [
+      'code',
+      'agents',
+      'advanced-coding',
+      'codebase-exploration',
+      'multi-file-editing'
+    ],
+    category: 'code',
+    isLatest: true,
+    notes:
+      'An enterprise grade text model that excels at using tools to explore codebases, editing multiple files and power software engineering agents.'
+  },
+  {
+    modelId: 'mistral-ocr-2505',
+    modelName: 'Mistral OCR 2505',
+    provider: 'Mistral AI',
+    inputPrice: 1.0,
+    outputPrice: 3.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 0,
+    capabilities: ['ocr', 'document-understanding', 'annotations', 'text-extraction'],
+    category: 'document',
+    isLatest: true,
+    notes:
+      'Our OCR service powering our Document AI stack that enables our users to extract interleaved text and images.'
   },
   {
     modelId: 'mistral-ocr-latest',
-    modelName: 'Document AI & OCR',
+    modelName: 'Mistral OCR 2505',
     provider: 'Mistral AI',
-    inputPrice: 1.0, // OCR per 1000 pages
-    outputPrice: 3.0, // Annotations per 1000 pages
-    unit: PricingUnit.PerRequest,
+    inputPrice: 1.0,
+    outputPrice: 3.0,
+    unit: PricingUnit.Per1MTokens,
     contextWindow: 0,
-    capabilities: ['ocr', 'document-understanding', 'annotations'],
+    capabilities: ['ocr', 'document-understanding', 'annotations', 'text-extraction'],
     category: 'document',
     isLatest: true,
-    notes: "World's best document understanding API. OCR: $1/1000 pages, Annotations: $3/1000 pages"
+    notes:
+      'Our OCR service powering our Document AI stack that enables our users to extract interleaved text and images.'
   },
   {
-    modelId: 'mistral-saba-latest',
-    modelName: 'Mistral Saba',
+    modelId: 'magistral-medium-2506',
+    modelName: 'Magistral Medium 1',
     provider: 'Mistral AI',
-    inputPrice: 0.2,
-    outputPrice: 0.6,
+    inputPrice: 2.0,
+    outputPrice: 5.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 40000,
+    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
+    category: 'reasoning',
+    isLatest: false,
+    notes: 'Our first frontier-class reasoning model released June 2025.'
+  },
+  {
+    modelId: 'ministral-3b-2410',
+    modelName: 'Ministral 3B',
+    provider: 'Mistral AI',
+    inputPrice: 0.04,
+    outputPrice: 0.04,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['text', 'custom-trained', 'regional'],
+    capabilities: ['text', 'edge', 'efficient', 'world-best'],
     category: 'text',
     isLatest: true,
-    notes: 'Custom-trained model to serve specific geographies, markets, and customers.'
+    notes: "World's best edge model."
   },
   {
-    modelId: 'mistral-large-latest',
-    modelName: 'Mistral Large',
+    modelId: 'ministral-3b-latest',
+    modelName: 'Ministral 3B',
+    provider: 'Mistral AI',
+    inputPrice: 0.04,
+    outputPrice: 0.04,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'edge', 'efficient', 'world-best'],
+    category: 'text',
+    isLatest: true,
+    notes: "World's best edge model."
+  },
+  {
+    modelId: 'ministral-8b-2410',
+    modelName: 'Ministral 8B',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'edge', 'on-device', 'high-performance-price-ratio'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Powerful edge model with extremely high performance/price ratio.'
+  },
+  {
+    modelId: 'ministral-8b-latest',
+    modelName: 'Ministral 8B',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'edge', 'on-device', 'high-performance-price-ratio'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Powerful edge model with extremely high performance/price ratio.'
+  },
+  {
+    modelId: 'mistral-medium-2505',
+    modelName: 'Mistral Medium 3',
+    provider: 'Mistral AI',
+    inputPrice: 0.4,
+    outputPrice: 2.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multimodal', 'vision', 'analysis', 'reasoning', 'enterprise'],
+    category: 'multimodal',
+    isLatest: false,
+    notes: 'Our frontier-class multimodal model released May 2025.'
+  },
+  {
+    modelId: 'codestral-2501',
+    modelName: 'Codestral 2501',
+    provider: 'Mistral AI',
+    inputPrice: 0.3,
+    outputPrice: 0.9,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 256000,
+    capabilities: [
+      'code',
+      'programming',
+      'multilingual-code',
+      'fill-in-middle',
+      'code-correction',
+      'test-generation'
+    ],
+    category: 'code',
+    isLatest: false,
+    notes:
+      'Our cutting-edge language model for coding with the second version released January 2025.'
+  },
+  {
+    modelId: 'mistral-large-2411',
+    modelName: 'Mistral Large 2.1',
     provider: 'Mistral AI',
     inputPrice: 2.0,
     outputPrice: 6.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['text', 'reasoning', 'complex-tasks'],
+    capabilities: ['text', 'reasoning', 'complex-tasks', 'high-complexity'],
     category: 'text',
     isLatest: true,
-    notes: 'Top-tier reasoning for high-complexity tasks and sophisticated problems.'
+    notes:
+      'Our top-tier large model for high-complexity tasks with the latest version released November 2024.'
+  },
+  {
+    modelId: 'mistral-large-latest',
+    modelName: 'Mistral Large 2.1',
+    provider: 'Mistral AI',
+    inputPrice: 2.0,
+    outputPrice: 6.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'reasoning', 'complex-tasks', 'high-complexity'],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Our top-tier large model for high-complexity tasks with the latest version released November 2024.'
+  },
+  {
+    modelId: 'pixtral-large-2411',
+    modelName: 'Pixtral Large',
+    provider: 'Mistral AI',
+    inputPrice: 2.0,
+    outputPrice: 6.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['vision', 'multimodal', 'reasoning', 'frontier-class'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'Our first frontier-class multimodal model released November 2024.'
   },
   {
     modelId: 'pixtral-large-latest',
@@ -101,49 +342,23 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 6.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['vision', 'multimodal', 'reasoning'],
+    capabilities: ['vision', 'multimodal', 'reasoning', 'frontier-class'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Vision-capable large model with frontier reasoning capabilities.'
+    notes: 'Our first frontier-class multimodal model released November 2024.'
   },
   {
-    modelId: 'ministral-8b-latest',
-    modelName: 'Ministral 8B 24.10',
+    modelId: 'mistral-small-2407',
+    modelName: 'Mistral Small 2',
     provider: 'Mistral AI',
     inputPrice: 0.1,
-    outputPrice: 0.1,
+    outputPrice: 0.3,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
-    capabilities: ['text', 'edge', 'on-device'],
-    category: 'text',
-    isLatest: true,
-    notes: 'Powerful model for on-device use cases.'
-  },
-  {
-    modelId: 'ministral-3b-latest',
-    modelName: 'Ministral 3B 24.10',
-    provider: 'Mistral AI',
-    inputPrice: 0.04,
-    outputPrice: 0.04,
-    unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
-    capabilities: ['text', 'edge', 'efficient'],
-    category: 'text',
-    isLatest: true,
-    notes: 'Most efficient edge model.'
-  },
-  {
-    modelId: 'codestral-embed-2505',
-    modelName: 'Codestral Embed',
-    provider: 'Mistral AI',
-    inputPrice: 0.15,
-    outputPrice: 0.15,
-    unit: PricingUnit.Per1MTokens,
-    contextWindow: 8192,
-    capabilities: ['embedding', 'code'],
-    category: 'embedding',
-    isLatest: true,
-    notes: 'State-of-the-art embedding model for code.'
+    contextWindow: 32000,
+    capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
+    category: 'multimodal',
+    isLatest: false,
+    notes: 'Our updated small version, released September 2024.'
   },
   {
     modelId: 'mistral-embed',
@@ -153,10 +368,36 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 8192,
-    capabilities: ['embedding', 'text'],
+    capabilities: ['embedding', 'text', 'semantic'],
     category: 'embedding',
     isLatest: true,
-    notes: 'State-of-the-art model for extracting representation of text extracts.'
+    notes: 'Our state-of-the-art semantic for extracting representation of text extracts.'
+  },
+  {
+    modelId: 'codestral-embed-2505',
+    modelName: 'Codestral Embed',
+    provider: 'Mistral AI',
+    inputPrice: 0.15,
+    outputPrice: 0.15,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 8192,
+    capabilities: ['embedding', 'code', 'semantic'],
+    category: 'embedding',
+    isLatest: true,
+    notes: 'Our state-of-the-art semantic for extracting representation of code extracts.'
+  },
+  {
+    modelId: 'mistral-moderation-2411',
+    modelName: 'Mistral Moderation 24.11',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['moderation', 'classification', 'harmful-content-detection'],
+    category: 'moderation',
+    isLatest: true,
+    notes: 'Our moderation service that enables our users to detect harmful text content.'
   },
   {
     modelId: 'mistral-moderation-latest',
@@ -166,12 +407,103 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 32000,
-    capabilities: ['moderation', 'classification'],
+    capabilities: ['moderation', 'classification', 'harmful-content-detection'],
     category: 'moderation',
     isLatest: true,
-    notes: 'A classifier service for text content moderation.'
+    notes: 'Our moderation service that enables our users to detect harmful text content.'
   },
   // Open Models
+  {
+    modelId: 'magistral-small-2507',
+    modelName: 'Magistral Small 1.1',
+    provider: 'Mistral AI',
+    inputPrice: 0.5,
+    outputPrice: 1.5,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 40000,
+    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
+    category: 'reasoning',
+    isLatest: true,
+    notes: 'Our small reasoning model released July 2025.'
+  },
+  {
+    modelId: 'magistral-small-latest',
+    modelName: 'Magistral Small 1.1',
+    provider: 'Mistral AI',
+    inputPrice: 0.5,
+    outputPrice: 1.5,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 40000,
+    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
+    category: 'reasoning',
+    isLatest: true,
+    notes: 'Our small reasoning model released July 2025.'
+  },
+  {
+    modelId: 'voxtral-small-2507',
+    modelName: 'Voxtral Small',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['audio', 'instruct', 'multimodal'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'Our first model with audio input capabilities for instruct use cases.'
+  },
+  {
+    modelId: 'voxtral-small-latest',
+    modelName: 'Voxtral Small',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['audio', 'instruct', 'multimodal'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'Our first model with audio input capabilities for instruct use cases.'
+  },
+  {
+    modelId: 'voxtral-mini-2507',
+    modelName: 'Voxtral Mini',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['audio', 'instruct', 'mini'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'A mini version of our first audio input model.'
+  },
+  {
+    modelId: 'voxtral-mini-latest',
+    modelName: 'Voxtral Mini',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.1,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['audio', 'instruct', 'mini'],
+    category: 'audio',
+    isLatest: true,
+    notes: 'A mini version of our first audio input model.'
+  },
+  {
+    modelId: 'mistral-small-2506',
+    modelName: 'Mistral Small 3.2',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.3,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'An update to our previous small model, released June 2025.'
+  },
   {
     modelId: 'mistral-small-latest',
     modelName: 'Mistral Small 3.2',
@@ -183,33 +515,102 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'SOTA. Multimodal. Multilingual. Apache 2.0.'
+    notes: 'An update to our previous small model, released June 2025.'
   },
   {
-    modelId: 'magistral-small-latest',
-    modelName: 'Magistral Small',
+    modelId: 'magistral-small-2506',
+    modelName: 'Magistral Small 1',
     provider: 'Mistral AI',
     inputPrice: 0.5,
     outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 40000,
     capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
     category: 'reasoning',
-    isLatest: true,
-    notes: 'Thinking model excelling in domain-specific, transparent, and multilingual reasoning.'
+    isLatest: false,
+    notes: 'Our first small reasoning model released June 2025.'
   },
   {
     modelId: 'devstral-small-2507',
-    modelName: 'Devstral Small',
+    modelName: 'Devstral Small 1.1',
     provider: 'Mistral AI',
     inputPrice: 0.1,
     outputPrice: 0.3,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['code', 'agents', 'open-source'],
+    capabilities: ['code', 'agents', 'open-source', 'codebase-exploration', 'multi-file-editing'],
     category: 'code',
     isLatest: true,
-    notes: 'The best open-source model for coding agents.'
+    notes:
+      'An update to our open source model that excels at using tools to explore codebases, editing multiple files and power software engineering agents.'
+  },
+  {
+    modelId: 'devstral-small-latest',
+    modelName: 'Devstral Small 1.1',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.3,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['code', 'agents', 'open-source', 'codebase-exploration', 'multi-file-editing'],
+    category: 'code',
+    isLatest: true,
+    notes:
+      'An update to our open source model that excels at using tools to explore codebases, editing multiple files and power software engineering agents.'
+  },
+  {
+    modelId: 'mistral-small-2503',
+    modelName: 'Mistral Small 3.1',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.3,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multimodal', 'multilingual', 'open-source', 'image-understanding'],
+    category: 'multimodal',
+    isLatest: false,
+    notes:
+      'A new leader in the small models category with image understanding capabilities, released March 2025.'
+  },
+  {
+    modelId: 'mistral-small-2501',
+    modelName: 'Mistral Small 3',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.3,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 32000,
+    capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
+    category: 'multimodal',
+    isLatest: false,
+    notes: 'A new leader in the small models category, released January 2025.'
+  },
+  {
+    modelId: 'devstral-small-2505',
+    modelName: 'Devstral Small 1',
+    provider: 'Mistral AI',
+    inputPrice: 0.1,
+    outputPrice: 0.3,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['code', 'agents', 'open-source', '24b-parameter'],
+    category: 'code',
+    isLatest: false,
+    notes:
+      'A 24B text model, open source model that excels at using tools to explore codebases, editing multiple files and power software engineering agents.'
+  },
+  {
+    modelId: 'pixtral-12b-2409',
+    modelName: 'Pixtral 12B',
+    provider: 'Mistral AI',
+    inputPrice: 0.15,
+    outputPrice: 0.15,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['vision', 'multimodal', 'small', 'image-understanding'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'A 12B model with image understanding capabilities in addition to text.'
   },
   {
     modelId: 'pixtral-12b',
@@ -219,10 +620,36 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.15,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['vision', 'multimodal', 'small'],
+    capabilities: ['vision', 'multimodal', 'small', 'image-understanding'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Vision-capable small model.'
+    notes: 'A 12B model with image understanding capabilities in addition to text.'
+  },
+  {
+    modelId: 'open-mistral-nemo-2407',
+    modelName: 'Mistral NeMo 12B',
+    provider: 'Mistral AI',
+    inputPrice: 0.15,
+    outputPrice: 0.15,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multilingual', 'open-source', 'best-multilingual'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Our best multilingual open source model released July 2024.'
+  },
+  {
+    modelId: 'open-mistral-nemo',
+    modelName: 'Mistral NeMo 12B',
+    provider: 'Mistral AI',
+    inputPrice: 0.15,
+    outputPrice: 0.15,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multilingual', 'open-source', 'best-multilingual'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Our best multilingual open source model released July 2024.'
   },
   {
     modelId: 'mistral-nemo',

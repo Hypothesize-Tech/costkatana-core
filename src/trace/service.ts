@@ -40,27 +40,27 @@ export interface LocalTraceServiceConfig {
    * Storage mode: 'memory' for in-memory storage, 'file' for file-based persistence
    */
   storageMode?: 'memory' | 'file';
-  
+
   /**
    * Directory for file-based storage (only used when storageMode is 'file')
    */
   storageDir?: string;
-  
+
   /**
    * Whether to auto-save traces to file periodically (only for memory mode)
    */
   autoSave?: boolean;
-  
+
   /**
    * Auto-save interval in milliseconds (default: 60000 - 1 minute)
    */
   autoSaveInterval?: number;
-  
+
   /**
    * Maximum number of sessions to keep in memory (older ones are evicted)
    */
   maxSessions?: number;
-  
+
   /**
    * Sensitive keys to redact from messages
    */
@@ -69,7 +69,7 @@ export interface LocalTraceServiceConfig {
 
 /**
  * Local implementation of TraceService for development and testing
- * 
+ *
  * @example
  * ```typescript
  * const traceService = new LocalTraceService({
@@ -77,7 +77,7 @@ export interface LocalTraceServiceConfig {
  *   storageDir: './traces',
  *   autoSave: true
  * });
- * 
+ *
  * // Use with middleware
  * app.use(createTraceMiddleware({
  *   startSpan: traceService.startSpan.bind(traceService),
@@ -91,7 +91,7 @@ export class LocalTraceService implements TraceService {
   private messages: Map<string, Message[]> = new Map();
   private config: Required<LocalTraceServiceConfig>;
   private autoSaveTimer?: NodeJS.Timeout;
-  
+
   constructor(config: LocalTraceServiceConfig = {}) {
     this.config = {
       storageMode: config.storageMode || 'memory',
@@ -113,12 +113,12 @@ export class LocalTraceService implements TraceService {
         'credit_card'
       ]
     };
-    
+
     // Load existing traces if using file storage
     if (this.config.storageMode === 'file') {
       this.loadFromDisk();
     }
-    
+
     // Set up auto-save if enabled
     if (this.config.autoSave && this.config.storageMode === 'memory') {
       this.autoSaveTimer = setInterval(() => {
@@ -126,11 +126,11 @@ export class LocalTraceService implements TraceService {
       }, this.config.autoSaveInterval);
     }
   }
-  
+
   async startSpan(input: StartSpanInput): Promise<{ traceId: string; sessionId: string }> {
     const sessionId = input.sessionId || uuidv4();
     const traceId = uuidv4();
-    
+
     // Get or create session
     let session = this.sessions.get(sessionId);
     if (!session) {
@@ -146,7 +146,7 @@ export class LocalTraceService implements TraceService {
         startedAt: new Date()
       };
       this.sessions.set(sessionId, session);
-      
+
       // Evict old sessions if needed
       if (this.sessions.size > this.config.maxSessions) {
         const oldestSessionId = this.sessions.keys().next().value;
@@ -155,7 +155,7 @@ export class LocalTraceService implements TraceService {
         }
       }
     }
-    
+
     // Calculate depth based on parent
     let depth = 0;
     if (input.parentId) {
@@ -164,7 +164,7 @@ export class LocalTraceService implements TraceService {
         depth = parent.depth + 1;
       }
     }
-    
+
     // Create trace
     const trace: StoredTrace = {
       id: traceId,
@@ -178,27 +178,27 @@ export class LocalTraceService implements TraceService {
       depth,
       messages: []
     };
-    
+
     this.traces.set(traceId, trace);
     session.totalSpans++;
-    
+
     // Save if using file storage
     if (this.config.storageMode === 'file') {
       this.saveTrace(trace);
     }
-    
+
     return { traceId, sessionId };
   }
-  
+
   async endSpan(traceId: string, input: EndSpanInput): Promise<void> {
     const trace = this.traces.get(traceId);
     if (!trace) {
       throw new Error(`Trace ${traceId} not found`);
     }
-    
+
     const endedAt = new Date();
     const duration = endedAt.getTime() - trace.startedAt.getTime();
-    
+
     // Update trace
     trace.status = input.status;
     trace.error = input.error;
@@ -210,7 +210,7 @@ export class LocalTraceService implements TraceService {
     trace.metadata = { ...trace.metadata, ...input.metadata };
     trace.endedAt = endedAt;
     trace.duration = duration;
-    
+
     // Update session metrics
     const session = this.sessions.get(trace.sessionId);
     if (session) {
@@ -225,17 +225,17 @@ export class LocalTraceService implements TraceService {
         session.status = 'error';
       }
     }
-    
+
     // Save if using file storage
     if (this.config.storageMode === 'file') {
       this.saveTrace(trace);
     }
   }
-  
+
   async recordMessage(input: RecordMessageInput): Promise<void> {
     // Redact sensitive content
     const redactedContent = this.redactContent(input.content);
-    
+
     const message: Message = {
       sessionId: input.sessionId,
       traceId: input.traceId,
@@ -246,28 +246,29 @@ export class LocalTraceService implements TraceService {
       metadata: input.metadata,
       createdAt: new Date()
     };
-    
+
     // Store message with trace
     const trace = this.traces.get(input.traceId);
     if (trace) {
       trace.messages.push(message);
     }
-    
+
     // Store message in session messages
     const sessionMessages = this.messages.get(input.sessionId) || [];
     sessionMessages.push(message);
     this.messages.set(input.sessionId, sessionMessages);
-    
+
     // Save if using file storage
     if (this.config.storageMode === 'file') {
       this.saveMessage(message);
     }
   }
-  
+
   async getSessionGraph(sessionId: string): Promise<SessionGraph> {
-    const sessionTraces = Array.from(this.traces.values())
-      .filter(trace => trace.sessionId === sessionId);
-    
+    const sessionTraces = Array.from(this.traces.values()).filter(
+      trace => trace.sessionId === sessionId
+    );
+
     const nodes: TraceNode[] = sessionTraces.map(trace => ({
       id: trace.id,
       parentId: trace.parentId,
@@ -287,7 +288,7 @@ export class LocalTraceService implements TraceService {
       duration: trace.duration,
       depth: trace.depth
     }));
-    
+
     const edges: TraceEdge[] = [];
     for (const node of nodes) {
       if (node.parentId) {
@@ -297,18 +298,18 @@ export class LocalTraceService implements TraceService {
         });
       }
     }
-    
+
     return { nodes, edges };
   }
-  
+
   async getSessionDetails(sessionId: string): Promise<SessionDetails> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
-    
+
     const sessionMessages = this.messages.get(sessionId) || [];
-    
+
     return {
       sessionId: session.sessionId,
       userId: session.userId,
@@ -323,7 +324,7 @@ export class LocalTraceService implements TraceService {
       messages: sessionMessages
     };
   }
-  
+
   /**
    * End a session and calculate final metrics
    */
@@ -332,16 +333,16 @@ export class LocalTraceService implements TraceService {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
-    
+
     session.status = session.status === 'error' ? 'error' : 'completed';
     session.endedAt = new Date();
-    
+
     // Save if using file storage
     if (this.config.storageMode === 'file') {
       this.saveSession(session);
     }
   }
-  
+
   /**
    * List all sessions with optional filters
    */
@@ -359,7 +360,7 @@ export class LocalTraceService implements TraceService {
     pages: number;
   }> {
     let sessions = Array.from(this.sessions.values());
-    
+
     // Apply filters
     if (params?.userId) {
       sessions = sessions.filter(s => s.userId === params.userId);
@@ -374,22 +375,22 @@ export class LocalTraceService implements TraceService {
     if (params?.to) {
       sessions = sessions.filter(s => s.startedAt <= params.to!);
     }
-    
+
     // Sort by start time (newest first)
     sessions.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
-    
+
     // Pagination
     const page = params?.page || 1;
     const limit = params?.limit || 20;
     const start = (page - 1) * limit;
     const end = start + limit;
     const paginatedSessions = sessions.slice(start, end);
-    
+
     // Get details for each session
     const sessionDetails = await Promise.all(
       paginatedSessions.map(s => this.getSessionDetails(s.sessionId))
     );
-    
+
     return {
       sessions: sessionDetails,
       total: sessions.length,
@@ -397,14 +398,11 @@ export class LocalTraceService implements TraceService {
       pages: Math.ceil(sessions.length / limit)
     };
   }
-  
+
   /**
    * Get summary statistics for sessions
    */
-  async getSessionsSummary(params?: {
-    from?: Date;
-    to?: Date;
-  }): Promise<{
+  async getSessionsSummary(params?: { from?: Date; to?: Date }): Promise<{
     totalSessions: number;
     activeSessions: number;
     totalCost: number;
@@ -412,7 +410,7 @@ export class LocalTraceService implements TraceService {
     errorRate: number;
   }> {
     let sessions = Array.from(this.sessions.values());
-    
+
     // Apply date filters
     if (params?.from) {
       sessions = sessions.filter(s => s.startedAt >= params.from!);
@@ -420,22 +418,23 @@ export class LocalTraceService implements TraceService {
     if (params?.to) {
       sessions = sessions.filter(s => s.startedAt <= params.to!);
     }
-    
+
     const totalSessions = sessions.length;
     const activeSessions = sessions.filter(s => s.status === 'active').length;
     const totalCost = sessions.reduce((sum, s) => sum + s.totalCostUSD, 0);
     const errorSessions = sessions.filter(s => s.status === 'error').length;
     const errorRate = totalSessions > 0 ? errorSessions / totalSessions : 0;
-    
+
     // Calculate average duration
     const completedSessions = sessions.filter(s => s.endedAt);
-    const avgDuration = completedSessions.length > 0
-      ? completedSessions.reduce((sum, s) => {
-          const duration = s.endedAt!.getTime() - s.startedAt.getTime();
-          return sum + duration;
-        }, 0) / completedSessions.length
-      : 0;
-    
+    const avgDuration =
+      completedSessions.length > 0
+        ? completedSessions.reduce((sum, s) => {
+            const duration = s.endedAt!.getTime() - s.startedAt.getTime();
+            return sum + duration;
+          }, 0) / completedSessions.length
+        : 0;
+
     return {
       totalSessions,
       activeSessions,
@@ -444,53 +443,53 @@ export class LocalTraceService implements TraceService {
       errorRate
     };
   }
-  
+
   // Private helper methods
-  
+
   private redactContent(content: string): string {
     let redacted = content;
-    
+
     for (const key of this.config.redactKeys) {
       // Redact key-value pairs in JSON-like structures
       const jsonRegex = new RegExp(`"${key}"\\s*:\\s*"[^"]*"`, 'gi');
       redacted = redacted.replace(jsonRegex, `"${key}": "[REDACTED]"`);
-      
+
       // Redact key=value pairs
       const kvRegex = new RegExp(`${key}\\s*=\\s*[^\\s,;]+`, 'gi');
       redacted = redacted.replace(kvRegex, `${key}=[REDACTED]`);
-      
+
       // Redact email addresses
       if (key === 'email') {
         const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
         redacted = redacted.replace(emailRegex, '[EMAIL_REDACTED]');
       }
-      
+
       // Redact phone numbers
       if (key === 'phone') {
         const phoneRegex = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g;
         redacted = redacted.replace(phoneRegex, '[PHONE_REDACTED]');
       }
     }
-    
+
     return redacted;
   }
-  
+
   private evictSession(sessionId: string): void {
     this.sessions.delete(sessionId);
-    
+
     // Remove associated traces
     for (const [traceId, trace] of this.traces) {
       if (trace.sessionId === sessionId) {
         this.traces.delete(traceId);
       }
     }
-    
+
     // Remove associated messages
     this.messages.delete(sessionId);
   }
-  
+
   // File storage methods
-  
+
   private getStoragePath(type: 'sessions' | 'traces' | 'messages'): string {
     const dir = path.join(this.config.storageDir, type);
     if (!fs.existsSync(dir)) {
@@ -498,32 +497,32 @@ export class LocalTraceService implements TraceService {
     }
     return dir;
   }
-  
+
   private saveTrace(trace: StoredTrace): void {
     const dir = this.getStoragePath('traces');
     const file = path.join(dir, `${trace.id}.json`);
     fs.writeFileSync(file, JSON.stringify(trace, null, 2));
   }
-  
+
   private saveSession(session: Session): void {
     const dir = this.getStoragePath('sessions');
     const file = path.join(dir, `${session.sessionId}.json`);
     fs.writeFileSync(file, JSON.stringify(session, null, 2));
   }
-  
+
   private saveMessage(message: Message): void {
     const dir = this.getStoragePath('messages');
     const file = path.join(dir, `${message.sessionId}.json`);
-    
+
     let messages: Message[] = [];
     if (fs.existsSync(file)) {
       messages = JSON.parse(fs.readFileSync(file, 'utf-8'));
     }
     messages.push(message);
-    
+
     fs.writeFileSync(file, JSON.stringify(messages, null, 2));
   }
-  
+
   private loadFromDisk(): void {
     // Load sessions
     const sessionsDir = this.getStoragePath('sessions');
@@ -541,7 +540,7 @@ export class LocalTraceService implements TraceService {
         }
       }
     }
-    
+
     // Load traces
     const tracesDir = this.getStoragePath('traces');
     if (fs.existsSync(tracesDir)) {
@@ -558,7 +557,7 @@ export class LocalTraceService implements TraceService {
         }
       }
     }
-    
+
     // Load messages
     const messagesDir = this.getStoragePath('messages');
     if (fs.existsSync(messagesDir)) {
@@ -576,18 +575,18 @@ export class LocalTraceService implements TraceService {
       }
     }
   }
-  
+
   private saveToDisk(): void {
     // Save all sessions
     for (const session of this.sessions.values()) {
       this.saveSession(session);
     }
-    
+
     // Save all traces
     for (const trace of this.traces.values()) {
       this.saveTrace(trace);
     }
-    
+
     // Save all messages
     for (const [sessionId, messages] of this.messages) {
       const dir = this.getStoragePath('messages');
@@ -595,7 +594,7 @@ export class LocalTraceService implements TraceService {
       fs.writeFileSync(file, JSON.stringify(messages, null, 2));
     }
   }
-  
+
   /**
    * Clean up resources
    */
@@ -603,7 +602,7 @@ export class LocalTraceService implements TraceService {
     if (this.autoSaveTimer) {
       clearInterval(this.autoSaveTimer);
     }
-    
+
     if (this.config.storageMode === 'file' || this.config.autoSave) {
       this.saveToDisk();
     }

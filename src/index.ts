@@ -482,7 +482,17 @@ export class AICostTracker {
       ...(payload.errorOccurred && { errorOccurred: payload.errorOccurred }),
       ...(payload.errorMessage && { errorMessage: payload.errorMessage }),
       ...(payload.ipAddress && { ipAddress: payload.ipAddress }),
-      ...(payload.userAgent && { userAgent: payload.userAgent })
+      ...(payload.userAgent && { userAgent: payload.userAgent }),
+      ...(payload.userEmail && { userEmail: payload.userEmail }),
+      ...(payload.customerEmail && { customerEmail: payload.customerEmail }),
+      // Enhanced request/response data
+      ...(payload.messages && { messages: payload.messages }),
+      ...(payload.system && { system: payload.system }),
+      ...(payload.input && { input: payload.input }),
+      ...(payload.output && { output: payload.output }),
+      // Enhanced metadata handling
+      ...(payload.requestMetadata && { requestMetadata: payload.requestMetadata }),
+      ...(payload.responseMetadata && { responseMetadata: payload.responseMetadata })
     };
 
     // Send to backend
@@ -685,11 +695,11 @@ export class AICostTracker {
    * Initialize gateway client for intelligent proxy functionality
    */
   initializeGateway(gatewayConfig: Partial<GatewayConfig> = {}): GatewayClient {
-    const apiKey = process.env.COSTKATANA_API_KEY || process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.API_KEY;
 
     if (!apiKey) {
       throw new Error(
-        'COSTKATANA_API_KEY or API_KEY environment variable not set for gateway functionality.'
+        'API_KEY or API_KEY environment variable not set for gateway functionality.'
       );
     }
 
@@ -877,7 +887,25 @@ export class AICostTracker {
         responseTime,
         tags: options.properties ? Object.keys(options.properties) : [],
         sessionId: options.sessionId,
-        projectId: options.projectId || options.budgetId || this.config.projectId
+        projectId: options.projectId || options.budgetId || this.config.projectId,
+        userEmail: options.userEmail,
+        customerEmail: options.customerEmail,
+        // Enhanced request/response data
+        messages: this.extractMessagesFromRequest(request),
+        system: this.extractSystemFromRequest(request),
+        input: promptText,
+        output: completionText,
+        // Enhanced metadata
+        requestMetadata: {
+          messages: this.extractMessagesFromRequest(request),
+          system: this.extractSystemFromRequest(request),
+          input: promptText,
+          prompt: promptText
+        },
+        responseMetadata: {
+          completion: completionText,
+          output: completionText
+        }
       };
 
       await this.trackUsage(usageMetadata);
@@ -929,6 +957,29 @@ export class AICostTracker {
         .join('\n');
     }
     return '';
+  }
+
+  /**
+   * Extract messages from a request object
+   */
+  private extractMessagesFromRequest(request: any): any[] {
+    if (request.messages && Array.isArray(request.messages)) {
+      return request.messages.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      }));
+    }
+    return [];
+  }
+
+  /**
+   * Extract system message from a request object
+   */
+  private extractSystemFromRequest(request: any): string | undefined {
+    if (request.system) {
+      return request.system;
+    }
+    return undefined;
   }
 
   /**
@@ -1685,6 +1736,563 @@ export const createXAITracker = (
 
 // Export the SimpleCostTracker class for advanced usage
 export { SimpleCostTracker };
+
+// ============================================================================
+// ULTRA-SIMPLE API - The easiest way to use Cost Katana
+// ============================================================================
+
+let globalTracker: AICostTracker | null = null;
+let globalGateway: GatewayClient | null = null;
+
+/**
+ * Auto-configure Cost Katana from environment variables
+ */
+async function autoConfigureIfNeeded(): Promise<void> {
+  if (globalTracker) return;
+
+  try {
+    // Try multiple API key sources
+    const apiKey = 
+      process.env.COST_KATANA_API_KEY ||
+      process.env.COST_KATANA_API_KEY ||
+      process.env.API_KEY ||
+      process.env.COSTKATANA_KEY;
+    
+    const projectId = 
+      process.env.COST_KATANA_PROJECT ||
+      process.env.PROJECT_ID ||
+      process.env.COSTKATANA_PROJECT_ID;
+
+    // If no Cost Katana credentials, try to work with provider keys directly
+    if (!apiKey || !projectId) {
+      logger.info('Cost Katana credentials not found, attempting direct provider mode');
+      
+      // Check for any provider keys
+      const hasOpenAI = !!process.env.OPENAI_API_KEY;
+      const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
+      const hasGoogle = !!process.env.GOOGLE_API_KEY;
+      const hasAWSBedrock = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
+      
+      if (!hasOpenAI && !hasAnthropic && !hasGoogle && !hasAWSBedrock) {
+        throw new Error(
+          `\n❌ No API keys found!\n\n` +
+          `Please set up Cost Katana for the best experience:\n\n` +
+          `  Option 1: Cost Katana (Recommended)\n` +
+          `    export COST_KATANA_API_KEY="dak_your_key"\n` +
+          `    export PROJECT_ID="your_project_id"\n` +
+          `    Get your keys at: https://costkatana.com/settings/api-keys\n\n` +
+          `  Option 2: Direct Provider Keys\n` +
+          `    export OPENAI_API_KEY="sk-..."\n` +
+          `    # or ANTHROPIC_API_KEY, GOOGLE_API_KEY, etc.\n\n` +
+          `  Option 3: Interactive Setup\n` +
+          `    npx cost-katana setup\n`
+        );
+      }
+
+      // Create tracker with available providers (limited mode)
+      const providers: ProviderConfig[] = [];
+      
+      if (hasOpenAI) {
+        providers.push({
+          provider: AIProvider.OpenAI,
+          apiKey: process.env.OPENAI_API_KEY!
+        });
+      }
+      
+      if (hasAnthropic) {
+        providers.push({
+          provider: AIProvider.Anthropic,
+          apiKey: process.env.ANTHROPIC_API_KEY!
+        });
+      }
+      
+      if (hasGoogle) {
+        providers.push({
+          provider: AIProvider.Google,
+          apiKey: process.env.GOOGLE_API_KEY!
+        });
+      }
+      
+      if (hasAWSBedrock) {
+        providers.push({
+          provider: AIProvider.AWSBedrock,
+          region: process.env.AWS_REGION || 'us-east-1'
+        });
+      }
+
+      // Create limited tracker without Cost Katana backend
+      globalTracker = new (AICostTracker as any)(
+        {
+          providers,
+          optimization: {
+            enablePromptOptimization: true,
+            enableModelSuggestions: true,
+            enableCachingSuggestions: true,
+            thresholds: optimizationThresholds
+          },
+          tracking: {
+            enableAutoTracking: true,
+            storageType: 'memory'
+          }
+        },
+        null // No API client for limited mode
+      );
+
+      logger.warn(
+        '⚠️  Running in limited mode without Cost Katana dashboard.\n' +
+        '   Some features like analytics and cost tracking are limited.\n' +
+        '   Sign up at https://costkatana.com for full features!'
+      );
+      
+      return;
+    }
+
+    // Full Cost Katana mode
+    const config: TrackerConfig = {
+      providers: [],
+      optimization: {
+        enablePromptOptimization: true,
+        enableModelSuggestions: true,
+        enableCachingSuggestions: true,
+        thresholds: optimizationThresholds
+      },
+      tracking: {
+        enableAutoTracking: true
+      }
+    };
+
+    // Auto-detect and add providers
+    if (process.env.OPENAI_API_KEY) {
+      config.providers.push({
+        provider: AIProvider.OpenAI,
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    }
+    
+    if (process.env.ANTHROPIC_API_KEY) {
+      config.providers.push({
+        provider: AIProvider.Anthropic,
+        apiKey: process.env.ANTHROPIC_API_KEY
+      });
+    }
+    
+    if (process.env.GOOGLE_API_KEY) {
+      config.providers.push({
+        provider: AIProvider.Google,
+        apiKey: process.env.GOOGLE_API_KEY
+      });
+    }
+    
+    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+      config.providers.push({
+        provider: AIProvider.AWSBedrock,
+        region: process.env.AWS_REGION || 'us-east-1'
+      });
+    }
+
+    // If no providers configured, add a default one with proxy key support
+    if (config.providers.length === 0) {
+      config.providers.push({
+        provider: AIProvider.OpenAI,
+        apiKey: 'proxy' // Will use Cost Katana proxy keys
+      });
+    }
+
+    // Create the tracker
+    globalTracker = await AICostTracker.create(config);
+
+    // Auto-initialize gateway if credentials available
+    const gatewayUrl = 
+      process.env.COSTKATANA_GATEWAY_URL ||
+      process.env.GATEWAY_URL ||
+      'https://cost-katana-backend.store/api/gateway';
+
+    globalGateway = globalTracker.initializeGateway({
+      baseUrl: gatewayUrl,
+      enableCache: true,
+      enableRetries: true
+    });
+
+    logger.info('✅ Cost Katana auto-configured successfully');
+    
+  } catch (error) {
+    logger.error('Failed to auto-configure Cost Katana', error as Error);
+    throw error;
+  }
+}
+
+/**
+ * Simple AI function - the easiest way to use Cost Katana
+ * 
+ * @example
+ * ```typescript
+ * import { ai } from 'cost-katana';
+ * 
+ * const response = await ai('gpt-4', 'Explain quantum computing');
+ * console.log(response.text);
+ * console.log(`Cost: $${response.cost}`);
+ * ```
+ */
+export async function ai(
+  model: string,
+  prompt: string,
+  options: {
+    systemMessage?: string;
+    temperature?: number;
+    maxTokens?: number;
+    cache?: boolean;
+    cortex?: boolean;
+  } = {}
+): Promise<{
+  text: string;
+  cost: number;
+  tokens: number;
+  model: string;
+  provider: string;
+  cached?: boolean;
+  optimized?: boolean;
+}> {
+  await autoConfigureIfNeeded();
+
+  if (!globalTracker) {
+    throw new Error('Failed to initialize Cost Katana');
+  }
+
+  try {
+    // Determine provider from model name
+    const provider = inferProviderFromModel(model);
+    
+    // Use gateway if available for better features
+    if (globalGateway) {
+      const request = buildGatewayRequest(model, prompt, options);
+      
+      const gatewayOptions: GatewayRequestOptions = {
+        cache: options.cache,
+        ...(options.cortex && {
+          cortex: {
+            enabled: true,
+            operation: 'optimize',
+            preserveSemantics: true,
+            intelligentRouting: true
+          }
+        })
+      };
+
+      const response = await globalGateway.makeRequest(
+        '/v1/chat/completions',
+        request,
+        gatewayOptions
+      );
+
+      const text = extractTextFromGatewayResponse(response.data);
+      const usage = extractUsageFromGatewayResponse(response.data);
+      const cost = calculateCostFromUsage(model, usage);
+
+      return {
+        text,
+        cost,
+        tokens: usage.totalTokens,
+        model,
+        provider,
+        cached: response.metadata?.cacheStatus === 'HIT',
+        optimized: !!options.cortex
+      };
+    }
+
+    // Fallback to direct provider call
+    const request: ProviderRequest = {
+      model,
+      messages: [
+        ...(options.systemMessage
+          ? [{ role: 'system' as const, content: options.systemMessage }]
+          : []),
+        { role: 'user' as const, content: prompt }
+      ],
+      maxTokens: options.maxTokens || 1000,
+      temperature: options.temperature || 0.7
+    };
+
+    const response = await globalTracker.makeRequest(request);
+    
+    const text = extractTextFromProviderResponse(response, provider);
+    const usage = extractUsageFromProviderResponse(response, provider);
+    const cost = calculateCostFromUsage(model, usage);
+
+    return {
+      text,
+      cost,
+      tokens: usage.totalTokens,
+      model,
+      provider
+    };
+    
+  } catch (error) {
+    logger.error('AI request failed', error as Error);
+    throw new Error(
+      `AI request failed: ${(error as Error).message}\n\n` +
+      `Troubleshooting:\n` +
+      `1. Check your API keys are set correctly\n` +
+      `2. Verify the model name is correct\n` +
+      `3. Ensure you have network connectivity\n` +
+      `4. Check your Cost Katana dashboard for usage limits`
+    );
+  }
+}
+
+/**
+ * Simple chat session - maintain conversation context
+ * 
+ * @example
+ * ```typescript
+ * import { chat } from 'cost-katana';
+ * 
+ * const session = chat('claude-3-sonnet');
+ * await session.send('Hello!');
+ * await session.send('Tell me more');
+ * console.log(`Total cost: $${session.totalCost}`);
+ * ```
+ */
+export function chat(
+  model: string,
+  options: {
+    systemMessage?: string;
+    temperature?: number;
+    maxTokens?: number;
+  } = {}
+) {
+  const messages: Array<{ role: string; content: string }> = [];
+  let totalCost = 0;
+  let totalTokens = 0;
+
+  if (options.systemMessage) {
+    messages.push({ role: 'system', content: options.systemMessage });
+  }
+
+  return {
+    async send(message: string) {
+      messages.push({ role: 'user', content: message });
+      
+      const response = await ai(model, message, {
+        ...options,
+        systemMessage: undefined // Already in messages
+      });
+
+      messages.push({ role: 'assistant', content: response.text });
+      
+      totalCost += response.cost;
+      totalTokens += response.tokens;
+
+      return response.text;
+    },
+
+    get messages() {
+      return [...messages];
+    },
+
+    get totalCost() {
+      return totalCost;
+    },
+
+    get totalTokens() {
+      return totalTokens;
+    },
+
+    clear() {
+      messages.length = 0;
+      if (options.systemMessage) {
+        messages.push({ role: 'system', content: options.systemMessage });
+      }
+      totalCost = 0;
+      totalTokens = 0;
+    }
+  };
+}
+
+/**
+ * Configure Cost Katana manually
+ * 
+ * @example
+ * ```typescript
+ * import { configure } from 'cost-katana';
+ * 
+ * configure({
+ *   apiKey: 'dak_your_key',
+ *   projectId: 'your_project',
+ *   cortex: true,
+ *   cache: true
+ * });
+ * ```
+ */
+export async function configure(options: {
+  apiKey?: string;
+  projectId?: string;
+  cortex?: boolean;
+  cache?: boolean;
+  firewall?: boolean;
+  providers?: Array<{
+    name: string;
+    apiKey?: string;
+  }>;
+}) {
+  // Set environment variables if provided
+  if (options.apiKey) {
+    process.env.API_KEY = options.apiKey;
+    process.env.COST_KATANA_API_KEY = options.apiKey;
+  }
+  
+  if (options.projectId) {
+    process.env.PROJECT_ID = options.projectId;
+  }
+
+  // Set provider API keys
+  if (options.providers) {
+    for (const provider of options.providers) {
+      const envKey = `${provider.name.toUpperCase()}_API_KEY`;
+      if (provider.apiKey) {
+        process.env[envKey] = provider.apiKey;
+      }
+    }
+  }
+
+  // Reset global instances to force reconfiguration
+  globalTracker = null;
+  globalGateway = null;
+
+  // Re-initialize with new configuration
+  await autoConfigureIfNeeded();
+
+  logger.info('Cost Katana configured successfully', {
+    cortex: options.cortex,
+    cache: options.cache,
+    firewall: options.firewall
+  });
+}
+
+// Helper functions for the simple API
+
+function inferProviderFromModel(model: string): string {
+  const modelLower = model.toLowerCase();
+  
+  if (modelLower.includes('gpt') || modelLower.includes('dall-e') || modelLower.includes('whisper')) {
+    return AIProvider.OpenAI;
+  }
+  if (modelLower.includes('claude')) {
+    return AIProvider.Anthropic;
+  }
+  if (modelLower.includes('gemini') || modelLower.includes('palm')) {
+    return AIProvider.Google;
+  }
+  if (modelLower.includes('command') || modelLower.includes('embed')) {
+    return AIProvider.Cohere;
+  }
+  if (modelLower.includes('llama') || modelLower.includes('mixtral')) {
+    return AIProvider.Groq;
+  }
+  if (modelLower.includes('deepseek')) {
+    return AIProvider.DeepSeek;
+  }
+  if (modelLower.includes('mistral')) {
+    return AIProvider.Mistral;
+  }
+  if (modelLower.includes('grok')) {
+    return AIProvider.XAI;
+  }
+  if (modelLower.includes('nova') || modelLower.includes('titan')) {
+    return AIProvider.AWSBedrock;
+  }
+  
+  // Default to OpenAI
+  return AIProvider.OpenAI;
+}
+
+function buildGatewayRequest(model: string, prompt: string, options: any) {
+  return {
+    model,
+    messages: [
+      ...(options.systemMessage
+        ? [{ role: 'system', content: options.systemMessage }]
+        : []),
+      { role: 'user', content: prompt }
+    ],
+    max_tokens: options.maxTokens || 1000,
+    temperature: options.temperature || 0.7
+  };
+}
+
+function extractTextFromGatewayResponse(response: any): string {
+  if (response.choices?.[0]?.message?.content) {
+    return response.choices[0].message.content;
+  }
+  if (response.content?.[0]?.text) {
+    return response.content[0].text;
+  }
+  if (response.text) {
+    return response.text;
+  }
+  return '';
+}
+
+function extractUsageFromGatewayResponse(response: any): any {
+  return {
+    promptTokens: response.usage?.prompt_tokens || 0,
+    completionTokens: response.usage?.completion_tokens || 0,
+    totalTokens: response.usage?.total_tokens || 0
+  };
+}
+
+function extractTextFromProviderResponse(response: any, provider: string): string {
+  switch (provider) {
+    case AIProvider.OpenAI:
+      return response.choices?.[0]?.message?.content || '';
+    case AIProvider.Anthropic:
+      return response.content?.[0]?.text || '';
+    case AIProvider.Google:
+      return response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    default:
+      return response.text || response.content || response.completion || '';
+  }
+}
+
+function extractUsageFromProviderResponse(response: any, provider: string): any {
+  switch (provider) {
+    case AIProvider.OpenAI:
+      return {
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0
+      };
+    case AIProvider.Anthropic:
+      return {
+        promptTokens: response.usage?.input_tokens || 0,
+        completionTokens: response.usage?.output_tokens || 0,
+        totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0)
+      };
+    default:
+      return {
+        promptTokens: 100,
+        completionTokens: 100,
+        totalTokens: 200
+      };
+  }
+}
+
+function calculateCostFromUsage(model: string, usage: any): number {
+  try {
+    const provider = inferProviderFromModel(model);
+    const modelPricing = getModelPricing(provider, model);
+    
+    if (modelPricing) {
+      const promptCost = (usage.promptTokens / 1_000_000) * modelPricing.inputPrice;
+      const completionCost = (usage.completionTokens / 1_000_000) * modelPricing.outputPrice;
+      return promptCost + completionCost;
+    }
+  } catch (error) {
+    // Fallback pricing
+  }
+  
+  // Default fallback pricing
+  return (usage.promptTokens * 0.000001) + (usage.completionTokens * 0.000002);
+}
 
 // ============================================================================
 // DISTRIBUTED TRACING - Enterprise-grade tracing for AI operations

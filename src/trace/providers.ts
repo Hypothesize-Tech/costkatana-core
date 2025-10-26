@@ -15,7 +15,7 @@ interface TracedProviderOptions {
    * Trace context from the current request
    */
   traceContext?: TraceContext;
-  
+
   /**
    * Function to start a span
    */
@@ -26,19 +26,22 @@ interface TracedProviderOptions {
     type: string;
     metadata?: Record<string, any>;
   }) => Promise<{ traceId: string }>;
-  
+
   /**
    * Function to end a span
    */
-  endSpan: (traceId: string, input: {
-    status: 'ok' | 'error';
-    error?: { message: string; stack?: string };
-    model?: string;
-    tokens?: { input: number; output: number };
-    costUSD?: number;
-    metadata?: Record<string, any>;
-  }) => Promise<void>;
-  
+  endSpan: (
+    traceId: string,
+    input: {
+      status: 'ok' | 'error';
+      error?: { message: string; stack?: string };
+      model?: string;
+      tokens?: { input: number; output: number };
+      costUSD?: number;
+      metadata?: Record<string, any>;
+    }
+  ) => Promise<void>;
+
   /**
    * Function to record messages (optional)
    */
@@ -48,7 +51,7 @@ interface TracedProviderOptions {
     role: 'user' | 'assistant' | 'system';
     content: string;
   }) => Promise<void>;
-  
+
   /**
    * Function to calculate cost (optional - will use default if not provided)
    */
@@ -62,18 +65,18 @@ interface TracedProviderOptions {
 
 /**
  * Wraps OpenAI provider for automatic tracing
- * 
+ *
  * @example
  * ```typescript
  * import { TrackedOpenAI } from 'ai-cost-tracker/trace';
- * 
+ *
  * const ai = new TrackedOpenAI({
  *   apiKey: process.env.OPENAI_API_KEY,
  *   traceContext: req.traceContext,
  *   startSpan: traceService.startSpan,
  *   endSpan: traceService.endSpan
  * });
- * 
+ *
  * const response = await ai.makeRequest({
  *   model: 'gpt-4',
  *   messages: [{ role: 'user', content: 'Hello!' }],
@@ -84,12 +87,13 @@ interface TracedProviderOptions {
 export class TrackedOpenAI {
   private provider: OpenAIProvider;
   private options: TracedProviderOptions;
-  
+
   constructor(config: any & TracedProviderOptions) {
-    const { traceContext, startSpan, endSpan, recordMessage, calculateCost, ...providerConfig } = config;
-    
+    const { traceContext, startSpan, endSpan, recordMessage, calculateCost, ...providerConfig } =
+      config;
+
     this.options = { traceContext, startSpan, endSpan, recordMessage, calculateCost };
-    
+
     // Create the underlying OpenAI provider
     this.provider = new OpenAIProvider({
       provider: AIProvider.OpenAI,
@@ -97,14 +101,14 @@ export class TrackedOpenAI {
       endpoint: providerConfig.endpoint
     });
   }
-  
+
   /**
    * Make a tracked request to OpenAI
    */
   async makeRequest(request: ProviderRequest): Promise<ProviderResponse> {
     const startTime = Date.now();
     let traceId: string | undefined;
-    
+
     try {
       // Start LLM span if we have context
       if (this.options.traceContext) {
@@ -120,7 +124,7 @@ export class TrackedOpenAI {
           }
         });
         traceId = span.traceId;
-        
+
         // Record user message
         if (this.options.recordMessage && request.messages?.length) {
           const lastMessage = request.messages[request.messages.length - 1];
@@ -139,21 +143,21 @@ export class TrackedOpenAI {
           });
         }
       }
-      
+
       // Make the actual API call using the provider
       const response = await this.provider.makeRequest(request);
-      
+
       // End span with success
       if (traceId && this.options.traceContext) {
         const endTime = Date.now();
         const latency = endTime - startTime;
-        
+
         // Calculate cost
         let costUSD = 0;
         if (response.usage) {
           const promptTokens = (response.usage as any).prompt_tokens || 0;
           const completionTokens = (response.usage as any).completion_tokens || 0;
-          
+
           if (this.options.calculateCost) {
             costUSD = this.options.calculateCost({
               model: request.model,
@@ -166,30 +170,33 @@ export class TrackedOpenAI {
             try {
               const pricing = getModelPricing('OpenAI', request.model);
               if (pricing) {
-                costUSD = (promptTokens / 1_000_000) * pricing.inputPrice + 
-                         (completionTokens / 1_000_000) * pricing.outputPrice;
+                costUSD =
+                  (promptTokens / 1_000_000) * pricing.inputPrice +
+                  (completionTokens / 1_000_000) * pricing.outputPrice;
               }
-            } catch (err) {
+            } catch {
               // Fallback to basic estimation
               costUSD = promptTokens * 0.000001 + completionTokens * 0.000002;
             }
           }
         }
-        
+
         await this.options.endSpan(traceId, {
           status: 'ok',
           model: request.model,
-          tokens: response.usage ? {
-            input: (response.usage as any).prompt_tokens || 0,
-            output: (response.usage as any).completion_tokens || 0
-          } : undefined,
+          tokens: response.usage
+            ? {
+                input: (response.usage as any).prompt_tokens || 0,
+                output: (response.usage as any).completion_tokens || 0
+              }
+            : undefined,
           costUSD,
           metadata: {
             latency,
             finishReason: response.choices?.[0]?.finishReason
           }
         });
-        
+
         // Record assistant message
         if (this.options.recordMessage && response.choices?.[0]) {
           const choice = response.choices[0];
@@ -204,7 +211,7 @@ export class TrackedOpenAI {
           }
         }
       }
-      
+
       return response;
     } catch (error: any) {
       // End span with error
@@ -220,7 +227,7 @@ export class TrackedOpenAI {
       throw error;
     }
   }
-  
+
   /**
    * Convenience method for chat completions
    */
@@ -242,7 +249,7 @@ export class TrackedOpenAI {
       topP: params.topP
     });
   }
-  
+
   /**
    * Get the underlying provider for direct access
    */
@@ -253,18 +260,18 @@ export class TrackedOpenAI {
 
 /**
  * Wraps Anthropic provider for automatic tracing
- * 
+ *
  * @example
  * ```typescript
  * import { TrackedAnthropic } from 'ai-cost-tracker/trace';
- * 
+ *
  * const ai = new TrackedAnthropic({
  *   apiKey: process.env.ANTHROPIC_API_KEY,
  *   traceContext: req.traceContext,
  *   startSpan: traceService.startSpan,
  *   endSpan: traceService.endSpan
  * });
- * 
+ *
  * const response = await ai.makeRequest({
  *   model: 'claude-3-opus-20240229',
  *   messages: [{ role: 'user', content: 'Hello!' }],
@@ -275,12 +282,13 @@ export class TrackedOpenAI {
 export class TrackedAnthropic {
   private provider: AnthropicProvider;
   private options: TracedProviderOptions;
-  
+
   constructor(config: any & TracedProviderOptions) {
-    const { traceContext, startSpan, endSpan, recordMessage, calculateCost, ...providerConfig } = config;
-    
+    const { traceContext, startSpan, endSpan, recordMessage, calculateCost, ...providerConfig } =
+      config;
+
     this.options = { traceContext, startSpan, endSpan, recordMessage, calculateCost };
-    
+
     // Create the underlying Anthropic provider
     this.provider = new AnthropicProvider({
       provider: AIProvider.Anthropic,
@@ -288,14 +296,14 @@ export class TrackedAnthropic {
       endpoint: providerConfig.endpoint
     });
   }
-  
+
   /**
    * Make a tracked request to Anthropic
    */
   async makeRequest(request: ProviderRequest): Promise<ProviderResponse> {
     const startTime = Date.now();
     let traceId: string | undefined;
-    
+
     try {
       // Start LLM span if we have context
       if (this.options.traceContext) {
@@ -311,7 +319,7 @@ export class TrackedAnthropic {
           }
         });
         traceId = span.traceId;
-        
+
         // Record user message
         if (this.options.recordMessage) {
           if (request.messages?.length) {
@@ -332,20 +340,20 @@ export class TrackedAnthropic {
           }
         }
       }
-      
+
       // Make the actual API call using the provider
       const response = await this.provider.makeRequest(request);
-      
+
       // End span with success
       if (traceId && this.options.traceContext) {
         const latency = Date.now() - startTime;
-        
+
         // Calculate cost
         let costUSD = 0;
         if (response.usage) {
           const inputTokens = (response.usage as any).input_tokens || 0;
           const outputTokens = (response.usage as any).output_tokens || 0;
-          
+
           if (this.options.calculateCost) {
             costUSD = this.options.calculateCost({
               model: request.model,
@@ -358,30 +366,33 @@ export class TrackedAnthropic {
             try {
               const pricing = getModelPricing('Anthropic', request.model);
               if (pricing) {
-                costUSD = (inputTokens / 1_000_000) * pricing.inputPrice + 
-                         (outputTokens / 1_000_000) * pricing.outputPrice;
+                costUSD =
+                  (inputTokens / 1_000_000) * pricing.inputPrice +
+                  (outputTokens / 1_000_000) * pricing.outputPrice;
               }
-            } catch (err) {
+            } catch {
               // Fallback to basic estimation
               costUSD = inputTokens * 0.000001 + outputTokens * 0.000002;
             }
           }
         }
-        
+
         await this.options.endSpan(traceId, {
           status: 'ok',
           model: request.model,
-          tokens: response.usage ? {
-            input: (response.usage as any).input_tokens || 0,
-            output: (response.usage as any).output_tokens || 0
-          } : undefined,
+          tokens: response.usage
+            ? {
+                input: (response.usage as any).input_tokens || 0,
+                output: (response.usage as any).output_tokens || 0
+              }
+            : undefined,
           costUSD,
           metadata: {
             latency,
             finishReason: response.choices?.[0]?.finishReason
           }
         });
-        
+
         // Record assistant message
         if (this.options.recordMessage && response.choices?.[0]) {
           const choice = response.choices[0];
@@ -396,7 +407,7 @@ export class TrackedAnthropic {
           }
         }
       }
-      
+
       return response;
     } catch (error: any) {
       // End span with error
@@ -412,7 +423,7 @@ export class TrackedAnthropic {
       throw error;
     }
   }
-  
+
   /**
    * Convenience method for messages API
    */
@@ -423,7 +434,7 @@ export class TrackedAnthropic {
     maxTokens?: number;
     temperature?: number;
   }): Promise<ProviderResponse> {
-    const formattedMessages = params.system 
+    const formattedMessages = params.system
       ? [{ role: 'system', content: params.system }, ...params.messages].map(m => ({
           role: m.role as 'user' | 'assistant' | 'system' | 'function',
           content: m.content
@@ -432,7 +443,7 @@ export class TrackedAnthropic {
           role: m.role as 'user' | 'assistant' | 'system' | 'function',
           content: m.content
         }));
-      
+
     return this.makeRequest({
       model: params.model,
       messages: formattedMessages,
@@ -440,7 +451,7 @@ export class TrackedAnthropic {
       temperature: params.temperature
     });
   }
-  
+
   /**
    * Get the underlying provider for direct access
    */
@@ -451,7 +462,7 @@ export class TrackedAnthropic {
 
 /**
  * Generic wrapper for any provider
- * 
+ *
  * @example
  * ```typescript
  * const trackedProvider = createTrackedProvider(
@@ -473,41 +484,41 @@ export function createTrackedProvider<T extends object>(
   }
 ): T {
   const originalMethod = provider[methodName] as any;
-  
+
   if (typeof originalMethod !== 'function') {
     throw new Error(`Method ${String(methodName)} is not a function`);
   }
-  
+
   // Create a proxy that intercepts the method call
   return new Proxy(provider, {
     get(target, prop, receiver) {
       if (prop === methodName) {
-        return async function(...args: any[]) {
+        return async function (...args: any[]) {
           if (!traceContext) {
             // No trace context, call original method
             return originalMethod.apply(target, args);
           }
-          
+
           const startTime = Date.now();
           const request = args[0];
           const modelName = request?.model || 'unknown';
-          
+
           const { traceId } = await traceService.startSpan({
             sessionId: traceContext.sessionId,
             parentId: traceContext.traceId,
             name: `LLM ${modelName}`,
             type: 'llm',
-            metadata: { 
+            metadata: {
               method: String(methodName),
               model: modelName,
               temperature: request?.temperature,
               maxTokens: request?.maxTokens || request?.max_tokens
             }
           });
-          
+
           try {
             const result = await originalMethod.apply(target, args);
-            
+
             await traceService.endSpan(traceId, {
               status: 'ok',
               model: modelName,
@@ -516,7 +527,7 @@ export function createTrackedProvider<T extends object>(
                 resultPreview: JSON.stringify(result).slice(0, 200)
               }
             });
-            
+
             return result;
           } catch (error: any) {
             await traceService.endSpan(traceId, {
@@ -530,7 +541,7 @@ export function createTrackedProvider<T extends object>(
           }
         };
       }
-      
+
       return Reflect.get(target, prop, receiver);
     }
   });

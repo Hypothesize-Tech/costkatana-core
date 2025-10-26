@@ -239,7 +239,7 @@ export class BedrockProvider extends BaseProvider {
     // This would require BedrockClient, not BedrockRuntimeClient
     // For now, return a static list
     return Promise.resolve([
-      'anthropic.claude-3-5-sonnet-20240620-v1:0',
+      'anthropic.claude-sonnet-4-20250514-v1:0',
       'anthropic.claude-3-opus-20240229-v1:0',
       'anthropic.claude-3-haiku-20240307-v1:0',
       'amazon.titan-text-express-v1',
@@ -249,7 +249,7 @@ export class BedrockProvider extends BaseProvider {
 
   async invokeModelWithOptimization(
     request: ProviderRequest,
-    optimizationModel: string = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+    optimizationModel: string = 'anthropic.claude-sonnet-4-20250514-v1:0'
   ): Promise<{ response: ProviderResponse; optimization?: any }> {
     // First, get optimization suggestions
     const optimizationPrompt = `Analyze this prompt and suggest optimizations to reduce tokens while maintaining effectiveness:
