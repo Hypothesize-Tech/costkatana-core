@@ -1,6 +1,6 @@
 {
   "name": "cost-katana",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "The simplest way to use AI with automatic cost tracking and optimization. Works with OpenAI, Anthropic, Google, AWS Bedrock, and more.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

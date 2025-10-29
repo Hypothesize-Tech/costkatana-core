@@ -110,3 +110,126 @@ export interface TraceService {
   getSessionGraph(sessionId: string): Promise<SessionGraph>;
   getSessionDetails(sessionId: string): Promise<SessionDetails>;
 }
+
+/**
+ * Session Replay Types
+ * For recording and replaying in-app AI interactions
+ */
+
+export type AppFeature = 'chat' | 'experimentation' | 'workflow' | 'agent' | 'notebook';
+
+export interface AIInteraction {
+  timestamp: Date;
+  model: string;
+  prompt: string;
+  response: string;
+  tokens: {
+    input: number;
+    output: number;
+  };
+  cost: number;
+  latency: number;
+  provider: string;
+  parameters?: Record<string, any>;
+  requestMetadata?: Record<string, any>;
+  responseMetadata?: Record<string, any>;
+}
+
+export interface UserAction {
+  timestamp: Date;
+  action: string;
+  target?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface CodeContext {
+  timestamp: Date;
+  file?: string;
+  language?: string;
+  snippet?: string;
+  cursorPosition?: {
+    line: number;
+    column: number;
+  };
+  metadata?: Record<string, any>;
+}
+
+export interface SystemMetrics {
+  timestamp: Date;
+  cpu?: number;
+  memory?: number;
+  activeRequests?: number;
+  metadata?: Record<string, any>;
+}
+
+export interface StartRecordingInput {
+  userId: string;
+  feature: AppFeature;
+  label: string;
+  metadata?: Record<string, any>;
+}
+
+export interface RecordInteractionInput {
+  sessionId: string;
+  interaction: AIInteraction;
+}
+
+export interface RecordUserActionInput {
+  sessionId: string;
+  action: UserAction;
+}
+
+export interface RecordCodeContextInput {
+  sessionId: string;
+  context: CodeContext;
+}
+
+export interface SessionReplayData {
+  aiInteractions: AIInteraction[];
+  userActions: UserAction[];
+  codeContext: CodeContext[];
+  systemMetrics: SystemMetrics[];
+  workspaceState?: Record<string, any>;
+}
+
+export interface SessionReplay {
+  sessionId: string;
+  userId: string;
+  label: string;
+  source: 'in-app' | 'integration';
+  appFeature?: AppFeature;
+  integrationName?: string;
+  startedAt: Date;
+  endedAt?: Date;
+  duration?: number;
+  status: 'active' | 'completed' | 'error';
+  hasErrors: boolean;
+  errorCount: number;
+  replayData: SessionReplayData;
+  summary: {
+    totalCost: number;
+    totalTokens: {
+      input: number;
+      output: number;
+    };
+    totalSpans: number;
+  };
+  metadata?: Record<string, any>;
+}
+
+export interface SessionReplayService {
+  startRecording(input: StartRecordingInput): Promise<{ sessionId: string }>;
+  recordInteraction(input: RecordInteractionInput): Promise<void>;
+  recordUserAction(input: RecordUserActionInput): Promise<void>;
+  recordCodeContext(input: RecordCodeContextInput): Promise<void>;
+  endRecording(sessionId: string): Promise<void>;
+  getSessionReplay(sessionId: string): Promise<SessionReplay>;
+  listSessionReplays(filters?: {
+    userId?: string;
+    feature?: AppFeature;
+    startDate?: Date;
+    endDate?: Date;
+    page?: number;
+    limit?: number;
+  }): Promise<{ replays: SessionReplay[]; total: number }>;
+}

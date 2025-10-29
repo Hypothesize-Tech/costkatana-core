@@ -432,10 +432,89 @@ console.log('Total cost:', session.totalCost);
 console.log('Total tokens:', session.totalTokens);
 ```
 
+### Session Replay & Recording
+
+Record and replay AI interactions for debugging and analysis:
+
+```typescript
+import { SessionReplayClient } from 'cost-katana/trace';
+
+const replayClient = new SessionReplayClient({
+  apiKey: process.env.COST_KATANA_API_KEY
+});
+
+// Start recording a chat session
+const { sessionId } = await replayClient.startRecording({
+  userId: 'user123',
+  feature: 'chat',
+  label: 'Customer Support Chat'
+});
+
+// Record AI interactions
+await replayClient.recordInteraction({
+  sessionId,
+  interaction: {
+    timestamp: new Date(),
+    model: 'gpt-4',
+    prompt: 'How can I help you?',
+    response: 'I need assistance with...',
+    tokens: { input: 10, output: 20 },
+    cost: 0.0015,
+    latency: 850,
+    provider: 'openai'
+  }
+});
+
+// Record user actions
+await replayClient.recordUserAction({
+  sessionId,
+  action: {
+    timestamp: new Date(),
+    action: 'button_click',
+    target: 'send_message'
+  }
+});
+
+// End recording
+await replayClient.endRecording(sessionId);
+
+// Later, retrieve the replay
+const replay = await replayClient.getSessionReplay(sessionId);
+console.log('Total interactions:', replay.replayData.aiInteractions.length);
+console.log('Total cost:', replay.summary.totalCost);
+```
+
+### Distributed Tracing
+
+Track AI operations across microservices:
+
+```typescript
+import { TraceClient, createTraceMiddleware } from 'cost-katana/trace';
+import express from 'express';
+
+const app = express();
+const traceClient = new TraceClient({
+  apiKey: process.env.COST_KATANA_API_KEY
+});
+
+// Add tracing middleware
+app.use(createTraceMiddleware({ traceService: traceClient }));
+
+// Your routes automatically get traced
+app.post('/api/chat', async (req, res) => {
+  const response = await ai('gpt-4', req.body.message);
+  res.json(response);
+});
+
+// View traces in your dashboard at costkatana.com/sessions
+```
+
 ### Dashboard Features
 
 Visit [costkatana.com/dashboard](https://costkatana.com/dashboard) to see:
 
+- **Session Replays**: Timeline playback of AI interactions
+- **Debug Traces**: Span-level distributed tracing  
 - Real-time cost tracking
 - Usage by model and provider
 - Daily/weekly/monthly spending

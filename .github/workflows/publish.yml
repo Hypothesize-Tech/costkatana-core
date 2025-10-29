@@ -104,7 +104,7 @@ jobs:
         tag_name: ${{ github.ref_name }}
         release_name: Release ${{ github.ref_name }}
         body: |
-          ## AI Cost Optimizer Core v${{ steps.version.outputs.version }}
+          ## CostKatana Core v${{ steps.version.outputs.version }}
           
           ### Installation
           ```bash

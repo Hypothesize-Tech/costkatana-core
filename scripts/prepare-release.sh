@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash 
 
-# AI Cost Optimizer Core Release Preparation Script
+# CostKatana Core Release Preparation Script
 # This script helps prepare a new release by updating version and creating a tag
 
 set -e
@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 AI Cost Optimizer Core Release Preparation${NC}"
+echo -e "${BLUE}🚀 CostKatana Core Release Preparation${NC}"
 echo "================================================"
 
 # Get current version
