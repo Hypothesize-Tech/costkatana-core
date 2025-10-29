@@ -15,7 +15,7 @@ jobs:
         node-version: [20]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         token: ${{ secrets.AI_GITHUB_TOKEN }}
         ssh-strict: false
@@ -47,7 +47,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/tags/v')
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         token: ${{ secrets.AI_GITHUB_TOKEN }}
         ssh-strict: false
