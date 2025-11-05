@@ -27,8 +27,7 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking', 'live-api'],
     category: 'multimodal',
     isLatest: true,
-    notes:
-      "Our best model in terms of price-performance, offering well-rounded capabilities. Support for Live API included for some endpoints. See the model's thinking process as part of the response. Audio input: $1.00"
+    notes: 'Our best model in terms of price-performance, offering well-rounded capabilities. Best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases. Support for Live API included for some endpoints. See the model\'s thinking process as part of the response. Audio input: $1.00'
   },
   {
     modelId: 'gemini-2.5-flash-lite-preview',
@@ -50,7 +49,29 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     category: 'multimodal',
     isLatest: true,
     notes:
-      'Our most cost effective model that supports high throughput tasks. The fastest model in the 2.5 line. Features 1M token context window and multimodal input. Outperforms 2.0 Flash on most evaluation benchmarks. Audio input: $0.50'
+      'Our fastest flash model optimized for cost-efficiency and high throughput. Features 1M token context window and multimodal input. Outperforms 2.0 Flash on most evaluation benchmarks. Audio input: $0.50'
+  },
+  {
+    modelId: 'gemini-2.5-flash-lite',
+    modelName: 'Gemini 2.5 Flash-Lite',
+    provider: 'Google AI',
+    inputPrice: 0.1, // text/image/video
+    outputPrice: 0.4,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: [
+      'text',
+      'image',
+      'video',
+      'multimodal',
+      'reasoning',
+      'thinking',
+      'high-throughput'
+    ],
+    category: 'multimodal',
+    isLatest: true,
+    notes:
+      'Our fastest flash model optimized for cost-efficiency and high throughput (stable version). Features 1M token context window and multimodal input. Audio input: $0.50'
   },
   {
     modelId: 'gemini-2.5-flash-audio',
@@ -144,8 +165,7 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'image', 'video', 'multimodal', 'agents', 'next-generation'],
     category: 'multimodal',
     isLatest: false,
-    notes:
-      'Our newest multimodal model, with next generation features and improved capabilities. Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
+    notes: 'Our second generation workhorse model, with a 1 million token context window. Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
   },
   {
     modelId: 'gemini-2.0-flash-lite',
@@ -158,8 +178,7 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'cost-efficient', 'low-latency'],
     category: 'multimodal',
     isLatest: false,
-    notes:
-      'A Gemini 2.0 Flash model optimized for cost efficiency and low latency. Smallest and most cost effective model, built for at scale usage'
+    notes: 'Our second generation small workhorse model, with a 1 million token context window. Optimized for cost efficiency and low latency, built for at scale usage'
   },
   {
     modelId: 'gemini-2.0-flash-audio',

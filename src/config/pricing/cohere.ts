@@ -385,5 +385,59 @@ export const COHERE_PRICING: ModelPricingConfig[] = [
     category: 'classification',
     isLatest: false,
     notes: 'Legacy text classification model'
+  },
+
+  // === Cohere Models on AWS Bedrock ===
+  {
+    modelId: 'cohere.command-r-plus-v1:0',
+    modelName: 'Command R+ (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 2.5,
+    outputPrice: 10.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multilingual', 'enterprise'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Cohere Command R+ via AWS Bedrock - advanced AI model for text generation and chat'
+  },
+  {
+    modelId: 'cohere.command-r-v1:0',
+    modelName: 'Command R (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 0.15,
+    outputPrice: 0.6,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 128000,
+    capabilities: ['text', 'multilingual', 'rag', 'tools'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Cohere Command R via AWS Bedrock - advanced AI model for text generation and chat'
+  },
+  {
+    modelId: 'cohere.embed-english-v3',
+    modelName: 'Embed English v3 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 0.1,
+    outputPrice: 0.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 512,
+    capabilities: ['embedding'],
+    category: 'embedding',
+    isLatest: true,
+    notes: 'Cohere Embed English v3 via AWS Bedrock - advanced AI model for text generation and chat'
+  },
+  {
+    modelId: 'cohere.embed-multilingual-v3',
+    modelName: 'Embed Multilingual v3 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 0.1,
+    outputPrice: 0.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 512,
+    capabilities: ['embedding', 'multilingual'],
+    category: 'embedding',
+    isLatest: true,
+    notes: 'Cohere Embed Multilingual v3 via AWS Bedrock - advanced AI model for text generation and chat'
   }
 ];

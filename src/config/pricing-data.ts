@@ -3,7 +3,10 @@ export enum PricingUnit {
   Per1MTokens = 'PER_1M_TOKENS',
   PerRequest = 'PER_REQUEST',
   PerHour = 'PER_HOUR',
-  PerMinute = 'PER_MINUTE'
+  PerMinute = 'PER_MINUTE',
+  PerSecond = 'PER_SECOND',
+  Per1KCharacters = 'PER_1K_CHARACTERS',
+  PerImage = 'PER_IMAGE'
 }
 
 export interface ModelPricingConfig {

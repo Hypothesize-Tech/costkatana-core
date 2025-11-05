@@ -184,26 +184,43 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
 
   // === Anthropic Claude Models (Updated) ===
   {
-    modelId: 'anthropic.claude-opus-4-1-20250805-v1:0',
-    modelName: 'Claude Opus 4.1 (Bedrock)',
+    modelId: 'anthropic.claude-sonnet-4-5-v1:0',
+    modelName: 'Claude Sonnet 4.5',
     provider: 'AWS Bedrock',
-    inputPrice: 15.0,
-    outputPrice: 75.0,
+    inputPrice: 3.00,
+    outputPrice: 15.00,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 200000,
-    cachedInputPrice: 1.5, // Cache read price
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'reasoning',
-      'extended-thinking',
-      'multilingual'
-    ],
-    category: 'multimodal',
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    category: 'text',
     isLatest: true,
-    notes:
-      'Claude Opus 4.1 via AWS Bedrock - most capable and intelligent Claude model yet. Cache write: $18.75, Cache read: $1.50'
+    notes: 'Claude Sonnet 4.5 on AWS Bedrock - latest Claude Sonnet model with enhanced capabilities and 1M context window support (beta)'
+  },
+  {
+    modelId: 'anthropic.claude-haiku-4-5-v1:0',
+    modelName: 'Claude Haiku 4.5',
+    provider: 'AWS Bedrock',
+    inputPrice: 1.00,
+    outputPrice: 5.00,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'multilingual'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Claude Haiku 4.5 on AWS Bedrock - latest Claude Haiku model with improved performance'
+  },
+  {
+    modelId: 'anthropic.claude-opus-4-1-20250805-v1:0',
+    modelName: 'Claude 4 Opus',
+    provider: 'AWS Bedrock',
+    inputPrice: 15.00,
+    outputPrice: 75.00,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Claude Opus 4.1 on AWS Bedrock - most powerful model for complex reasoning'
   },
   {
     modelId: 'anthropic.claude-opus-4-20250514-v1:0',
@@ -227,61 +244,56 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     notes: 'Claude Opus 4 via AWS Bedrock. Cache write: $18.75, Cache read: $1.50'
   },
   {
-    modelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
-    modelName: 'Claude Sonnet 4 (Bedrock)',
+    modelId: 'anthropic.claude-opus-4-20250514-v1:0',
+    modelName: 'Claude Opus 4',
     provider: 'AWS Bedrock',
-    inputPrice: 3.0,
-    outputPrice: 15.0,
+    inputPrice: 15.00,
+    outputPrice: 75.00,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 200000,
-    cachedInputPrice: 0.3, // Cache read price
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'reasoning',
-      'extended-thinking',
-      'multilingual'
-    ],
-    category: 'multimodal',
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    category: 'text',
     isLatest: true,
-    notes: 'Claude Sonnet 4 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30'
+    notes: 'Claude Opus 4 on AWS Bedrock - previous flagship model'
+  },
+  {
+    modelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
+    modelName: 'Claude Sonnet 4',
+    provider: 'AWS Bedrock',
+    inputPrice: 3.00,
+    outputPrice: 15.00,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Claude Sonnet 4 on AWS Bedrock - high-performance model with exceptional reasoning'
   },
   {
     modelId: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
-    modelName: 'Claude Sonnet 3.7 (Bedrock)',
+    modelName: 'Claude Sonnet 3.7',
     provider: 'AWS Bedrock',
-    inputPrice: 3.0,
-    outputPrice: 15.0,
+    inputPrice: 3.00,
+    outputPrice: 15.00,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 200000,
-    cachedInputPrice: 0.3, // Cache read price
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'reasoning',
-      'extended-thinking',
-      'multilingual'
-    ],
-    category: 'multimodal',
-    isLatest: true,
-    notes: 'Claude Sonnet 3.7 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30'
+    contextWindow: 200_000,
+    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    category: 'text',
+    isLatest: false,
+    notes: 'Claude Sonnet 3.7 on AWS Bedrock - high-performance model with early extended thinking (deprecated)'
   },
   {
-    modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
-    modelName: 'Claude Sonnet 3.5 v2 (Bedrock)',
+    modelId: 'anthropic.claude-3-5-sonnet-20241022-v1:0',
+    modelName: 'Claude Sonnet 3.5 v2',
     provider: 'AWS Bedrock',
-    inputPrice: 3.0,
-    outputPrice: 15.0,
+    inputPrice: 3.00,
+    outputPrice: 15.00,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 200000,
-    cachedInputPrice: 0.3, // Cache read price
+    contextWindow: 200_000,
     capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'multilingual'],
-    category: 'multimodal',
+    category: 'text',
     isLatest: false,
-    notes:
-      'Claude Sonnet 3.5 v2 via AWS Bedrock. Cache write: $3.75, Cache read: $0.30, Batch: $1.50/$7.50'
+    notes: 'Claude Sonnet 3.5 v2 on AWS Bedrock - upgraded version'
   },
   {
     modelId: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
@@ -298,18 +310,16 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
   },
   {
     modelId: 'anthropic.claude-3-5-haiku-20241022-v1:0',
-    modelName: 'Claude Haiku 3.5 (Bedrock)',
+    modelName: 'Claude 3.5 Haiku',
     provider: 'AWS Bedrock',
-    inputPrice: 0.8,
-    outputPrice: 4.0,
+    inputPrice: 0.80,
+    outputPrice: 4.00,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 200000,
-    cachedInputPrice: 0.08, // Cache read price
+    contextWindow: 200_000,
     capabilities: ['text', 'vision', 'multimodal', 'multilingual'],
-    category: 'multimodal',
-    isLatest: true,
-    notes:
-      'Claude Haiku 3.5 via AWS Bedrock. Cache write: $1.00, Cache read: $0.08, Latency optimized: $1.00/$5.00'
+    category: 'text',
+    isLatest: false,
+    notes: 'Claude 3.5 Haiku on AWS Bedrock - fast and intelligent for quick responses (superseded by Haiku 4.5)'
   },
   {
     modelId: 'anthropic.claude-3-opus-20240229-v1:0',
