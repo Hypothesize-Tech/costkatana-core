@@ -708,6 +708,7 @@ export class AICostTracker {
       apiKey,
       enableCache: true,
       enableRetries: true,
+      autoTrack: true, // Default to true for backward compatibility
       retryConfig: {
         count: 3,
         factor: 2,

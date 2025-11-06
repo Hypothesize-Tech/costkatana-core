@@ -118,6 +118,10 @@ export class GatewayClient {
         }
       }
 
+      // Add default auto-track setting (default: true)
+      const autoTrack = this.config.autoTrack !== undefined ? this.config.autoTrack : true;
+      requestConfig.headers['CostKatana-Auto-Track'] = autoTrack.toString();
+
       return requestConfig;
     });
 
@@ -465,6 +469,16 @@ export class GatewayClient {
             options.firewall.llamaThreshold.toString();
         }
       }
+    }
+
+    // Auto-track configuration (per-request override takes precedence)
+    if (options.autoTrack !== undefined) {
+      headers['CostKatana-Auto-Track'] = options.autoTrack.toString();
+    } else if (this.config.autoTrack !== undefined) {
+      headers['CostKatana-Auto-Track'] = this.config.autoTrack.toString();
+    } else {
+      // Default to true if not specified
+      headers['CostKatana-Auto-Track'] = 'true';
     }
 
     // Failover configuration
