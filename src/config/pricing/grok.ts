@@ -13,7 +13,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'function-calling', 'structured-outputs'],
     category: 'text',
     isLatest: true,
-    notes: 'Latest cost-efficient reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+    notes:
+      'Latest cost-efficient reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
   },
   {
     modelId: 'grok-4-fast-non-reasoning',
@@ -26,7 +27,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'function-calling', 'structured-outputs'],
     category: 'text',
     isLatest: true,
-    notes: 'Latest cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+    notes:
+      'Latest cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
   },
   {
     modelId: 'grok-code-fast-1',
@@ -39,7 +41,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['code', 'programming', 'function-calling', 'structured-outputs'],
     category: 'code',
     isLatest: true,
-    notes: 'Cost-efficient coding model optimized for code generation and programming tasks. 2M TPM, 480 RPM rate limits'
+    notes:
+      'Cost-efficient coding model optimized for code generation and programming tasks. 2M TPM, 480 RPM rate limits'
   },
 
   // === Grok 4 Series ===
@@ -54,7 +57,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'function-calling', 'structured-outputs'],
     category: 'text',
     isLatest: true,
-    notes: 'Latest Grok 4 reasoning model. Note: Grok 4 is always a reasoning model with no non-reasoning mode. 2M TPM, 480 RPM rate limits. Knowledge cutoff: November 2024'
+    notes:
+      'Latest Grok 4 reasoning model. Note: Grok 4 is always a reasoning model with no non-reasoning mode. 2M TPM, 480 RPM rate limits. Knowledge cutoff: November 2024'
   },
   {
     modelId: 'grok-4',
@@ -67,7 +71,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'function-calling', 'structured-outputs'],
     category: 'text',
     isLatest: true,
-    notes: 'Alias for latest stable Grok 4 version. Points to grok-4-0709. 2M TPM, 480 RPM rate limits'
+    notes:
+      'Alias for latest stable Grok 4 version. Points to grok-4-0709. 2M TPM, 480 RPM rate limits'
   },
   {
     modelId: 'grok-4-latest',
@@ -80,7 +85,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'function-calling', 'structured-outputs'],
     category: 'text',
     isLatest: true,
-    notes: 'Alias for latest Grok 4 version (may include preview features). Auto-updates with new releases. 2M TPM, 480 RPM rate limits'
+    notes:
+      'Alias for latest Grok 4 version (may include preview features). Auto-updates with new releases. 2M TPM, 480 RPM rate limits'
   },
 
   // === Grok 3 Series ===
@@ -123,7 +129,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'vision', 'image-understanding'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Grok 2 Vision model for image understanding. 600 RPM rate limits (us-east-1) or 50 RPS (eu-west-1)'
+    notes:
+      'Grok 2 Vision model for image understanding. 600 RPM rate limits (us-east-1) or 50 RPS (eu-west-1)'
   },
   {
     modelId: 'grok-2-vision-1212-us-east-1',
@@ -177,7 +184,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['image-generation'],
     category: 'image',
     isLatest: true,
-    notes: 'Alias for latest stable Grok 2 Image version. Points to grok-2-image-1212. $0.07 per image, 300 RPM rate limits'
+    notes:
+      'Alias for latest stable Grok 2 Image version. Points to grok-2-image-1212. $0.07 per image, 300 RPM rate limits'
   },
   {
     modelId: 'grok-2-image-latest',
@@ -190,6 +198,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['image-generation'],
     category: 'image',
     isLatest: true,
-    notes: 'Alias for latest Grok 2 Image version. Auto-updates with new releases. $0.07 per image, 300 RPM rate limits'
+    notes:
+      'Alias for latest Grok 2 Image version. Auto-updates with new releases. $0.07 per image, 300 RPM rate limits'
   }
 ];

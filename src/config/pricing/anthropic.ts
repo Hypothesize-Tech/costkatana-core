@@ -10,10 +10,18 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
-    notes: 'Latest Claude Sonnet model with enhanced capabilities and 1M context window support (beta)'
+    notes:
+      'Latest Claude Sonnet model with enhanced capabilities and 1M context window support (beta)'
   },
   {
     modelId: 'anthropic.claude-sonnet-4-5-v1:0',
@@ -23,10 +31,18 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
-    notes: 'Claude Sonnet 4.5 via AWS Bedrock - latest Claude Sonnet model with enhanced capabilities'
+    notes:
+      'Claude Sonnet 4.5 via AWS Bedrock - latest Claude Sonnet model with enhanced capabilities'
   },
   {
     modelId: 'claude-haiku-4-5',
@@ -64,7 +80,14 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
     notes: 'Most capable and intelligent Claude model yet - superior reasoning and advanced coding'
@@ -77,7 +100,14 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
     notes: 'Claude Opus 4.1 via AWS Bedrock - most capable and intelligent Claude model yet'
@@ -90,7 +120,14 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
     notes: 'Previous flagship model with very high intelligence and capability'
@@ -103,7 +140,14 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 75.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
     notes: 'Claude Opus 4 via AWS Bedrock - previous flagship model'
@@ -116,10 +160,18 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
-    notes: 'High-performance model with exceptional reasoning and efficiency (1M context beta available)'
+    notes:
+      'High-performance model with exceptional reasoning and efficiency (1M context beta available)'
   },
   {
     modelId: 'anthropic.claude-sonnet-4-20250514-v1:0',
@@ -129,7 +181,14 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: true,
     notes: 'Claude Sonnet 4 via AWS Bedrock - high-performance model with exceptional reasoning'
@@ -144,10 +203,18 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: false,
-    notes: 'High-performance model with early extended thinking (Oct 2024 cutoff, 64k output) - DEPRECATED'
+    notes:
+      'High-performance model with early extended thinking (Oct 2024 cutoff, 64k output) - DEPRECATED'
   },
   {
     modelId: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
@@ -157,10 +224,18 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 15.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'reasoning', 'extended-thinking', 'multilingual'],
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'extended-thinking',
+      'multilingual'
+    ],
     category: 'text',
     isLatest: false,
-    notes: 'Claude Sonnet 3.7 via AWS Bedrock - high-performance model with early extended thinking - DEPRECATED'
+    notes:
+      'Claude Sonnet 3.7 via AWS Bedrock - high-performance model with early extended thinking - DEPRECATED'
   },
 
   // === Claude 3.5 Series ===

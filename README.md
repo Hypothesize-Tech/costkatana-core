@@ -637,6 +637,34 @@ const response = await ai('gpt-4', 'Hello');
 - **Email**: support@costkatana.com
 - **Discord**: [discord.gg/costkatana](https://discord.gg/D8nDArmKbY)
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details on:
+
+- Development setup and workflow
+- Code quality standards (linting, formatting, testing)
+- Pre-commit hooks and CI/CD pipeline
+- Commit message conventions
+- How to submit pull requests
+
+### Quick Development Start
+
+```bash
+# Clone and install
+git clone https://github.com/Hypothesize-Tech/costkatana-core.git
+cd costkatana-core
+npm install
+
+# Development commands
+npm run lint        # Check linting
+npm run lint:fix    # Auto-fix linting errors
+npm run format      # Format code
+npm test            # Run tests
+npm run build       # Build the project
+```
+
+**Code Quality**: We maintain **0 linting errors** with automatic pre-commit hooks. All commits are checked for code quality before merging.
+
 ## License
 
 MIT © Cost Katana

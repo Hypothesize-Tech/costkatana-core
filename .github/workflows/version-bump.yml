@@ -27,7 +27,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js
@@ -38,36 +38,36 @@ jobs:
     
     - name: Debug token availability
       run: |
-        if [ -n "${{ secrets.AI_GITHUB_TOKEN }}" ]; then
-          echo "AI_GITHUB_TOKEN is available"
+        if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+          echo "GITHUB_TOKEN is available"
           # Test token permissions
-          curl -H "Authorization: token ${{ secrets.AI_GITHUB_TOKEN }}" \
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/${{ github.repository }} | jq -r '.permissions'
         else
-          echo "AI_GITHUB_TOKEN is not available"
+          echo "GITHUB_TOKEN is not available"
           exit 1
         fi
     
     - name: Verify GitHub token
       run: |
-        if [ -n "${{ secrets.AI_GITHUB_TOKEN }}" ]; then
-          echo "AI_GITHUB_TOKEN is available"
+        if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+          echo "GITHUB_TOKEN is available"
           # Test token with GitHub API
-          if curl -H "Authorization: token ${{ secrets.AI_GITHUB_TOKEN }}" \
+          if curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                   -H "Accept: application/vnd.github.v3+json" \
                   https://api.github.com/user 2>/dev/null | grep -q "login"; then
             echo "✅ GitHub token is valid"
           else
             echo "❌ GitHub token is invalid or has insufficient permissions"
-            echo "Please check that your AI_GITHUB_TOKEN has the following permissions:"
+            echo "Please check that your GITHUB_TOKEN has the following permissions:"
             echo "- Contents: Write"
             echo "- Metadata: Read"
             echo "- Actions: Write"
             exit 1
           fi
         else
-          echo "AI_GITHUB_TOKEN is not available"
+          echo "GITHUB_TOKEN is not available"
           exit 1
         fi
     
@@ -140,7 +140,7 @@ jobs:
         git config --local user.name "GitHub Action"
         
         # Configure git to use the token for authentication
-        git remote set-url origin https://x-access-token:${{ secrets.AI_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         
         # Verify the remote URL is set correctly
         echo "Remote URL: $(git remote get-url origin)"
@@ -160,7 +160,7 @@ jobs:
           echo "✅ Successfully pushed commit"
         else
           echo "Git push failed, trying with GitHub CLI..."
-          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
           
           # Try again with GitHub CLI authentication
           if git push origin HEAD:${{ github.ref }}; then
@@ -168,7 +168,7 @@ jobs:
           else
             echo "❌ Failed to push commit even with GitHub CLI"
             echo "Please check:"
-            echo "1. AI_GITHUB_TOKEN has 'Contents: Write' permission"
+            echo "1. GITHUB_TOKEN has 'Contents: Write' permission"
             echo "2. Token is valid and not expired"
             echo "3. You have write access to the repository"
             exit 1
@@ -182,7 +182,7 @@ jobs:
           echo "✅ Successfully pushed tag"
         else
           echo "Tag push failed, trying with GitHub CLI..."
-          echo "${{ secrets.AI_GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
           
           # Try again with GitHub CLI authentication
           if git push origin "v${{ steps.new_version.outputs.new_version }}"; then
@@ -190,7 +190,7 @@ jobs:
           else
             echo "❌ Failed to push tag even with GitHub CLI"
             echo "Please check:"
-            echo "1. AI_GITHUB_TOKEN has 'Contents: Write' permission"
+            echo "1. GITHUB_TOKEN has 'Contents: Write' permission"
             echo "2. Token is valid and not expired"
             echo "3. You have write access to the repository"
             exit 1

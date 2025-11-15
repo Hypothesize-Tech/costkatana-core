@@ -527,10 +527,12 @@ export class GatewayClient {
         headers['CostKatana-Cortex-Semantic-Cache'] = options.cortex.semanticCache.toString();
       }
       if (options.cortex.preserveSemantics !== undefined) {
-        headers['CostKatana-Cortex-Preserve-Semantics'] = options.cortex.preserveSemantics.toString();
+        headers['CostKatana-Cortex-Preserve-Semantics'] =
+          options.cortex.preserveSemantics.toString();
       }
       if (options.cortex.intelligentRouting !== undefined) {
-        headers['CostKatana-Cortex-Intelligent-Routing'] = options.cortex.intelligentRouting.toString();
+        headers['CostKatana-Cortex-Intelligent-Routing'] =
+          options.cortex.intelligentRouting.toString();
       }
 
       // SAST-specific headers
@@ -847,7 +849,7 @@ export class GatewayClient {
    * Compare traditional optimization vs SAST optimization
    */
   async compareSast(
-    endpoint: string, 
+    endpoint: string,
     data: any,
     options: GatewayRequestOptions = {}
   ): Promise<{
@@ -873,10 +875,11 @@ export class GatewayClient {
     // Calculate comparison metrics
     const traditionalTokens = traditional.metadata.processingTime || 0;
     const sastTokens = sast.metadata.processingTime || 0;
-    const tokenReduction = traditionalTokens > 0 ? 
-      ((traditionalTokens - sastTokens) / traditionalTokens) * 100 : 0;
-    
-    const processingTimeDiff = (sast.metadata.processingTime || 0) - (traditional.metadata.processingTime || 0);
+    const tokenReduction =
+      traditionalTokens > 0 ? ((traditionalTokens - sastTokens) / traditionalTokens) * 100 : 0;
+
+    const processingTimeDiff =
+      (sast.metadata.processingTime || 0) - (traditional.metadata.processingTime || 0);
 
     return {
       traditional,
@@ -899,11 +902,16 @@ export class GatewayClient {
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse[]> {
     const promises = languages.map(language =>
-      this.withSast(endpoint, data, {
-        language,
-        crossLingualMode: true,
-        ambiguityResolution: true
-      }, options)
+      this.withSast(
+        endpoint,
+        data,
+        {
+          language,
+          crossLingualMode: true,
+          ambiguityResolution: true
+        },
+        options
+      )
     );
 
     return Promise.all(promises);

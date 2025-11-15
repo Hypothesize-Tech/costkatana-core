@@ -698,9 +698,7 @@ export class AICostTracker {
     const apiKey = process.env.API_KEY || process.env.API_KEY;
 
     if (!apiKey) {
-      throw new Error(
-        'API_KEY or API_KEY environment variable not set for gateway functionality.'
-      );
+      throw new Error('API_KEY or API_KEY environment variable not set for gateway functionality.');
     }
 
     const defaultConfig: GatewayConfig = {
@@ -1753,13 +1751,13 @@ async function autoConfigureIfNeeded(): Promise<void> {
 
   try {
     // Try multiple API key sources
-    const apiKey = 
+    const apiKey =
       process.env.COST_KATANA_API_KEY ||
       process.env.COST_KATANA_API_KEY ||
       process.env.API_KEY ||
       process.env.COSTKATANA_KEY;
-    
-    const projectId = 
+
+    const projectId =
       process.env.COST_KATANA_PROJECT ||
       process.env.PROJECT_ID ||
       process.env.COSTKATANA_PROJECT_ID;
@@ -1767,53 +1765,53 @@ async function autoConfigureIfNeeded(): Promise<void> {
     // If no Cost Katana credentials, try to work with provider keys directly
     if (!apiKey || !projectId) {
       logger.info('Cost Katana credentials not found, attempting direct provider mode');
-      
+
       // Check for any provider keys
       const hasOpenAI = !!process.env.OPENAI_API_KEY;
       const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
       const hasGoogle = !!process.env.GOOGLE_API_KEY;
       const hasAWSBedrock = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
-      
+
       if (!hasOpenAI && !hasAnthropic && !hasGoogle && !hasAWSBedrock) {
         throw new Error(
           `\n❌ No API keys found!\n\n` +
-          `Please set up Cost Katana for the best experience:\n\n` +
-          `  Option 1: Cost Katana (Recommended)\n` +
-          `    export COST_KATANA_API_KEY="dak_your_key"\n` +
-          `    export PROJECT_ID="your_project_id"\n` +
-          `    Get your keys at: https://costkatana.com/settings/api-keys\n\n` +
-          `  Option 2: Direct Provider Keys\n` +
-          `    export OPENAI_API_KEY="sk-..."\n` +
-          `    # or ANTHROPIC_API_KEY, GOOGLE_API_KEY, etc.\n\n` +
-          `  Option 3: Interactive Setup\n` +
-          `    npx cost-katana setup\n`
+            `Please set up Cost Katana for the best experience:\n\n` +
+            `  Option 1: Cost Katana (Recommended)\n` +
+            `    export COST_KATANA_API_KEY="dak_your_key"\n` +
+            `    export PROJECT_ID="your_project_id"\n` +
+            `    Get your keys at: https://costkatana.com/settings/api-keys\n\n` +
+            `  Option 2: Direct Provider Keys\n` +
+            `    export OPENAI_API_KEY="sk-..."\n` +
+            `    # or ANTHROPIC_API_KEY, GOOGLE_API_KEY, etc.\n\n` +
+            `  Option 3: Interactive Setup\n` +
+            `    npx cost-katana setup\n`
         );
       }
 
       // Create tracker with available providers (limited mode)
       const providers: ProviderConfig[] = [];
-      
+
       if (hasOpenAI) {
         providers.push({
           provider: AIProvider.OpenAI,
           apiKey: process.env.OPENAI_API_KEY!
         });
       }
-      
+
       if (hasAnthropic) {
         providers.push({
           provider: AIProvider.Anthropic,
           apiKey: process.env.ANTHROPIC_API_KEY!
         });
       }
-      
+
       if (hasGoogle) {
         providers.push({
           provider: AIProvider.Google,
           apiKey: process.env.GOOGLE_API_KEY!
         });
       }
-      
+
       if (hasAWSBedrock) {
         providers.push({
           provider: AIProvider.AWSBedrock,
@@ -1841,10 +1839,10 @@ async function autoConfigureIfNeeded(): Promise<void> {
 
       logger.warn(
         '⚠️  Running in limited mode without Cost Katana dashboard.\n' +
-        '   Some features like analytics and cost tracking are limited.\n' +
-        '   Sign up at https://costkatana.com for full features!'
+          '   Some features like analytics and cost tracking are limited.\n' +
+          '   Sign up at https://costkatana.com for full features!'
       );
-      
+
       return;
     }
 
@@ -1869,21 +1867,21 @@ async function autoConfigureIfNeeded(): Promise<void> {
         apiKey: process.env.OPENAI_API_KEY
       });
     }
-    
+
     if (process.env.ANTHROPIC_API_KEY) {
       config.providers.push({
         provider: AIProvider.Anthropic,
         apiKey: process.env.ANTHROPIC_API_KEY
       });
     }
-    
+
     if (process.env.GOOGLE_API_KEY) {
       config.providers.push({
         provider: AIProvider.Google,
         apiKey: process.env.GOOGLE_API_KEY
       });
     }
-    
+
     if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
       config.providers.push({
         provider: AIProvider.AWSBedrock,
@@ -1903,7 +1901,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
     globalTracker = await AICostTracker.create(config);
 
     // Auto-initialize gateway if credentials available
-    const gatewayUrl = 
+    const gatewayUrl =
       process.env.COSTKATANA_GATEWAY_URL ||
       process.env.GATEWAY_URL ||
       'https://cost-katana-backend.store/api/gateway';
@@ -1915,7 +1913,6 @@ async function autoConfigureIfNeeded(): Promise<void> {
     });
 
     logger.info('✅ Cost Katana auto-configured successfully');
-    
   } catch (error) {
     logger.error('Failed to auto-configure Cost Katana', error as Error);
     throw error;
@@ -1924,11 +1921,11 @@ async function autoConfigureIfNeeded(): Promise<void> {
 
 /**
  * Simple AI function - the easiest way to use Cost Katana
- * 
+ *
  * @example
  * ```typescript
  * import { ai } from 'cost-katana';
- * 
+ *
  * const response = await ai('gpt-4', 'Explain quantum computing');
  * console.log(response.text);
  * console.log(`Cost: $${response.cost}`);
@@ -1962,11 +1959,11 @@ export async function ai(
   try {
     // Determine provider from model name
     const provider = inferProviderFromModel(model);
-    
+
     // Use gateway if available for better features
     if (globalGateway) {
       const request = buildGatewayRequest(model, prompt, options);
-      
+
       const gatewayOptions: GatewayRequestOptions = {
         cache: options.cache,
         ...(options.cortex && {
@@ -2014,7 +2011,7 @@ export async function ai(
     };
 
     const response = await globalTracker.makeRequest(request);
-    
+
     const text = extractTextFromProviderResponse(response, provider);
     const usage = extractUsageFromProviderResponse(response, provider);
     const cost = calculateCostFromUsage(model, usage);
@@ -2026,27 +2023,26 @@ export async function ai(
       model,
       provider
     };
-    
   } catch (error) {
     logger.error('AI request failed', error as Error);
     throw new Error(
       `AI request failed: ${(error as Error).message}\n\n` +
-      `Troubleshooting:\n` +
-      `1. Check your API keys are set correctly\n` +
-      `2. Verify the model name is correct\n` +
-      `3. Ensure you have network connectivity\n` +
-      `4. Check your Cost Katana dashboard for usage limits`
+        `Troubleshooting:\n` +
+        `1. Check your API keys are set correctly\n` +
+        `2. Verify the model name is correct\n` +
+        `3. Ensure you have network connectivity\n` +
+        `4. Check your Cost Katana dashboard for usage limits`
     );
   }
 }
 
 /**
  * Simple chat session - maintain conversation context
- * 
+ *
  * @example
  * ```typescript
  * import { chat } from 'cost-katana';
- * 
+ *
  * const session = chat('claude-3-sonnet');
  * await session.send('Hello!');
  * await session.send('Tell me more');
@@ -2072,14 +2068,14 @@ export function chat(
   return {
     async send(message: string) {
       messages.push({ role: 'user', content: message });
-      
+
       const response = await ai(model, message, {
         ...options,
         systemMessage: undefined // Already in messages
       });
 
       messages.push({ role: 'assistant', content: response.text });
-      
+
       totalCost += response.cost;
       totalTokens += response.tokens;
 
@@ -2111,11 +2107,11 @@ export function chat(
 
 /**
  * Configure Cost Katana manually
- * 
+ *
  * @example
  * ```typescript
  * import { configure } from 'cost-katana';
- * 
+ *
  * configure({
  *   apiKey: 'dak_your_key',
  *   projectId: 'your_project',
@@ -2140,7 +2136,7 @@ export async function configure(options: {
     process.env.API_KEY = options.apiKey;
     process.env.COST_KATANA_API_KEY = options.apiKey;
   }
-  
+
   if (options.projectId) {
     process.env.PROJECT_ID = options.projectId;
   }
@@ -2173,8 +2169,12 @@ export async function configure(options: {
 
 function inferProviderFromModel(model: string): string {
   const modelLower = model.toLowerCase();
-  
-  if (modelLower.includes('gpt') || modelLower.includes('dall-e') || modelLower.includes('whisper')) {
+
+  if (
+    modelLower.includes('gpt') ||
+    modelLower.includes('dall-e') ||
+    modelLower.includes('whisper')
+  ) {
     return AIProvider.OpenAI;
   }
   if (modelLower.includes('claude')) {
@@ -2201,7 +2201,7 @@ function inferProviderFromModel(model: string): string {
   if (modelLower.includes('nova') || modelLower.includes('titan')) {
     return AIProvider.AWSBedrock;
   }
-  
+
   // Default to OpenAI
   return AIProvider.OpenAI;
 }
@@ -2210,9 +2210,7 @@ function buildGatewayRequest(model: string, prompt: string, options: any) {
   return {
     model,
     messages: [
-      ...(options.systemMessage
-        ? [{ role: 'system', content: options.systemMessage }]
-        : []),
+      ...(options.systemMessage ? [{ role: 'system', content: options.systemMessage }] : []),
       { role: 'user', content: prompt }
     ],
     max_tokens: options.maxTokens || 1000,
@@ -2281,18 +2279,18 @@ function calculateCostFromUsage(model: string, usage: any): number {
   try {
     const provider = inferProviderFromModel(model);
     const modelPricing = getModelPricing(provider, model);
-    
+
     if (modelPricing) {
       const promptCost = (usage.promptTokens / 1_000_000) * modelPricing.inputPrice;
       const completionCost = (usage.completionTokens / 1_000_000) * modelPricing.outputPrice;
       return promptCost + completionCost;
     }
-  } catch (error) {
+  } catch (_error) {
     // Fallback pricing
   }
-  
+
   // Default fallback pricing
-  return (usage.promptTokens * 0.000001) + (usage.completionTokens * 0.000002);
+  return usage.promptTokens * 0.000001 + usage.completionTokens * 0.000002;
 }
 
 // ============================================================================

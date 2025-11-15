@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js

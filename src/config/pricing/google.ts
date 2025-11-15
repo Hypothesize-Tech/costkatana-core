@@ -27,7 +27,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking', 'live-api'],
     category: 'multimodal',
     isLatest: true,
-    notes: 'Our best model in terms of price-performance, offering well-rounded capabilities. Best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases. Support for Live API included for some endpoints. See the model\'s thinking process as part of the response. Audio input: $1.00'
+    notes:
+      "Our best model in terms of price-performance, offering well-rounded capabilities. Best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases. Support for Live API included for some endpoints. See the model's thinking process as part of the response. Audio input: $1.00"
   },
   {
     modelId: 'gemini-2.5-flash-lite-preview',
@@ -165,7 +166,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'image', 'video', 'multimodal', 'agents', 'next-generation'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Our second generation workhorse model, with a 1 million token context window. Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
+    notes:
+      'Our second generation workhorse model, with a 1 million token context window. Most balanced multimodal model built for the era of Agents. Audio input: $0.70'
   },
   {
     modelId: 'gemini-2.0-flash-lite',
@@ -178,7 +180,8 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'cost-efficient', 'low-latency'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Our second generation small workhorse model, with a 1 million token context window. Optimized for cost efficiency and low latency, built for at scale usage'
+    notes:
+      'Our second generation small workhorse model, with a 1 million token context window. Optimized for cost efficiency and low latency, built for at scale usage'
   },
   {
     modelId: 'gemini-2.0-flash-audio',

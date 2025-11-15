@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js ${{ matrix.node-version }}
@@ -49,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js
@@ -99,7 +104,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.AI_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref_name }}
         release_name: Release ${{ github.ref_name }}

@@ -425,7 +425,8 @@ export const COHERE_PRICING: ModelPricingConfig[] = [
     capabilities: ['embedding'],
     category: 'embedding',
     isLatest: true,
-    notes: 'Cohere Embed English v3 via AWS Bedrock - advanced AI model for text generation and chat'
+    notes:
+      'Cohere Embed English v3 via AWS Bedrock - advanced AI model for text generation and chat'
   },
   {
     modelId: 'cohere.embed-multilingual-v3',
@@ -438,6 +439,7 @@ export const COHERE_PRICING: ModelPricingConfig[] = [
     capabilities: ['embedding', 'multilingual'],
     category: 'embedding',
     isLatest: true,
-    notes: 'Cohere Embed Multilingual v3 via AWS Bedrock - advanced AI model for text generation and chat'
+    notes:
+      'Cohere Embed Multilingual v3 via AWS Bedrock - advanced AI model for text generation and chat'
   }
 ];

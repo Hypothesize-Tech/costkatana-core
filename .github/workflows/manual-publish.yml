@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js
@@ -75,7 +75,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git remote set-url origin https://x-access-token:${{ secrets.AI_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         git add package.json
         git commit -m "Bump version to ${{ github.event.inputs.version }}"
         git tag -a "v${{ github.event.inputs.version }}" -m "Release version ${{ github.event.inputs.version }}"

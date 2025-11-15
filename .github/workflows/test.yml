@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -16,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.AI_GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         ssh-strict: false
     
     - name: Use Node.js ${{ matrix.node-version }}

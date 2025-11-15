@@ -158,7 +158,7 @@ export class GoogleProvider extends BaseProvider {
 
   private formatResponse(response: GoogleResponse, request: ProviderRequest): ProviderResponse {
     const choice = response.candidates?.[0];
-    const usage = response.usageMetadata ?? {} as GoogleUsage;
+    const usage = response.usageMetadata ?? ({} as GoogleUsage);
 
     return {
       id: `google-${Date.now()}`,

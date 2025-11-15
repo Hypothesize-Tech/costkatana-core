@@ -38,7 +38,14 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 5.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 40000,
-    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual', 'multimodal'],
+    capabilities: [
+      'text',
+      'reasoning',
+      'thinking',
+      'domain-specific',
+      'multilingual',
+      'multimodal'
+    ],
     category: 'reasoning',
     isLatest: true,
     notes: 'Our frontier-class multimodal reasoning model released September 2025 (v25.09).'
@@ -51,7 +58,14 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 5.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 40000,
-    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual', 'multimodal'],
+    capabilities: [
+      'text',
+      'reasoning',
+      'thinking',
+      'domain-specific',
+      'multilingual',
+      'multimodal'
+    ],
     category: 'reasoning',
     isLatest: true,
     notes: 'Our frontier-class multimodal reasoning model released September 2025 (v25.09).'
@@ -67,7 +81,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
     category: 'reasoning',
     isLatest: false,
-    notes: 'Our frontier-class reasoning model released July 2025 (v25.07). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Medium 1.2 instead.'
+    notes:
+      'Our frontier-class reasoning model released July 2025 (v25.07). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Medium 1.2 instead.'
   },
   {
     modelId: 'codestral-2508',
@@ -147,10 +162,18 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 2.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['code', 'agents', 'advanced-coding', 'codebase-exploration', 'multi-file-editing', 'swe'],
+    capabilities: [
+      'code',
+      'agents',
+      'advanced-coding',
+      'codebase-exploration',
+      'multi-file-editing',
+      'swe'
+    ],
     category: 'code',
     isLatest: true,
-    notes: 'An enterprise grade text model that excels at SWE use cases, released July 2025 (v25.07).'
+    notes:
+      'An enterprise grade text model that excels at SWE use cases, released July 2025 (v25.07).'
   },
   {
     modelId: 'devstral-medium-latest',
@@ -160,10 +183,18 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 2.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['code', 'agents', 'advanced-coding', 'codebase-exploration', 'multi-file-editing', 'swe'],
+    capabilities: [
+      'code',
+      'agents',
+      'advanced-coding',
+      'codebase-exploration',
+      'multi-file-editing',
+      'swe'
+    ],
     category: 'code',
     isLatest: true,
-    notes: 'An enterprise grade text model that excels at SWE use cases, released July 2025 (v25.07).'
+    notes:
+      'An enterprise grade text model that excels at SWE use cases, released July 2025 (v25.07).'
   },
   {
     modelId: 'mistral-ocr-2505',
@@ -230,7 +261,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'edge', 'mobile', 'open-source', 'high-performance'],
     category: 'text',
     isLatest: true,
-    notes: 'Powerful edge model with extremely high performance/price ratio, released October 2024 (v24.1).'
+    notes:
+      'Powerful edge model with extremely high performance/price ratio, released October 2024 (v24.1).'
   },
   {
     modelId: 'mistral-medium-2505',
@@ -331,7 +363,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'An update to our efficient small model with open weights under an MRL license, released September 2024 (v24.09).'
+    notes:
+      'An update to our efficient small model with open weights under an MRL license, released September 2024 (v24.09).'
   },
   {
     modelId: 'mistral-small-2407',
@@ -407,7 +440,14 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 40000,
-    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual', 'multimodal'],
+    capabilities: [
+      'text',
+      'reasoning',
+      'thinking',
+      'domain-specific',
+      'multilingual',
+      'multimodal'
+    ],
     category: 'reasoning',
     isLatest: true,
     notes: 'Our small multimodal reasoning model released September 2025 (v25.09).'
@@ -420,7 +460,14 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 40000,
-    capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual', 'multimodal'],
+    capabilities: [
+      'text',
+      'reasoning',
+      'thinking',
+      'domain-specific',
+      'multilingual',
+      'multimodal'
+    ],
     category: 'reasoning',
     isLatest: true,
     notes: 'Our small multimodal reasoning model released September 2025 (v25.09).'
@@ -436,7 +483,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
     category: 'reasoning',
     isLatest: false,
-    notes: 'Our small reasoning model released July 2025 (v25.07). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Small 1.2 instead.'
+    notes:
+      'Our small reasoning model released July 2025 (v25.07). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Small 1.2 instead.'
   },
   {
     modelId: 'voxtral-small-2507',
@@ -527,7 +575,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'reasoning', 'thinking', 'domain-specific', 'multilingual'],
     category: 'reasoning',
     isLatest: false,
-    notes: 'Our first small reasoning model released June 2025 (v25.06). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Small 1.2 instead.'
+    notes:
+      'Our first small reasoning model released June 2025 (v25.06). Deprecated October 31, 2025, retirement November 30, 2025. Use Magistral Small 1.2 instead.'
   },
   {
     modelId: 'devstral-small-2507',
@@ -568,7 +617,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'multilingual', 'open-source', 'image-understanding'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'A new leader in the small models category with image understanding capabilities, released March 2025 (v25.03).'
+    notes:
+      'A new leader in the small models category with image understanding capabilities, released March 2025 (v25.03).'
   },
   {
     modelId: 'mistral-small-2501',
@@ -581,7 +631,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'multimodal', 'multilingual', 'open-source'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'A small efficient and powerful 24B open model for personal or commercial use, released January 2025 (v25.01).'
+    notes:
+      'A small efficient and powerful 24B open model for personal or commercial use, released January 2025 (v25.01).'
   },
   {
     modelId: 'devstral-small-2505',
@@ -594,7 +645,8 @@ export const MISTRAL_PRICING: ModelPricingConfig[] = [
     capabilities: ['code', 'agents', 'open-source', '24b-parameter', 'swe'],
     category: 'code',
     isLatest: false,
-    notes: 'A 24B text model, open source model that excels at SWE use cases, released May 2025 (v25.05). Deprecated October 31, 2025, retirement November 30, 2025. Use Devstral Small 1.1 instead.'
+    notes:
+      'A 24B text model, open source model that excels at SWE use cases, released May 2025 (v25.05). Deprecated October 31, 2025, retirement November 30, 2025. Use Devstral Small 1.1 instead.'
   },
   {
     modelId: 'pixtral-12b-2409',
