@@ -255,7 +255,7 @@ async function handleCustomerQuery(query: string) {
 import { ai } from 'cost-katana';
 
 async function generateBlogPost(topic: string) {
-  // Use Cortex for long-form content (70-95% savings)
+  // Use Cortex for long-form content (40-75% savings)
   const post = await ai('gpt-4', `Write a blog post about ${topic}`, {
     cortex: true,
     maxTokens: 2000

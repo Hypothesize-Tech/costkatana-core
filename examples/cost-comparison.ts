@@ -188,7 +188,7 @@ async function runAllComparisons() {
     console.log('\n✅ Comparison complete!');
     console.log('\n💡 Tips:');
     console.log('- Use GPT-3.5-Turbo for simple tasks (10x cheaper than GPT-4)');
-    console.log('- Enable Cortex for long-form content (70-95% savings)');
+    console.log('- Enable Cortex for long-form content (40-75% savings)');
     console.log('- Use caching for repeated queries');
     console.log('- Check your dashboard at https://costkatana.com for detailed analytics');
     

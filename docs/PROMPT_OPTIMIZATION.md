@@ -4,7 +4,7 @@ Learn how to reduce AI costs by up to 95% with Cost Katana.
 
 ## Quick Wins
 
-### 1. Enable Cortex Optimization (70-95% savings)
+### 1. Enable Cortex Optimization (40-75% savings)
 
 ```typescript
 import { ai } from 'cost-katana';
