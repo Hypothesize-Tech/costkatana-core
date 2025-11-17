@@ -110,3 +110,17 @@ export const logConfig = {
   compressionEnabled: true,
   retentionDays: 7
 };
+
+export const aiLoggingConfig = {
+  enableLogging: true,
+  batchSize: 50,
+  flushInterval: 5000, // 5 seconds
+  maxPromptLength: 1000,
+  maxResultLength: 1000,
+  redactSensitiveData: true
+};
+
+export const templateConfig = {
+  enableCaching: true,
+  cacheTTL: 300000 // 5 minutes
+};

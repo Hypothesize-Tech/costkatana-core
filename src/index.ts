@@ -153,7 +153,7 @@ export {
   sanitizeInput
 } from './utils/validators';
 
-export { Logger, LogLevel, logger } from './utils/logger';
+export { Logger as UtilLogger, LogLevel as UtilLogLevel, logger as utilLogger } from './utils/logger';
 export type { LoggerConfig } from './utils/logger';
 
 // Configuration
@@ -214,7 +214,7 @@ import { UsageTracker } from './analyzers/usage-tracker';
 import { SuggestionEngine } from './optimizers/suggestion-engine';
 import { PromptOptimizer } from './optimizers/prompt-optimizer';
 import { validateTrackerConfig, validatePrompt, validateUserId } from './utils/validators';
-import { logger } from './utils/logger';
+import { logger, LogLevel } from './utils/logger';
 import { optimizationThresholds } from './config/default';
 import { getModelById } from './types/models';
 import { ProviderRequest } from './types/providers';
@@ -255,6 +255,8 @@ export class AICostTracker {
   private promptOptimizer: PromptOptimizer;
   private apiClient: AxiosInstance;
   private gatewayClient?: GatewayClient;
+  private aiLoggerInstance?: AILogger;
+  private templateManagerInstance?: TemplateManager;
 
   private constructor(config: TrackerConfig, apiClient: AxiosInstance) {
     validateTrackerConfig(config);
@@ -280,6 +282,20 @@ export class AICostTracker {
       config.optimization,
       config.optimization.bedrockConfig
     );
+
+    // Initialize AI logger if enabled
+    if ((config as any).enableAILogging !== false) {
+      this.aiLoggerInstance = new AILogger({
+        apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY,
+        projectId: (config as any).projectId || process.env.PROJECT_ID,
+        enableLogging: true,
+      });
+    }
+
+    // Initialize template manager
+    this.templateManagerInstance = new TemplateManager({
+      apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY,
+    });
 
     logger.info('AICostTracker initialized', {
       providers: config.providers.map(p => p.provider)
@@ -738,6 +754,20 @@ export class AICostTracker {
       throw new Error('Gateway client not initialized. Call initializeGateway() first.');
     }
     return this.gatewayClient;
+  }
+
+  /**
+   * Get the AI logger instance
+   */
+  getAILogger(): AILogger | undefined {
+    return this.aiLoggerInstance;
+  }
+
+  /**
+   * Get the template manager instance
+   */
+  getTemplateManager(): TemplateManager | undefined {
+    return this.templateManagerInstance;
   }
 
   /**
@@ -1309,6 +1339,21 @@ export class AICostTracker {
 export default AICostTracker;
 
 // ============================================================================
+// LOGGING & TEMPLATES EXPORTS
+// ============================================================================
+
+export { AILogger, aiLogger, Logger, logger } from './logging';
+export { TemplateManager, templateManager } from './templates';
+export type { AILogEntry, AILoggerConfig, ConsoleLoggerConfig } from './types/logging';
+export type { LogLevel } from './types/logging';
+export type {
+  TemplateDefinition,
+  TemplateVariable,
+  TemplateResolutionResult,
+  TemplateManagerConfig
+} from './types/templates';
+
+// ============================================================================
 // SIMPLIFIED API - Easy integration using existing AICostTracker
 // ============================================================================
 
@@ -1740,8 +1785,13 @@ export { SimpleCostTracker };
 // ULTRA-SIMPLE API - The easiest way to use Cost Katana
 // ============================================================================
 
+import { AILogger } from './logging/ai-logger';
+import { TemplateManager } from './templates/template-manager';
+
 let globalTracker: AICostTracker | null = null;
 let globalGateway: GatewayClient | null = null;
+let globalAILogger: AILogger | null = null;
+let globalTemplateManager: TemplateManager | null = null;
 
 /**
  * Auto-configure Cost Katana from environment variables
@@ -1912,6 +1962,18 @@ async function autoConfigureIfNeeded(): Promise<void> {
       enableRetries: true
     });
 
+    // Initialize global AI logger
+    globalAILogger = new AILogger({
+      apiKey,
+      projectId,
+      enableLogging: true,
+    });
+
+    // Initialize global template manager
+    globalTemplateManager = new TemplateManager({
+      apiKey,
+    });
+
     logger.info('✅ Cost Katana auto-configured successfully');
   } catch (error) {
     logger.error('Failed to auto-configure Cost Katana', error as Error);
@@ -1940,6 +2002,9 @@ export async function ai(
     maxTokens?: number;
     cache?: boolean;
     cortex?: boolean;
+    templateId?: string;
+    templateVariables?: Record<string, any>;
+    enableAILogging?: boolean;
   } = {}
 ): Promise<{
   text: string;
@@ -1949,6 +2014,7 @@ export async function ai(
   provider: string;
   cached?: boolean;
   optimized?: boolean;
+  templateUsed?: boolean;
 }> {
   await autoConfigureIfNeeded();
 
@@ -1956,13 +2022,30 @@ export async function ai(
     throw new Error('Failed to initialize Cost Katana');
   }
 
+  const startTime = Date.now();
+  let actualPrompt = prompt;
+  let templateUsed = false;
+  let templateName: string | undefined;
+
   try {
+    // Handle template if provided
+    if (options.templateId && globalTemplateManager) {
+      const resolution = await globalTemplateManager.resolveTemplate(
+        options.templateId,
+        options.templateVariables || {}
+      );
+      actualPrompt = resolution.prompt;
+      templateUsed = true;
+      templateName = resolution.template.name;
+      logger.debug('Template resolved', { id: options.templateId, name: templateName });
+    }
+
     // Determine provider from model name
     const provider = inferProviderFromModel(model);
 
     // Use gateway if available for better features
     if (globalGateway) {
-      const request = buildGatewayRequest(model, prompt, options);
+      const request = buildGatewayRequest(model, actualPrompt, options);
 
       const gatewayOptions: GatewayRequestOptions = {
         cache: options.cache,
@@ -1985,6 +2068,30 @@ export async function ai(
       const text = extractTextFromGatewayResponse(response.data);
       const usage = extractUsageFromGatewayResponse(response.data);
       const cost = calculateCostFromUsage(model, usage);
+      const responseTime = Date.now() - startTime;
+
+      // Log AI call if enabled
+      if (options.enableAILogging !== false && globalAILogger) {
+        await globalAILogger.logAICall({
+          service: provider,
+          operation: 'chat_completion',
+          aiModel: model,
+          statusCode: 200,
+          responseTime,
+          prompt: actualPrompt,
+          result: text,
+          inputTokens: usage.promptTokens,
+          outputTokens: usage.completionTokens,
+          totalTokens: usage.totalTokens,
+          cost,
+          success: true,
+          cacheHit: response.metadata?.cacheStatus === 'HIT',
+          cortexEnabled: !!options.cortex,
+          templateId: options.templateId,
+          templateName,
+          templateVariables: options.templateVariables,
+        });
+      }
 
       return {
         text,
@@ -1993,7 +2100,8 @@ export async function ai(
         model,
         provider,
         cached: response.metadata?.cacheStatus === 'HIT',
-        optimized: !!options.cortex
+        optimized: !!options.cortex,
+        templateUsed
       };
     }
 
@@ -2004,7 +2112,7 @@ export async function ai(
         ...(options.systemMessage
           ? [{ role: 'system' as const, content: options.systemMessage }]
           : []),
-        { role: 'user' as const, content: prompt }
+        { role: 'user' as const, content: actualPrompt }
       ],
       maxTokens: options.maxTokens || 1000,
       temperature: options.temperature || 0.7
@@ -2015,13 +2123,36 @@ export async function ai(
     const text = extractTextFromProviderResponse(response, provider);
     const usage = extractUsageFromProviderResponse(response, provider);
     const cost = calculateCostFromUsage(model, usage);
+    const responseTime = Date.now() - startTime;
+
+    // Log AI call if enabled
+    if (options.enableAILogging !== false && globalAILogger) {
+      await globalAILogger.logAICall({
+        service: provider,
+        operation: 'chat_completion',
+        aiModel: model,
+        statusCode: 200,
+        responseTime,
+        prompt: actualPrompt,
+        result: text,
+        inputTokens: usage.promptTokens,
+        outputTokens: usage.completionTokens,
+        totalTokens: usage.totalTokens,
+        cost,
+        success: true,
+        templateId: options.templateId,
+        templateName,
+        templateVariables: options.templateVariables,
+      });
+    }
 
     return {
       text,
       cost,
       tokens: usage.totalTokens,
       model,
-      provider
+      provider,
+      templateUsed
     };
   } catch (error) {
     logger.error('AI request failed', error as Error);
@@ -2055,6 +2186,7 @@ export function chat(
     systemMessage?: string;
     temperature?: number;
     maxTokens?: number;
+    enableAILogging?: boolean;
   } = {}
 ) {
   const messages: Array<{ role: string; content: string }> = [];
@@ -2066,12 +2198,20 @@ export function chat(
   }
 
   return {
-    async send(message: string) {
+    async send(
+      message: string,
+      messageOptions?: {
+        templateId?: string;
+        templateVariables?: Record<string, any>;
+      }
+    ) {
       messages.push({ role: 'user', content: message });
 
       const response = await ai(model, message, {
         ...options,
-        systemMessage: undefined // Already in messages
+        systemMessage: undefined, // Already in messages
+        templateId: messageOptions?.templateId,
+        templateVariables: messageOptions?.templateVariables,
       });
 
       messages.push({ role: 'assistant', content: response.text });
@@ -2126,6 +2266,8 @@ export async function configure(options: {
   cortex?: boolean;
   cache?: boolean;
   firewall?: boolean;
+  enableAILogging?: boolean;
+  logLevel?: LogLevel;
   providers?: Array<{
     name: string;
     apiKey?: string;
@@ -2154,6 +2296,13 @@ export async function configure(options: {
   // Reset global instances to force reconfiguration
   globalTracker = null;
   globalGateway = null;
+  globalAILogger = null;
+  globalTemplateManager = null;
+
+  // Set log level if provided
+  if (options.logLevel) {
+    logger.setLevel(options.logLevel);
+  }
 
   // Re-initialize with new configuration
   await autoConfigureIfNeeded();
@@ -2161,7 +2310,9 @@ export async function configure(options: {
   logger.info('Cost Katana configured successfully', {
     cortex: options.cortex,
     cache: options.cache,
-    firewall: options.firewall
+    firewall: options.firewall,
+    aiLogging: options.enableAILogging !== false,
+    logLevel: options.logLevel || 'info'
   });
 }
 
