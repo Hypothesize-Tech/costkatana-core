@@ -38,5 +38,28 @@ module.exports = {
       'no-unused-labels': 'error',
       'prefer-template': 'error'
     },
-    ignorePatterns: ['dist', 'node_modules', 'coverage', '*.js']
+    ignorePatterns: ['dist', 'node_modules', 'coverage', '*.js'],
+    overrides: [
+      {
+        files: ['src/constants/models.ts'],
+        rules: {
+          '@typescript-eslint/no-namespace': 'off'
+        }
+      },
+      {
+        files: ['examples/**/*.ts', 'tests/**/*.ts'],
+        parserOptions: {
+          project: null
+        },
+        rules: {
+          '@typescript-eslint/no-unsafe-assignment': 'off',
+          '@typescript-eslint/no-unsafe-member-access': 'off',
+          '@typescript-eslint/no-unsafe-return': 'off',
+          '@typescript-eslint/no-unsafe-argument': 'off',
+          '@typescript-eslint/no-unsafe-call': 'off',
+          '@typescript-eslint/await-thenable': 'off',
+          '@typescript-eslint/require-await': 'off'
+        }
+      }
+    ]
   };

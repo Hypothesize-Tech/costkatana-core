@@ -110,6 +110,23 @@ export type {
 // Model registry
 export { MODELS, getModelById, getModelsByProvider, getAllModels } from './types/models';
 
+// Model Constants - Type-safe model selection
+export {
+  OPENAI,
+  ANTHROPIC,
+  GOOGLE,
+  AWS_BEDROCK,
+  XAI,
+  DEEPSEEK,
+  MISTRAL,
+  COHERE,
+  GROQ,
+  META,
+  isModelConstant,
+  getAllModelConstants,
+  getProviderFromModel
+} from './constants/models';
+
 // Providers
 export {
   BaseProvider,
@@ -153,7 +170,11 @@ export {
   sanitizeInput
 } from './utils/validators';
 
-export { Logger as UtilLogger, LogLevel as UtilLogLevel, logger as utilLogger } from './utils/logger';
+export {
+  Logger as UtilLogger,
+  LogLevel as UtilLogLevel,
+  logger as utilLogger
+} from './utils/logger';
 export type { LoggerConfig } from './utils/logger';
 
 // Configuration
@@ -288,13 +309,13 @@ export class AICostTracker {
       this.aiLoggerInstance = new AILogger({
         apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY,
         projectId: (config as any).projectId || process.env.PROJECT_ID,
-        enableLogging: true,
+        enableLogging: true
       });
     }
 
     // Initialize template manager
     this.templateManagerInstance = new TemplateManager({
-      apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY,
+      apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY
     });
 
     logger.info('AICostTracker initialized', {
@@ -1787,6 +1808,7 @@ export { SimpleCostTracker };
 
 import { AILogger } from './logging/ai-logger';
 import { TemplateManager } from './templates/template-manager';
+import { isModelConstant } from './constants/models';
 
 let globalTracker: AICostTracker | null = null;
 let globalGateway: GatewayClient | null = null;
@@ -1966,12 +1988,12 @@ async function autoConfigureIfNeeded(): Promise<void> {
     globalAILogger = new AILogger({
       apiKey,
       projectId,
-      enableLogging: true,
+      enableLogging: true
     });
 
     // Initialize global template manager
     globalTemplateManager = new TemplateManager({
-      apiKey,
+      apiKey
     });
 
     logger.info('✅ Cost Katana auto-configured successfully');
@@ -2020,6 +2042,18 @@ export async function ai(
 
   if (!globalTracker) {
     throw new Error('Failed to initialize Cost Katana');
+  }
+
+  // Deprecation warning for string model names
+  if (!isModelConstant(model)) {
+    logger.warn(
+      `⚠️  Deprecation Warning: Using string model names is deprecated and will be removed in a future version.\n` +
+        `   Please use type-safe model constants instead for better autocomplete and error prevention:\n` +
+        `   Example: import { OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';\n` +
+        `            await ai(OPENAI.GPT_4, 'your prompt');\n` +
+        `            await ai(ANTHROPIC.CLAUDE_3_5_SONNET_20241022, 'your prompt');\n` +
+        `            await ai(GOOGLE.GEMINI_2_5_PRO, 'your prompt');`
+    );
   }
 
   const startTime = Date.now();
@@ -2089,7 +2123,7 @@ export async function ai(
           cortexEnabled: !!options.cortex,
           templateId: options.templateId,
           templateName,
-          templateVariables: options.templateVariables,
+          templateVariables: options.templateVariables
         });
       }
 
@@ -2142,7 +2176,7 @@ export async function ai(
         success: true,
         templateId: options.templateId,
         templateName,
-        templateVariables: options.templateVariables,
+        templateVariables: options.templateVariables
       });
     }
 
@@ -2189,6 +2223,17 @@ export function chat(
     enableAILogging?: boolean;
   } = {}
 ) {
+  // Deprecation warning for string model names
+  if (!isModelConstant(model)) {
+    logger.warn(
+      `⚠️  Deprecation Warning: Using string model names is deprecated and will be removed in a future version.\n` +
+        `   Please use type-safe model constants instead for better autocomplete and error prevention:\n` +
+        `   Example: import { OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';\n` +
+        `            const session = chat(OPENAI.GPT_4, { ... });\n` +
+        `            const session = chat(ANTHROPIC.CLAUDE_3_5_SONNET_20241022, { ... });`
+    );
+  }
+
   const messages: Array<{ role: string; content: string }> = [];
   let totalCost = 0;
   let totalTokens = 0;
@@ -2211,7 +2256,7 @@ export function chat(
         ...options,
         systemMessage: undefined, // Already in messages
         templateId: messageOptions?.templateId,
-        templateVariables: messageOptions?.templateVariables,
+        templateVariables: messageOptions?.templateVariables
       });
 
       messages.push({ role: 'assistant', content: response.text });

@@ -3,14 +3,15 @@
 **AI that just works. With automatic cost tracking.**
 
 ```typescript
-import { ai } from 'cost-katana';
+import { ai, OPENAI } from 'cost-katana';
 
-const response = await ai('gpt-4', 'Hello, world!');
+// NEW: Type-safe model selection (recommended)
+const response = await ai(OPENAI.GPT_4, 'Hello, world!');
 console.log(response.text);        // "Hello! How can I help you today?"
 console.log(`Cost: $${response.cost}`);  // "Cost: $0.0012"
 ```
 
-That's it. No setup. No configuration. No complexity.
+That's it. No setup. No configuration. No complexity. **And no typos!**
 
 ## Installation
 
@@ -26,23 +27,29 @@ npm install cost-katana
 
 ## Quick Start
 
-### Zero Configuration
+### 🎯 Type-Safe Model Selection (Recommended)
 
 ```typescript
-import { ai } from 'cost-katana';
+import { ai, OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';
 
-// Just works with any AI model
-await ai('gpt-4', 'Explain quantum computing');
-await ai('claude-3-sonnet', 'Write a haiku');
-await ai('gemini-pro', 'Solve this equation: 2x + 5 = 13');
+// Type-safe model constants with autocomplete
+await ai(OPENAI.GPT_4, 'Explain quantum computing');
+await ai(ANTHROPIC.CLAUDE_3_5_SONNET_20241022, 'Write a haiku');
+await ai(GOOGLE.GEMINI_2_5_PRO, 'Solve this equation: 2x + 5 = 13');
 ```
+
+**Benefits:**
+- ✅ **Autocomplete** - Your IDE suggests all available models
+- ✅ **No typos** - Compile-time errors catch mistakes
+- ✅ **Refactor safely** - Update model names with confidence
+- ✅ **Self-documenting** - See exactly which model you're using
 
 ### Chat Conversations
 
 ```typescript
-import { chat } from 'cost-katana';
+import { chat, OPENAI } from 'cost-katana';
 
-const session = chat('gpt-4');
+const session = chat(OPENAI.GPT_4);
 await session.send('Hello!');
 await session.send('What can you help me with?');
 await session.send('Tell me a joke');
@@ -79,16 +86,63 @@ console.log(`Total cost: $${session.totalCost}`);
 ### Compare Models
 
 ```typescript
-import { ai } from 'cost-katana';
+import { ai, OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';
 
-const models = ['gpt-4', 'claude-3-sonnet', 'gemini-pro'];
+const models = [
+  { name: 'GPT-4', constant: OPENAI.GPT_4 },
+  { name: 'Claude 3.5 Sonnet', constant: ANTHROPIC.CLAUDE_3_5_SONNET_20241022 },
+  { name: 'Gemini 2.5 Pro', constant: GOOGLE.GEMINI_2_5_PRO }
+];
 const prompt = 'Explain relativity in one sentence';
 
-for (const model of models) {
-  const response = await ai(model, prompt);
-  console.log(`${model}: $${response.cost.toFixed(4)}`);
+for (const { name, constant } of models) {
+  const response = await ai(constant, prompt);
+  console.log(`${name}: $${response.cost.toFixed(4)}`);
 }
 ```
+
+### 🔄 Migration Guide (from string model names)
+
+**Old way (deprecated, still works):**
+```typescript
+// String model names (shows deprecation warning)
+await ai('gpt-4', 'Hello');
+await ai('claude-3-sonnet', 'Hello');
+```
+
+**New way (recommended):**
+```typescript
+import { ai, OPENAI, ANTHROPIC } from 'cost-katana';
+
+// Type-safe constants with autocomplete
+await ai(OPENAI.GPT_4, 'Hello');
+await ai(ANTHROPIC.CLAUDE_3_5_SONNET_20241022, 'Hello');
+```
+
+**Available Model Constants:**
+
+```typescript
+// OpenAI Models
+OPENAI.GPT_5, OPENAI.GPT_5_MINI, OPENAI.GPT_4, OPENAI.GPT_4_TURBO,
+OPENAI.GPT_4O, OPENAI.GPT_3_5_TURBO, OPENAI.O1, OPENAI.O3, ...
+
+// Anthropic Models  
+ANTHROPIC.CLAUDE_SONNET_4_5, ANTHROPIC.CLAUDE_HAIKU_4_5,
+ANTHROPIC.CLAUDE_3_5_SONNET_20241022, ANTHROPIC.CLAUDE_3_5_HAIKU_20241022, ...
+
+// Google Models
+GOOGLE.GEMINI_2_5_PRO, GOOGLE.GEMINI_2_5_FLASH, GOOGLE.GEMINI_1_5_PRO,
+GOOGLE.GEMINI_1_5_FLASH, ...
+
+// AWS Bedrock Models
+AWS_BEDROCK.NOVA_PRO, AWS_BEDROCK.NOVA_LITE, AWS_BEDROCK.CLAUDE_SONNET_4_5, ...
+
+// Other Providers
+XAI.GROK_2_1212, DEEPSEEK.DEEPSEEK_CHAT, MISTRAL.MISTRAL_LARGE_LATEST,
+COHERE.COMMAND_R_PLUS, GROQ.LLAMA_3_3_70B_VERSATILE, META.LLAMA_3_3_70B_INSTRUCT, ...
+```
+
+> **Note**: String model names will continue to work but show a deprecation warning. They will be removed in a future major version.
 
 ## Features
 
@@ -176,10 +230,18 @@ const response = await ai('gpt-4', 'Hello');
 # Option 1: Cost Katana (Recommended - all features)
 COST_KATANA_API_KEY=dak_your_key_here
 
-# Option 2: Direct provider keys (limited features)
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GOOGLE_API_KEY=...
+# Option 2: Direct provider keys (uses native SDKs)
+OPENAI_API_KEY=sk-...              # For OpenAI models (native SDK)
+GOOGLE_API_KEY=...                 # For Gemini models (native SDK)
+ANTHROPIC_API_KEY=sk-ant-...       # For Claude models
+AWS_ACCESS_KEY_ID=...              # For AWS Bedrock
+AWS_SECRET_ACCESS_KEY=...          # For AWS Bedrock
+AWS_REGION=us-east-1               # For AWS Bedrock
+
+# Note: With direct provider keys, Cost Katana automatically uses:
+# - Native OpenAI SDK for GPT models
+# - Native Google Gemini SDK for Gemini models
+# - AWS Bedrock as fallback for both
 ```
 
 ### Manual Configuration
@@ -209,26 +271,124 @@ const response = await ai('gpt-4', 'Your prompt', {
 
 ## Multi-Provider Support
 
-Works with all major AI providers:
+Works with all major AI providers with **native SDK support** for optimal performance:
 
 ```typescript
-// OpenAI
+// OpenAI (Native SDK)
 await ai('gpt-4', 'Hello');
 await ai('gpt-3.5-turbo', 'Hello');
+await ai('gpt-4-turbo', 'Hello');
+
+// Google Gemini (Native SDK)
+await ai('gemini-pro', 'Hello');
+await ai('gemini-1.5-flash', 'Hello');
+await ai('gemini-1.5-pro', 'Hello');
 
 // Anthropic
 await ai('claude-3-sonnet', 'Hello');
 await ai('claude-3-haiku', 'Hello');
-
-// Google
-await ai('gemini-pro', 'Hello');
-await ai('gemini-flash', 'Hello');
 
 // AWS Bedrock
 await ai('nova-pro', 'Hello');
 await ai('nova-lite', 'Hello');
 
 // And many more...
+```
+
+### Native SDK Integration
+
+Cost Katana uses **native SDKs** for OpenAI and Google Gemini, providing:
+- ✅ **Better Performance** - Direct API calls, no middleman
+- ✅ **Lower Latency** - Optimized request/response handling  
+- ✅ **Automatic Failover** - Falls back to AWS Bedrock if native SDK fails
+- ✅ **Full Feature Support** - Access to all provider-specific features
+
+#### OpenAI Native SDK
+
+```typescript
+import { ai, OpenAIProvider } from 'cost-katana';
+
+// Option 1: Automatic (uses OPENAI_API_KEY from env)
+const response = await ai('gpt-4', 'Explain quantum computing');
+
+// Option 2: Manual configuration
+const openai = new OpenAIProvider({
+  apiKey: 'sk-your-openai-key',
+  provider: 'openai'
+});
+
+const result = await openai.makeRequest({
+  model: 'gpt-4-turbo',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant' },
+    { role: 'user', content: 'Hello!' }
+  ],
+  maxTokens: 500,
+  temperature: 0.7
+});
+
+console.log(result.choices[0].message.content);
+console.log(`Tokens: ${result.usage.total_tokens}`);
+```
+
+#### Google Gemini Native SDK
+
+```typescript
+import { ai, GoogleProvider } from 'cost-katana';
+
+// Option 1: Automatic (uses GOOGLE_API_KEY from env)
+const response = await ai('gemini-1.5-pro', 'Write a haiku about AI');
+
+// Option 2: Manual configuration
+const gemini = new GoogleProvider({
+  apiKey: 'your-google-ai-key',
+  provider: 'google'
+});
+
+const result = await gemini.makeRequest({
+  model: 'gemini-1.5-flash',
+  messages: [
+    { role: 'user', content: 'Explain machine learning' }
+  ],
+  maxTokens: 1000,
+  temperature: 0.8
+});
+
+console.log(result.choices[0].message.content);
+console.log(`Tokens: ${result.usage.totalTokenCount}`);
+```
+
+#### Provider Auto-Detection
+
+Cost Katana automatically detects the right provider based on the model name:
+
+```typescript
+// Auto-routes to OpenAI SDK
+await ai('gpt-4', 'Hello');
+
+// Auto-routes to Google Gemini SDK
+await ai('gemini-pro', 'Hello');  
+
+// Auto-routes to Anthropic
+await ai('claude-3-sonnet', 'Hello');
+
+// Auto-routes to AWS Bedrock
+await ai('nova-pro', 'Hello');
+```
+
+#### Failover & Reliability
+
+If a native SDK fails, Cost Katana automatically falls back to AWS Bedrock:
+
+```typescript
+// Primary: OpenAI SDK
+// Fallback: AWS Bedrock (if OpenAI fails)
+const response = await ai('gpt-4', 'Hello', {
+  fallback: true  // Enable automatic failover
+});
+
+console.log(`Provider used: ${response.provider}`);
+// Output might be 'openai' or 'aws-bedrock' depending on availability
 ```
 
 ## Real-World Examples
