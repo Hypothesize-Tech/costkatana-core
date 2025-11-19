@@ -231,18 +231,25 @@ const response = await ai('gpt-4', 'Hello');
 COST_KATANA_API_KEY=dak_your_key_here
 
 # Option 2: Direct provider keys (uses native SDKs)
-OPENAI_API_KEY=sk-...              # For OpenAI models (native SDK)
-GOOGLE_API_KEY=...                 # For Gemini models (native SDK)
+OPENAI_API_KEY=sk-...              # For OpenAI models (native SDK) - USER PROVIDED
+GEMINI_API_KEY=...                 # For Gemini models (native SDK) - USER PROVIDED
 ANTHROPIC_API_KEY=sk-ant-...       # For Claude models
 AWS_ACCESS_KEY_ID=...              # For AWS Bedrock
 AWS_SECRET_ACCESS_KEY=...          # For AWS Bedrock
 AWS_REGION=us-east-1               # For AWS Bedrock
-
-# Note: With direct provider keys, Cost Katana automatically uses:
-# - Native OpenAI SDK for GPT models
-# - Native Google Gemini SDK for Gemini models
-# - AWS Bedrock as fallback for both
 ```
+
+> **⚠️ Important for Self-Hosted Users**: 
+> - **OpenAI and Gemini providers require YOUR OWN API keys** 
+> - Cost Katana **does not provide** OpenAI or Google API keys
+> - Without `OPENAI_API_KEY`, OpenAI models (GPT-*) will not be available
+> - Without `GEMINI_API_KEY`, Gemini models will not be available
+> - Only AWS Bedrock models (Claude, Nova, etc.) work with AWS credentials
+> 
+> **With direct provider keys, Cost Katana automatically uses:**
+> - Native OpenAI SDK for GPT models (if OPENAI_API_KEY provided)
+> - Native Google Gemini SDK for Gemini models (if GEMINI_API_KEY provided)
+> - AWS Bedrock as fallback for both
 
 ### Manual Configuration
 
