@@ -35,7 +35,7 @@ export type ProviderModelMap = {
   [AIProvider.AWSBedrock]: AWSBedrockModels;
   [AIProvider.Google]: GoogleModels;
   [AIProvider.Cohere]: CohereModels;
-  [AIProvider.Groq]: GroqModels;
+  [AIProvider.Grok]: GroqModels;
   [AIProvider.DeepSeek]: DeepSeekModels;
   [AIProvider.Mistral]: MistralModels;
   [AIProvider.XAI]: XAIModels;
@@ -60,7 +60,7 @@ export type AnySimpleConfig =
   | SimpleConfig<AIProvider.AWSBedrock>
   | SimpleConfig<AIProvider.Google>
   | SimpleConfig<AIProvider.Cohere>
-  | SimpleConfig<AIProvider.Groq>
+  | SimpleConfig<AIProvider.Grok>
   | SimpleConfig<AIProvider.DeepSeek>
   | SimpleConfig<AIProvider.Mistral>
   | SimpleConfig<AIProvider.XAI>

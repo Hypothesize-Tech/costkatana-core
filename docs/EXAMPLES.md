@@ -43,7 +43,7 @@ import { configure } from 'cost-katana';
 
 await configure({
   apiKey: 'dak_your_key',
-  cortex: true,  // 70-95% savings
+  cortex: true,  // 40-75% savings
   cache: true    // Smart caching
 });
 ```

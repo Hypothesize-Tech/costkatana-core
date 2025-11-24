@@ -3563,11 +3563,11 @@ export const MODELS: Record<string, ProviderModel> = {
     }
   },
 
-  // ==== Groq ====
+  // ==== Grok ====
   'llama3-70b-8192': {
     id: 'llama3-70b-8192',
-    name: 'Llama 3 70B (Groq)',
-    provider: AIProvider.Groq,
+    name: 'Llama 3 70B (Grok)',
+    provider: AIProvider.Grok,
     maxTokens: 8192,
     contextWindow: 8192,
     pricing: {
@@ -3589,8 +3589,8 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'mixtral-8x7b-32768': {
     id: 'mixtral-8x7b-32768',
-    name: 'Mixtral 8x7B (Groq)',
-    provider: AIProvider.Groq,
+    name: 'Mixtral 8x7B (Grok)',
+    provider: AIProvider.Grok,
     maxTokens: 32768,
     contextWindow: 32768,
     pricing: {

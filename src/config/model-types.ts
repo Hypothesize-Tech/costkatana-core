@@ -14,7 +14,7 @@ const anthropicModelIds = extractModelIds('Anthropic');
 const awsBedrockModelIds = extractModelIds('AWS Bedrock');
 const googleModelIds = extractModelIds('Google AI');
 const cohereModelIds = extractModelIds('Cohere');
-const groqModelIds = extractModelIds('Groq');
+const groqModelIds = extractModelIds('Grok');
 const deepSeekModelIds = extractModelIds('DeepSeek');
 const mistralModelIds = extractModelIds('Mistral AI');
 const xaiModelIds = extractModelIds('xAI');
@@ -57,7 +57,7 @@ export function getModelsForProvider(provider: string): string[] {
       return [...GOOGLE_MODEL_IDS];
     case 'Cohere':
       return [...COHERE_MODEL_IDS];
-    case 'Groq':
+    case 'Grok':
       return [...GROQ_MODEL_IDS];
     case 'DeepSeek':
       return [...DEEPSEEK_MODEL_IDS];

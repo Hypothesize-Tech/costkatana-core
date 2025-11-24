@@ -46,7 +46,7 @@ export const PRICING_CONFIG: Record<string, ModelPricingConfig[]> = {
   DeepSeek: DEEPSEEK_PRICING,
   'Mistral AI': MISTRAL_PRICING,
   Cohere: COHERE_PRICING,
-  Groq: GROK_PRICING,
+  Grok: GROK_PRICING,
   Meta: META_PRICING,
   'AWS Bedrock': AWS_BEDROCK_PRICING
 };
@@ -228,7 +228,7 @@ export const PRICING_METADATA = {
     'Complete Cohere AI lineup with all models',
     'Command A, Command R+/R/R7B, Rerank 3.5, Embed 4',
     'Cohere generative and retrieval models',
-    'Groq ultra-fast inference',
+    'Grok ultra-fast inference',
     'All AWS Bedrock models',
     'Claude 4 (Opus, Sonnet) and 3.7/3.5/3 Haiku/Sonnet/Opus (2025)',
     'Google Gemini 1.5 with 1M context',

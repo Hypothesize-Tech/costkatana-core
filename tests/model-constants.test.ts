@@ -209,8 +209,8 @@ describe('Model Constants', () => {
       expect(getProviderFromModel(COHERE.COMMAND_R_PLUS)).toBe('Cohere');
     });
 
-    it('should return Groq for Groq models', () => {
-      expect(getProviderFromModel(GROQ.LLAMA_3_3_70B_VERSATILE)).toBe('Groq');
+    it('should return Grok for Grok models', () => {
+      expect(getProviderFromModel(GROQ.LLAMA_3_3_70B_VERSATILE)).toBe('Grok');
     });
 
     it('should return Meta for Meta models', () => {

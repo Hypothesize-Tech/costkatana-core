@@ -105,7 +105,7 @@ async function advancedFeaturesExample() {
 
   // Configure advanced features
   await configure({
-    cortex: true, // Enable 70-95% cost reduction
+    cortex: true, // Enable 40-75% cost reduction
     cache: true, // Enable smart caching
     firewall: true // Enable security
   });
@@ -226,7 +226,7 @@ async function runAllExamples() {
     console.log('\n💡 Tips:');
     console.log('- The simple API auto-detects your configuration');
     console.log('- Use chat() for conversations with cost tracking');
-    console.log('- Enable cortex for 70-95% cost savings');
+    console.log('- Enable cortex for 40-75% cost savings');
     console.log('- Check your dashboard at https://costkatana.com for analytics');
   } catch (error) {
     console.error('\n❌ Example failed:', error);

@@ -174,7 +174,7 @@ console.log(response2.cached); // true - saved money!
 
 ### ⚡ Cortex Optimization
 
-Reduce costs by 70-95% with Cortex:
+Reduce costs by 40-75% with Cortex:
 
 ```typescript
 const response = await ai('gpt-4', 'Write a complete guide to Python', {
@@ -258,7 +258,7 @@ import { configure } from 'cost-katana';
 
 await configure({
   apiKey: 'dak_your_key',
-  cortex: true,     // 70-95% cost savings
+  cortex: true,     // 40-75% cost savings
   cache: true,      // Smart caching
   firewall: true    // Security
 });
@@ -570,7 +570,7 @@ await ai('gpt-4', 'Common question', { cache: true });
 ### 3. Use Cortex for Long Content
 
 ```typescript
-// 70-95% savings on long-form content
+// 40-75% savings on long-form content
 await ai('gpt-4', 'Write a book chapter', { cortex: true });
 ```
 

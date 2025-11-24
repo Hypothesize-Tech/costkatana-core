@@ -1042,7 +1042,7 @@ export class AICostTracker {
       if (options.targetUrl.includes('googleapis.com')) return AIProvider.Google;
       if (options.targetUrl.includes('cohere.ai')) return AIProvider.Cohere;
       if (options.targetUrl.includes('deepseek.com')) return AIProvider.DeepSeek;
-      if (options.targetUrl.includes('groq.com')) return AIProvider.Groq;
+      if (options.targetUrl.includes('groq.com')) return AIProvider.Grok;
     }
     return AIProvider.OpenAI; // Default fallback
   }
@@ -1689,8 +1689,8 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
         return 'Google AI';
       case AIProvider.Cohere:
         return 'Cohere';
-      case AIProvider.Groq:
-        return 'Groq';
+      case AIProvider.Grok:
+        return 'Grok';
       case AIProvider.DeepSeek:
         return 'DeepSeek';
       case AIProvider.Mistral:
@@ -1714,7 +1714,7 @@ function getDefaultApiKey(provider: keyof ProviderModelMap): string | undefined 
       return process.env.GOOGLE_API_KEY;
     case AIProvider.Cohere:
       return process.env.COHERE_API_KEY;
-    case AIProvider.Groq:
+    case AIProvider.Grok:
       return process.env.GROQ_API_KEY;
     case AIProvider.DeepSeek:
       return process.env.DEEPSEEK_API_KEY;
@@ -1772,11 +1772,11 @@ export const createCohereTracker = (
 ) => createTracker({ ...config, provider: AIProvider.Cohere });
 
 /**
- * Create Groq tracker with type-safe model selection
+ * Create Grok tracker with type-safe model selection
  */
 export const createGroqTracker = (
-  config: Omit<Parameters<typeof createTracker<AIProvider.Groq>>[0], 'provider'>
-) => createTracker({ ...config, provider: AIProvider.Groq });
+  config: Omit<Parameters<typeof createTracker<AIProvider.Grok>>[0], 'provider'>
+) => createTracker({ ...config, provider: AIProvider.Grok });
 
 /**
  * Create DeepSeek tracker with type-safe model selection
@@ -2383,7 +2383,7 @@ function inferProviderFromModel(model: string): string {
     return AIProvider.Cohere;
   }
   if (modelLower.includes('llama') || modelLower.includes('mixtral')) {
-    return AIProvider.Groq;
+    return AIProvider.Grok;
   }
   if (modelLower.includes('deepseek')) {
     return AIProvider.DeepSeek;

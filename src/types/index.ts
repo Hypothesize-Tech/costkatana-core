@@ -161,7 +161,7 @@ export enum AIProvider {
   Cohere = 'cohere',
   Gemini = 'gemini',
   DeepSeek = 'deepseek',
-  Groq = 'groq',
+  Grok = 'groq',
   Mistral = 'mistral',
   XAI = 'xai',
   HuggingFace = 'huggingface',

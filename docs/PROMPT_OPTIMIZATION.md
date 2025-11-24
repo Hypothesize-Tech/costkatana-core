@@ -147,7 +147,7 @@ await session.send('Now help with JavaScript');
 
 ### What is Cortex?
 
-Cortex is our revolutionary meta-language that reduces token usage by 70-95% while maintaining quality.
+Cortex is our revolutionary meta-language that reduces token usage by 40-75% while maintaining quality.
 
 **How it works:**
 1. Encodes your prompt into optimized format
@@ -335,7 +335,7 @@ await configure({
 import { configure } from 'cost-katana';
 
 await configure({
-  cortex: true,    // 70-95% savings
+  cortex: true,    // 40-75% savings
   cache: true,     // 50-90% savings on repeated queries
   firewall: true   // Block malicious prompts (saves cost)
 });

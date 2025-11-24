@@ -41,7 +41,7 @@ console.log(`Cost: $${r2.cost}`); // $0.00
 
 ### Cortex Optimization
 
-Reduce costs by 70-95%:
+Reduce costs by 40-75%:
 
 ```typescript
 import { ai } from 'cost-katana';
@@ -194,7 +194,7 @@ const response = await ai('gpt-4', 'Your prompt', {
 - Zero-cost cached responses
 
 ### 2. Cortex Optimization
-- 70-95% token reduction
+- 40-75% token reduction
 - Maintains response quality
 - Automatic semantic preservation
 - Real-time analytics
@@ -247,7 +247,7 @@ async function generateBlogPost(topic: string) {
   const post = await ai('gpt-4', 
     `Write a comprehensive blog post about ${topic}`,
     {
-      cortex: true,     // 70-95% savings on long content
+      cortex: true,     // 40-75% savings on long content
       maxTokens: 2000,
       cache: true       // Cache for repeated topics
     }

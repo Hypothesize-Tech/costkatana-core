@@ -20,7 +20,7 @@ const response = await ai(model, prompt, options?);
   - `temperature` (number): 0-2, default 0.7
   - `maxTokens` (number): Max response tokens, default 1000
   - `cache` (boolean): Enable caching, default false
-  - `cortex` (boolean): Enable 70-95% optimization, default false
+  - `cortex` (boolean): Enable 40-75% optimization, default false
 
 **Returns:**
 ```typescript
@@ -182,7 +182,7 @@ GATEWAY_URL=...
 - Any Bedrock model ID
 
 ### Others
-- Cohere, Groq, DeepSeek, Mistral, xAI (Grok)
+- Cohere, Grok, DeepSeek, Mistral, xAI (Grok)
 
 ---
 
@@ -259,7 +259,7 @@ const r2 = await ai('gpt-4', 'FAQ question', { cache: true });
 
 ### Cortex Optimization
 ```typescript
-// 70-95% cost reduction on long content
+// 40-75% cost reduction on long content
 const response = await ai('gpt-4', 'Write a comprehensive guide', {
   cortex: true,
   maxTokens: 2000
