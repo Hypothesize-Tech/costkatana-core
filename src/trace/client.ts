@@ -68,7 +68,7 @@ export class TraceClient implements TraceService {
 
   constructor(config: TraceClientConfig) {
     this.config = {
-      apiUrl: config.apiUrl || 'https://cost-katana-backend.store',
+      apiUrl: config.apiUrl || 'https://api.costkatana.com',
       apiKey: config.apiKey,
       projectId: config.projectId,
       headers: config.headers || {},

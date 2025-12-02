@@ -11,7 +11,7 @@ export class FeedbackClient {
   private baseURL: string;
   private apiKey: string;
 
-  constructor(apiKey: string, baseURL: string = 'https://cost-katana-backend.store/api') {
+  constructor(apiKey: string, baseURL: string = 'https://api.costkatana.com/api') {
     this.apiKey = apiKey;
     this.baseURL = baseURL;
     this.client = axios.create({

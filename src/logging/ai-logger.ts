@@ -23,20 +23,20 @@ export class AILogger {
     /password[_-]?:\s*['"]?([^'"]+)['"]?/gi,
     /secret[_-]?:\s*['"]?([a-zA-Z0-9_-]+)['"]?/gi,
     /bearer\s+([a-zA-Z0-9_.-]+)/gi,
-    /\b[A-Z0-9]{20,}\b/g, // Long uppercase alphanumeric (likely keys)
+    /\b[A-Z0-9]{20,}\b/g // Long uppercase alphanumeric (likely keys)
   ];
 
   constructor(config: AILoggerConfig = {}) {
     this.config = {
       apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || process.env.API_KEY || '',
       projectId: config.projectId || process.env.PROJECT_ID || '',
-      baseUrl: config.baseUrl || 'https://cost-katana-backend.store',
+      baseUrl: config.baseUrl || 'https://api.costkatana.com',
       batchSize: config.batchSize ?? 50,
       flushInterval: config.flushInterval ?? 5000,
       enableLogging: config.enableLogging ?? true,
       maxPromptLength: config.maxPromptLength ?? 1000,
       maxResultLength: config.maxResultLength ?? 1000,
-      redactSensitiveData: config.redactSensitiveData ?? true,
+      redactSensitiveData: config.redactSensitiveData ?? true
     };
 
     if (this.config.enableLogging && this.config.apiKey) {
@@ -54,9 +54,9 @@ export class AILogger {
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
         'Content-Type': 'application/json',
-        'x-project-id': this.config.projectId,
+        'x-project-id': this.config.projectId
       },
-      timeout: 10000,
+      timeout: 10000
     });
   }
 
@@ -65,7 +65,7 @@ export class AILogger {
       clearInterval(this.flushTimer);
     }
     this.flushTimer = setInterval(() => {
-      this.flush().catch((err) => {
+      this.flush().catch(err => {
         logger.debug('Periodic flush failed', err);
       });
     }, this.config.flushInterval);
@@ -101,19 +101,22 @@ export class AILogger {
       logger.debug('AI call logged to buffer', {
         operation: entry.operation,
         model: entry.aiModel,
-        bufferSize: this.logBuffer.length,
+        bufferSize: this.logBuffer.length
       });
 
       // Flush if buffer is full
       if (this.logBuffer.length >= this.config.batchSize) {
         // Don't await - fire and forget for non-blocking behavior
-        this.flush().catch((err) => {
+        this.flush().catch(err => {
           logger.debug('Auto-flush failed', err);
         });
       }
     } catch (error) {
       // Never let logging errors crash the application
-      logger.error('Failed to log AI call', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to log AI call',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 
@@ -135,7 +138,7 @@ export class AILogger {
       templateId,
       templateName,
       templateVariables: variables,
-      ...additionalData,
+      ...additionalData
     });
   }
 
@@ -155,8 +158,10 @@ export class AILogger {
       : undefined;
 
     // Calculate tokens if not provided
-    const inputTokens = entry.inputTokens ?? (entry.prompt ? Math.ceil(entry.prompt.length / 4) : 0);
-    const outputTokens = entry.outputTokens ?? (entry.result ? Math.ceil(entry.result.length / 4) : 0);
+    const inputTokens =
+      entry.inputTokens ?? (entry.prompt ? Math.ceil(entry.prompt.length / 4) : 0);
+    const outputTokens =
+      entry.outputTokens ?? (entry.result ? Math.ceil(entry.result.length / 4) : 0);
     const totalTokens = entry.totalTokens ?? inputTokens + outputTokens;
 
     // Determine success from status code if not provided
@@ -178,7 +183,7 @@ export class AILogger {
       success,
       logLevel,
       environment: entry.environment || (process.env.NODE_ENV as any) || 'development',
-      logSource: entry.logSource || 'cost-katana-sdk',
+      logSource: entry.logSource || 'cost-katana-sdk'
     };
   }
 
@@ -192,8 +197,12 @@ export class AILogger {
 
     let redacted = text;
     for (const pattern of this.SENSITIVE_PATTERNS) {
-      redacted = redacted.replace(pattern, (match) => {
-        return match.substring(0, 3) + '*'.repeat(Math.max(0, match.length - 6)) + match.substring(match.length - 3);
+      redacted = redacted.replace(pattern, match => {
+        return (
+          match.substring(0, 3) +
+          '*'.repeat(Math.max(0, match.length - 6)) +
+          match.substring(match.length - 3)
+        );
       });
     }
     return redacted;
@@ -271,4 +280,3 @@ export class AILogger {
 
 // Export singleton instance
 export const aiLogger = new AILogger();
-

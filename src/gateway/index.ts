@@ -21,8 +21,7 @@ export function createGatewayClient(config: GatewayConfig): GatewayClient {
  */
 export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {}): GatewayClient {
   const apiKey = process.env.API_KEY || process.env.API_KEY;
-  const baseUrl =
-    process.env.COSTKATANA_GATEWAY_URL || 'https://cost-katana-backend.store/api/gateway';
+  const baseUrl = process.env.COSTKATANA_GATEWAY_URL || 'https://api.costkatana.com/api/gateway';
 
   if (!apiKey) {
     throw new Error(

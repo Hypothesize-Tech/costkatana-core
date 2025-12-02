@@ -157,7 +157,7 @@ AWS_REGION=us-east-1
 
 ### Gateway Configuration
 ```bash
-COSTKATANA_GATEWAY_URL=https://cost-katana-backend.store/api/gateway
+COSTKATANA_GATEWAY_URL=https://api.costkatana.com/api/gateway
 GATEWAY_URL=...
 ```
 

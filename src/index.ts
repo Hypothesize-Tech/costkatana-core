@@ -265,7 +265,7 @@ import {
 } from './types/simplified';
 import { getModelPricing } from './config/pricing-data';
 
-const DEFAULT_API_URL = 'https://cost-katana-backend.store/api';
+const DEFAULT_API_URL = 'https://api.costkatana.com/api';
 
 export class AICostTracker {
   private config: TrackerConfig;
@@ -739,7 +739,7 @@ export class AICostTracker {
     }
 
     const defaultConfig: GatewayConfig = {
-      baseUrl: 'https://cost-katana-backend.store/api/gateway',
+      baseUrl: 'https://api.costkatana.com/api/gateway',
       apiKey,
       enableCache: true,
       enableRetries: true,
@@ -1976,7 +1976,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
     const gatewayUrl =
       process.env.COSTKATANA_GATEWAY_URL ||
       process.env.GATEWAY_URL ||
-      'https://cost-katana-backend.store/api/gateway';
+      'https://api.costkatana.com/api/gateway';
 
     globalGateway = globalTracker.initializeGateway({
       baseUrl: gatewayUrl,

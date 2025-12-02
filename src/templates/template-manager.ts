@@ -4,7 +4,11 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { TemplateDefinition, TemplateResolutionResult, TemplateManagerConfig } from '../types/templates';
+import {
+  TemplateDefinition,
+  TemplateResolutionResult,
+  TemplateManagerConfig
+} from '../types/templates';
 import { logger } from '../logging/logger';
 
 export class TemplateManager {
@@ -16,9 +20,9 @@ export class TemplateManager {
   constructor(config: TemplateManagerConfig = {}) {
     this.config = {
       apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || process.env.API_KEY || '',
-      baseUrl: config.baseUrl || 'https://cost-katana-backend.store',
+      baseUrl: config.baseUrl || 'https://api.costkatana.com',
       enableCaching: config.enableCaching ?? true,
-      cacheTTL: config.cacheTTL ?? 300000, // 5 minutes
+      cacheTTL: config.cacheTTL ?? 300000 // 5 minutes
     };
 
     if (this.config.apiKey) {
@@ -31,9 +35,9 @@ export class TemplateManager {
       baseURL: this.config.baseUrl,
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      timeout: 10000,
+      timeout: 10000
     });
   }
 
@@ -86,7 +90,7 @@ export class TemplateManager {
       if (this.config.enableCaching) {
         this.templateCache.set(templateId, {
           template,
-          expiry: Date.now() + this.config.cacheTTL,
+          expiry: Date.now() + this.config.cacheTTL
         });
       }
 
@@ -114,19 +118,22 @@ export class TemplateManager {
       try {
         const response = await this.apiClient.get('/api/prompt-templates');
         const backendTemplates: TemplateDefinition[] = response.data.data || [];
-        
+
         // Filter out duplicates (local takes precedence)
         const uniqueBackendTemplates = backendTemplates.filter(
-          (bt) => !this.localTemplates.has(bt.id)
+          bt => !this.localTemplates.has(bt.id)
         );
-        
+
         templates.push(...uniqueBackendTemplates);
-        logger.debug('Templates listed', { 
-          local: this.localTemplates.size, 
-          backend: uniqueBackendTemplates.length 
+        logger.debug('Templates listed', {
+          local: this.localTemplates.size,
+          backend: uniqueBackendTemplates.length
         });
       } catch (error) {
-        logger.error('Failed to list backend templates', error instanceof Error ? error : new Error(String(error)));
+        logger.error(
+          'Failed to list backend templates',
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -156,9 +163,9 @@ export class TemplateManager {
     }
 
     // Check for missing required variables
-    const requiredVariables = template.variables?.filter((v) => v.required).map((v) => v.name) || [];
+    const requiredVariables = template.variables?.filter(v => v.required).map(v => v.name) || [];
     const missingVariables = requiredVariables.filter(
-      (name) => !(name in variables) && !template.variables?.find((v) => v.name === name)?.defaultValue
+      name => !(name in variables) && !template.variables?.find(v => v.name === name)?.defaultValue
     );
 
     if (missingVariables.length > 0) {
@@ -167,11 +174,11 @@ export class TemplateManager {
 
     // Resolve variables with defaults
     const resolvedVariables: Record<string, any> = {};
-    foundVariables.forEach((varName) => {
+    foundVariables.forEach(varName => {
       if (varName in variables) {
         resolvedVariables[varName] = variables[varName];
       } else {
-        const varDef = template.variables?.find((v) => v.name === varName);
+        const varDef = template.variables?.find(v => v.name === varName);
         if (varDef?.defaultValue !== undefined) {
           resolvedVariables[varName] = varDef.defaultValue;
         } else {
@@ -190,12 +197,12 @@ export class TemplateManager {
     logger.debug('Template resolved', {
       id: templateId,
       name: template.name,
-      variableCount: Object.keys(resolvedVariables).length,
+      variableCount: Object.keys(resolvedVariables).length
     });
 
     // Track usage if backend available
     if (this.apiClient) {
-      this.trackTemplateUsage(templateId, resolvedVariables).catch((err) => {
+      this.trackTemplateUsage(templateId, resolvedVariables).catch(err => {
         logger.debug('Failed to track template usage', err);
       });
     }
@@ -204,20 +211,23 @@ export class TemplateManager {
       prompt,
       template,
       resolvedVariables,
-      missingVariables: missingVariables.length > 0 ? missingVariables : undefined,
+      missingVariables: missingVariables.length > 0 ? missingVariables : undefined
     };
   }
 
   /**
    * Track template usage on backend
    */
-  private async trackTemplateUsage(templateId: string, variables: Record<string, any>): Promise<void> {
+  private async trackTemplateUsage(
+    templateId: string,
+    variables: Record<string, any>
+  ): Promise<void> {
     if (!this.apiClient) return;
 
     try {
       await this.apiClient.post(`/api/prompt-templates/${templateId}/use`, {
         variables,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       // Silent fail - tracking is not critical
@@ -254,4 +264,3 @@ export class TemplateManager {
 
 // Export singleton instance
 export const templateManager = new TemplateManager();
-
