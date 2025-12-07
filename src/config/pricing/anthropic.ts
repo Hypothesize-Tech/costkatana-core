@@ -52,10 +52,24 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     outputPrice: 5.0,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 200000,
-    capabilities: ['text', 'vision', 'multimodal', 'multilingual'],
+    capabilities: ['text', 'fast'],
     category: 'text',
     isLatest: true,
-    notes: 'Latest Claude Haiku model with improved performance and capabilities'
+    notes:
+      'Latest Claude Haiku model with improved performance and capabilities. Cached: $0.10. Batch: $0.50/$2.50'
+  },
+  {
+    modelId: 'claude-opus-4-5',
+    modelName: 'Claude Opus 4.5',
+    provider: 'Anthropic',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200000,
+    capabilities: ['text', 'reasoning', 'premium'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Latest Claude Opus model with enhanced capabilities. Cached: $0.50. Batch: $2.50/$12.50'
   },
   {
     modelId: 'anthropic.claude-haiku-4-5-v1:0',

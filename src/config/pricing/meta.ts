@@ -6,18 +6,11 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelId: 'llama-4-scout',
     modelName: 'Llama 4 Scout',
     provider: 'Meta',
-    inputPrice: 0.19,
-    outputPrice: 0.49,
+    inputPrice: 0.15,
+    outputPrice: 0.15,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 10000000, // 10M context window
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'long-context',
-      'multilingual',
-      'image-grounding'
-    ],
+    capabilities: ['text', 'vision', 'coding', 'reasoning'],
     category: 'multimodal',
     isLatest: true,
     notes:
@@ -28,18 +21,10 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelName: 'Llama 4 Maverick',
     provider: 'Meta',
     inputPrice: 0.19,
-    outputPrice: 0.49,
+    outputPrice: 0.19,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 10000000, // 10M context window
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'long-context',
-      'multilingual',
-      'image-grounding',
-      'fast-responses'
-    ],
+    capabilities: ['text', 'vision', 'coding', 'reasoning', 'multilingual', 'long-context'],
     category: 'multimodal',
     isLatest: true,
     notes:
@@ -49,19 +34,11 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelId: 'llama-4-behemoth-preview',
     modelName: 'Llama 4 Behemoth Preview',
     provider: 'Meta',
-    inputPrice: 0.19,
-    outputPrice: 0.49,
+    inputPrice: 0.3,
+    outputPrice: 0.3,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 10000000, // 10M context window
-    capabilities: [
-      'text',
-      'vision',
-      'multimodal',
-      'long-context',
-      'multilingual',
-      'image-grounding',
-      'teacher-model'
-    ],
+    capabilities: ['text', 'vision', 'coding', 'reasoning', 'multilingual'],
     category: 'multimodal',
     isLatest: true,
     notes:
@@ -73,11 +50,11 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelId: 'llama-3.3-70b',
     modelName: 'Llama 3.3 70B',
     provider: 'Meta',
-    inputPrice: 0.59,
-    outputPrice: 0.79,
+    inputPrice: 0.1,
+    outputPrice: 0.1,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 131072,
-    capabilities: ['text', 'multilingual', 'open-source'],
+    capabilities: ['text', 'coding'],
     category: 'text',
     isLatest: true,
     notes:
@@ -89,11 +66,11 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelId: 'llama-3.2-11b',
     modelName: 'Llama 3.2 11B',
     provider: 'Meta',
-    inputPrice: 0.16,
-    outputPrice: 0.16,
+    inputPrice: 0.08,
+    outputPrice: 0.08,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
-    capabilities: ['text', 'vision', 'multimodal', 'open-source'],
+    capabilities: ['text', 'vision'],
     category: 'multimodal',
     isLatest: true,
     notes:
@@ -147,8 +124,8 @@ export const META_PRICING: ModelPricingConfig[] = [
     modelId: 'llama-3.1-405b',
     modelName: 'Llama 3.1 405B',
     provider: 'Meta',
-    inputPrice: 0.0, // Open source - pricing varies by provider
-    outputPrice: 0.0,
+    inputPrice: 0.2,
+    outputPrice: 0.2,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 131072,
     capabilities: ['text', 'multilingual', 'open-source'],

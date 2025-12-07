@@ -52,7 +52,7 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     unit: PricingUnit.Per1MTokens,
     contextWindow: 128000,
     cachedInputPrice: 0.00875, // Cache read price
-    capabilities: ['text', 'ultra-fast', 'cost-effective'],
+    capabilities: ['text', 'fast'],
     category: 'text',
     isLatest: true,
     notes: 'Amazon Nova Micro via AWS Bedrock. Cache read: $0.00875, Batch: $0.0175/$0.07'
@@ -66,8 +66,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     unit: PricingUnit.Per1MTokens,
     contextWindow: 300000,
     cachedInputPrice: 0.015, // Cache read price
-    capabilities: ['text', 'multimodal', 'fast'],
-    category: 'multimodal',
+    capabilities: ['text', 'fast'],
+    category: 'text',
     isLatest: true,
     notes: 'Amazon Nova Lite via AWS Bedrock. Cache read: $0.015, Batch: $0.03/$0.12'
   },
@@ -80,8 +80,8 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
     unit: PricingUnit.Per1MTokens,
     contextWindow: 300000,
     cachedInputPrice: 0.2, // Cache read price
-    capabilities: ['text', 'multimodal', 'reasoning'],
-    category: 'multimodal',
+    capabilities: ['text', 'vision'],
+    category: 'text',
     isLatest: true,
     notes:
       'Amazon Nova Pro via AWS Bedrock. Cache read: $0.20, Batch: $0.40/$1.60, Latency optimized: $1.00/$4.00'

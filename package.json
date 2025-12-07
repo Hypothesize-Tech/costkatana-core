@@ -1,6 +1,6 @@
 {
   "name": "cost-katana",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "The simplest way to use AI with automatic cost tracking and optimization. Native SDK support for OpenAI and Google Gemini with automatic AWS Bedrock fallback.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

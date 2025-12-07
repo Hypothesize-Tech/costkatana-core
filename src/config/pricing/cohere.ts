@@ -133,11 +133,11 @@ export const COHERE_PRICING: ModelPricingConfig[] = [
     modelId: 'command-light',
     modelName: 'Command Light',
     provider: 'Cohere',
-    inputPrice: 0.15,
+    inputPrice: 0.3,
     outputPrice: 0.6,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 4096,
-    capabilities: ['text', 'lightweight', 'fast'],
+    capabilities: ['text', 'fast'],
     category: 'text',
     isLatest: false,
     notes: 'Smaller, faster version of command, almost as capable but much faster'

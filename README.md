@@ -30,6 +30,49 @@ console.log(response.tokens); // 47
 
 ---
 
+## 🌍 Provider-Independent by Design
+
+Cost Katana is **completely provider-agnostic**. Never lock yourself into a single vendor.
+
+### ✅ Use Capability-Based Routing
+
+```typescript
+import { ai, ModelCapability } from 'cost-katana';
+
+// Automatically selects best model for each task
+const code = await ai(ModelCapability.CODE_GENERATION, 'Write a React component');
+const chat = await ai(ModelCapability.CONVERSATION, 'Hello!');
+const vision = await ai(ModelCapability.VISION, 'Describe this image', { image });
+```
+
+### ✅ Optimize by Performance Characteristics
+
+```typescript
+import { ai } from 'cost-katana';
+
+// Fastest model available
+const fast = await ai({ speed: 'fastest' }, prompt);
+
+// Cheapest model available
+const cheap = await ai({ cost: 'cheapest' }, prompt);
+
+// Best quality model
+const best = await ai({ quality: 'best' }, prompt);
+
+// Balanced approach
+const balanced = await ai({ speed: 'fast', cost: 'cheap' }, prompt);
+```
+
+**Benefits:**
+- 🔄 **Automatic Failover** - Seamlessly switch providers if one goes down
+- 💰 **Cost Optimization** - Routes to the cheapest provider automatically
+- 🚀 **Future-Proof** - New providers added without code changes
+- 🔓 **Zero Lock-In** - Switch providers anytime, no refactoring needed
+
+[Read the full Provider-Agnostic Guide →](https://github.com/Hypothesize-Tech/costkatana-examples/blob/main/PROVIDER_AGNOSTIC_GUIDE.md)
+
+---
+
 ## 📖 Tutorial: Build a Cost-Aware Chatbot
 
 Let's build something real. In this tutorial, you'll create a chatbot that:

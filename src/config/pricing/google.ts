@@ -1,6 +1,33 @@
 import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 
 export const GOOGLE_PRICING: ModelPricingConfig[] = [
+  // === Gemini 3 Models (Latest) ===
+  {
+    modelId: 'gemini-3-pro-preview',
+    modelName: 'Gemini 3 Pro Preview',
+    provider: 'Google AI',
+    inputPrice: 2.0,
+    outputPrice: 12.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2000000,
+    capabilities: ['text', 'vision', 'reasoning', 'coding', 'agents'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'Latest Gemini 3 Pro preview model. Cached: $0.20'
+  },
+  {
+    modelId: 'gemini-3-pro-image-preview',
+    modelName: 'Gemini 3 Pro Image Preview',
+    provider: 'Google AI',
+    inputPrice: 2.0,
+    outputPrice: 12.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2000000,
+    capabilities: ['text', 'image', 'vision'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'Latest Gemini 3 Pro Image preview model'
+  },
   // === Gemini 2.5 Models (Latest) ===
   {
     modelId: 'gemini-2.5-pro',
@@ -10,11 +37,11 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 10.0, // <= 200k tokens
     unit: PricingUnit.Per1MTokens,
     contextWindow: 2000000,
-    capabilities: ['text', 'multimodal', 'reasoning', 'coding', 'complex-problems'],
+    capabilities: ['text', 'vision', 'reasoning', 'coding'],
     category: 'multimodal',
     isLatest: true,
     notes:
-      'Our most advanced reasoning Gemini model, made to solve complex problems. Best for multimodal understanding, coding (web development), and complex prompts. $2.50/$15.00 for prompts > 200k tokens'
+      'Our state-of-the-art thinking model, capable of reasoning over complex problems in code, math, and STEM, as well as analyzing large datasets, codebases, and documents using long context. Best for multimodal understanding, coding (web development), and complex prompts. Cached: $0.125. $2.50/$15.00 for prompts > 200k tokens'
   },
   {
     modelId: 'gemini-2.5-flash',
@@ -24,11 +51,11 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 2.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: ['text', 'image', 'video', 'multimodal', 'reasoning', 'thinking', 'live-api'],
+    capabilities: ['text', 'vision', 'audio', 'fast'],
     category: 'multimodal',
     isLatest: true,
     notes:
-      "Our best model in terms of price-performance, offering well-rounded capabilities. Best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases. Support for Live API included for some endpoints. See the model's thinking process as part of the response. Audio input: $1.00"
+      "Our best model in terms of price-performance, offering well-rounded capabilities. Best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases. Support for Live API included for some endpoints. See the model's thinking process as part of the response. Cached: $0.03. Audio input: $1.00"
   },
   {
     modelId: 'gemini-2.5-flash-lite-preview',
@@ -53,6 +80,19 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
       'Our fastest flash model optimized for cost-efficiency and high throughput. Features 1M token context window and multimodal input. Outperforms 2.0 Flash on most evaluation benchmarks. Audio input: $0.50'
   },
   {
+    modelId: 'gemini-2.5-flash-preview-09-2025',
+    modelName: 'Gemini 2.5 Flash Preview',
+    provider: 'Google AI',
+    inputPrice: 0.3, // text/image/video
+    outputPrice: 2.5,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1000000,
+    capabilities: ['text', 'vision', 'audio', 'fast'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'Gemini 2.5 Flash preview model. Cached: $0.03'
+  },
+  {
     modelId: 'gemini-2.5-flash-lite',
     modelName: 'Gemini 2.5 Flash-Lite',
     provider: 'Google AI',
@@ -60,19 +100,11 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     outputPrice: 0.4,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 1000000,
-    capabilities: [
-      'text',
-      'image',
-      'video',
-      'multimodal',
-      'reasoning',
-      'thinking',
-      'high-throughput'
-    ],
+    capabilities: ['text', 'vision', 'fast'],
     category: 'multimodal',
     isLatest: true,
     notes:
-      'Our fastest flash model optimized for cost-efficiency and high throughput (stable version). Features 1M token context window and multimodal input. Audio input: $0.50'
+      'Our fastest flash model optimized for cost-efficiency and high throughput (stable version). Features 1M token context window and multimodal input. Cached: $0.01. Audio input: $0.50'
   },
   {
     modelId: 'gemini-2.5-flash-audio',
@@ -458,6 +490,19 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
   },
 
   // === Embeddings Models ===
+  {
+    modelId: 'gemini-embedding-001',
+    modelName: 'Gemini Embedding',
+    provider: 'Google AI',
+    inputPrice: 0.15,
+    outputPrice: 0.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2048,
+    capabilities: ['embeddings'],
+    category: 'embedding',
+    isLatest: true,
+    notes: 'Gemini embedding model for semantic search and similarity tasks'
+  },
   {
     modelId: 'text-embedding-004',
     modelName: 'Text Embedding 004',
