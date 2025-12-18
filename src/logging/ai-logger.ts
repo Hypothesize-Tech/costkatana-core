@@ -28,7 +28,7 @@ export class AILogger {
 
   constructor(config: AILoggerConfig = {}) {
     this.config = {
-      apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || process.env.API_KEY || '',
+      apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || '',
       projectId: config.projectId || process.env.PROJECT_ID || '',
       baseUrl: config.baseUrl || 'https://api.costkatana.com',
       batchSize: config.batchSize ?? 50,

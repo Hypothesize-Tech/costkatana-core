@@ -46,7 +46,7 @@ export interface TraceClientConfig {
  * import { TraceClient } from 'ai-cost-tracker/trace';
  *
  * const traceClient = new TraceClient({
- *   apiKey: process.env.API_KEY,
+ *   apiKey: process.env.COST_KATANA_API_KEY,
  *   projectId: process.env.PROJECT_ID
  * });
  *

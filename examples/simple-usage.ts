@@ -192,7 +192,6 @@ async function runAllExamples() {
     // Check if we have any API keys configured
     const hasKeys =
       process.env.COST_KATANA_API_KEY ||
-      process.env.API_KEY ||
       process.env.OPENAI_API_KEY ||
       process.env.ANTHROPIC_API_KEY;
 

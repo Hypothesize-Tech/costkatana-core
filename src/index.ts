@@ -307,7 +307,7 @@ export class AICostTracker {
     // Initialize AI logger if enabled
     if ((config as any).enableAILogging !== false) {
       this.aiLoggerInstance = new AILogger({
-        apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY,
+        apiKey: process.env.COST_KATANA_API_KEY,
         projectId: (config as any).projectId || process.env.PROJECT_ID,
         enableLogging: true
       });
@@ -315,7 +315,7 @@ export class AICostTracker {
 
     // Initialize template manager
     this.templateManagerInstance = new TemplateManager({
-      apiKey: process.env.API_KEY || process.env.COST_KATANA_API_KEY
+      apiKey: process.env.COST_KATANA_API_KEY || ''
     });
 
     logger.info('AICostTracker initialized', {
@@ -324,7 +324,7 @@ export class AICostTracker {
   }
 
   public static async create(config: TrackerConfig): Promise<AICostTracker> {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.COST_KATANA_API_KEY || '';
     const projectId = process.env.PROJECT_ID;
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
@@ -732,7 +732,7 @@ export class AICostTracker {
    * Initialize gateway client for intelligent proxy functionality
    */
   initializeGateway(gatewayConfig: Partial<GatewayConfig> = {}): GatewayClient {
-    const apiKey = process.env.API_KEY || process.env.API_KEY;
+    const apiKey = process.env.COST_KATANA_API_KEY || '';
 
     if (!apiKey) {
       throw new Error('API_KEY or API_KEY environment variable not set for gateway functionality.');
@@ -1826,7 +1826,6 @@ async function autoConfigureIfNeeded(): Promise<void> {
     const apiKey =
       process.env.COST_KATANA_API_KEY ||
       process.env.COST_KATANA_API_KEY ||
-      process.env.API_KEY ||
       process.env.COSTKATANA_KEY;
 
     const projectId =
@@ -2320,7 +2319,6 @@ export async function configure(options: {
 }) {
   // Set environment variables if provided
   if (options.apiKey) {
-    process.env.API_KEY = options.apiKey;
     process.env.COST_KATANA_API_KEY = options.apiKey;
   }
 

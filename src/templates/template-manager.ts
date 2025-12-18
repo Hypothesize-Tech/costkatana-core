@@ -19,7 +19,7 @@ export class TemplateManager {
 
   constructor(config: TemplateManagerConfig = {}) {
     this.config = {
-      apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || process.env.API_KEY || '',
+      apiKey: config.apiKey || process.env.COST_KATANA_API_KEY || '',
       baseUrl: config.baseUrl || 'https://api.costkatana.com',
       enableCaching: config.enableCaching ?? true,
       cacheTTL: config.cacheTTL ?? 300000 // 5 minutes
