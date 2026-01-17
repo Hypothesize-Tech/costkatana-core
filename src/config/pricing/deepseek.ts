@@ -1,16 +1,16 @@
 import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 
 export const DEEPSEEK_PRICING: ModelPricingConfig[] = [
-  // DeepSeek Chat (V3-0324) - Latest
+  // DeepSeek Chat (V3.2) - Latest
   {
     modelId: 'deepseek-chat',
-    modelName: 'DeepSeek Chat (V3-0324)',
+    modelName: 'DeepSeek Chat (V3.2)',
     provider: 'DeepSeek',
-    inputPrice: 0.27, // Standard price (cache miss)
-    outputPrice: 1.1,
+    inputPrice: 0.28, // Standard price (cache miss)
+    outputPrice: 0.42,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 64000,
-    cachedInputPrice: 0.07, // Cache hit price
+    contextWindow: 128000,
+    cachedInputPrice: 0.028, // Cache hit price
     capabilities: [
       'text',
       'analysis',
@@ -22,18 +22,18 @@ export const DEEPSEEK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Latest DeepSeek V3 model with 64K context. Cache hit: $0.07, Off-peak 50% discount (16:30-00:30 UTC)'
+      'Latest DeepSeek V3.2 model with 128K context. Max output: 4K default, 8K maximum. Cache hit: $0.028 per 1M tokens'
   },
-  // DeepSeek Reasoner (R1-0528) - Latest Reasoning Model
+  // DeepSeek Reasoner (V3.2 Thinking Mode) - Latest Reasoning Model
   {
     modelId: 'deepseek-reasoner',
-    modelName: 'DeepSeek Reasoner (R1-0528)',
+    modelName: 'DeepSeek Reasoner (V3.2 Thinking Mode)',
     provider: 'DeepSeek',
-    inputPrice: 0.55, // Standard price (cache miss)
-    outputPrice: 2.19,
+    inputPrice: 0.28, // Standard price (cache miss)
+    outputPrice: 0.42,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 64000,
-    cachedInputPrice: 0.14, // Cache hit price
+    contextWindow: 128000,
+    cachedInputPrice: 0.028, // Cache hit price
     capabilities: [
       'text',
       'reasoning',
@@ -45,7 +45,7 @@ export const DEEPSEEK_PRICING: ModelPricingConfig[] = [
     category: 'reasoning',
     isLatest: true,
     notes:
-      'Latest DeepSeek R1 reasoning model with CoT. Max 32K default output (64K max). Cache hit: $0.14, Off-peak 75% discount (16:30-00:30 UTC)'
+      'Latest DeepSeek V3.2 reasoning model with CoT (Thinking Mode). Max output: 32K default, 64K maximum. Cache hit: $0.028 per 1M tokens. FIM completion not supported.'
   },
   // DeepSeek V3 (Previous version for compatibility)
   {

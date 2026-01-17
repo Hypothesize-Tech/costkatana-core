@@ -14,7 +14,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Latest cost-efficient reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+      'Latest cost-efficient reasoning model with 2M context window. Lightning fast, low cost. Priced at $0.20 per 1M input tokens and $0.50 per 1M output tokens. Rate limits: 4M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
   {
     modelId: 'grok-4-1-fast-non-reasoning',
@@ -28,7 +28,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Latest cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+      'Latest cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. Priced at $0.20 per 1M input tokens and $0.50 per 1M output tokens. Rate limits: 4M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
   // === Grok 4 Fast Series ===
   {
@@ -43,7 +43,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Cost-efficient reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+      'Cost-efficient reasoning model with 2M context window. Lightning fast, low cost. Priced at $0.20 per 1M input tokens and $0.50 per 1M output tokens. Rate limits: 4M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
   {
     modelId: 'grok-4-fast-non-reasoning',
@@ -57,7 +57,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. 4M TPM, 480 RPM rate limits'
+      'Cost-efficient non-reasoning model with 2M context window. Lightning fast, low cost. Priced at $0.20 per 1M input tokens and $0.50 per 1M output tokens. Rate limits: 4M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
   {
     modelId: 'grok-code-fast-1',
@@ -67,11 +67,11 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     outputPrice: 1.5,
     unit: PricingUnit.Per1MTokens,
     contextWindow: 256000,
-    capabilities: ['code', 'programming', 'function-calling', 'structured-outputs'],
+    capabilities: ['text', 'coding', 'function-calling', 'structured-outputs'],
     category: 'code',
     isLatest: true,
     notes:
-      'Cost-efficient coding model optimized for code generation and programming tasks. 2M TPM, 480 RPM rate limits'
+      'Cost-efficient coding model optimized for code generation and programming tasks. Priced at $0.20 per 1M input tokens and $1.50 per 1M output tokens. Context window: 256K tokens. Rate limits: 2M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
 
   // === Grok 4 Series ===
@@ -87,7 +87,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Latest Grok 4 reasoning model. Note: Grok 4 is always a reasoning model with no non-reasoning mode. 2M TPM, 480 RPM rate limits. Knowledge cutoff: November 2024'
+      'Latest Grok 4 reasoning model. Note: Grok 4 is always a reasoning model with no non-reasoning mode. Priced at $3.00 per 1M input tokens and $15.00 per 1M output tokens. Context window: 256K tokens. Rate limits: 2M TPM (tokens per minute), 480 RPM (requests per minute). Knowledge cutoff: November 2024'
   },
   {
     modelId: 'grok-4',
@@ -101,7 +101,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Alias for latest stable Grok 4 version. Points to grok-4-0709. 2M TPM, 480 RPM rate limits'
+      'Alias for latest stable Grok 4 version. Points to grok-4-0709. Priced at $3.00 per 1M input tokens and $15.00 per 1M output tokens. Context window: 256K tokens. Rate limits: 2M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
   {
     modelId: 'grok-4-latest',
@@ -115,7 +115,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Alias for latest Grok 4 version (may include preview features). Auto-updates with new releases. 2M TPM, 480 RPM rate limits'
+      'Alias for latest Grok 4 version (may include preview features). Auto-updates with new releases. Priced at $3.00 per 1M input tokens and $15.00 per 1M output tokens. Context window: 256K tokens. Rate limits: 2M TPM (tokens per minute), 480 RPM (requests per minute)'
   },
 
   // === Grok 3 Series ===
@@ -130,7 +130,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'vision', 'function-calling', 'structured-outputs'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Standard Grok 3 model. 600 RPM rate limits. Knowledge cutoff: November 2024'
+    notes:
+      'Standard Grok 3 model. Priced at $3.00 per 1M input tokens and $15.00 per 1M output tokens. Context window: 131K tokens. Rate limits: 600 RPM (requests per minute). Knowledge cutoff: November 2024'
   },
   {
     modelId: 'grok-3-mini',
@@ -143,7 +144,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'vision', 'function-calling', 'structured-outputs'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Cost-effective Grok 3 Mini model. 480 RPM rate limits. Knowledge cutoff: November 2024'
+    notes:
+      'Cost-effective Grok 3 Mini model. Priced at $0.30 per 1M input tokens and $0.50 per 1M output tokens. Context window: 131K tokens. Rate limits: 480 RPM (requests per minute). Knowledge cutoff: November 2024'
   },
 
   // === Grok 2 Vision Series ===
@@ -159,7 +161,7 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     category: 'multimodal',
     isLatest: false,
     notes:
-      'Grok 2 Vision model for image understanding. 600 RPM rate limits (us-east-1) or 50 RPS (eu-west-1)'
+      'Grok 2 Vision model for image understanding. Priced at $2.00 per 1M input tokens and $10.00 per 1M output tokens. Context window: 32K tokens. Rate limits: 600 RPM (requests per minute) for us-east-1 region, 50 RPS (requests per second) for eu-west-1 region'
   },
   {
     modelId: 'grok-2-vision-1212-us-east-1',
@@ -172,7 +174,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'vision', 'image-understanding'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Grok 2 Vision model for us-east-1 region. 600 RPM rate limits'
+    notes:
+      'Grok 2 Vision model for us-east-1 region. Priced at $2.00 per 1M input tokens and $10.00 per 1M output tokens. Context window: 32K tokens. Rate limits: 600 RPM (requests per minute)'
   },
   {
     modelId: 'grok-2-vision-1212-eu-west-1',
@@ -185,7 +188,8 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     capabilities: ['text', 'vision', 'image-understanding'],
     category: 'multimodal',
     isLatest: false,
-    notes: 'Grok 2 Vision model for eu-west-1 region. 50 RPS rate limits'
+    notes:
+      'Grok 2 Vision model for eu-west-1 region. Priced at $2.00 per 1M input tokens and $10.00 per 1M output tokens. Context window: 32K tokens. Rate limits: 50 RPS (requests per second)'
   },
 
   // === Grok 2 Image Generation ===
@@ -194,40 +198,41 @@ export const GROK_PRICING: ModelPricingConfig[] = [
     modelName: 'Grok 2 Image',
     provider: 'xAI',
     inputPrice: 0.07,
-    outputPrice: 0.07,
+    outputPrice: 0.0,
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['image-generation'],
+    capabilities: ['image-generation', 'text-to-image'],
     category: 'image',
     isLatest: true,
-    notes: 'Grok 2 image generation model. $0.07 per image output, 300 RPM rate limits'
+    notes:
+      'Grok 2 image generation model. Priced at $0.07 per image output. Rate limits: 300 RPM (requests per minute)'
   },
   {
     modelId: 'grok-2-image',
     modelName: 'Grok 2 Image (Alias)',
     provider: 'xAI',
     inputPrice: 0.07,
-    outputPrice: 0.07,
+    outputPrice: 0.0,
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['image-generation'],
+    capabilities: ['image-generation', 'text-to-image'],
     category: 'image',
     isLatest: true,
     notes:
-      'Alias for latest stable Grok 2 Image version. Points to grok-2-image-1212. $0.07 per image, 300 RPM rate limits'
+      'Alias for latest stable Grok 2 Image version. Points to grok-2-image-1212. Priced at $0.07 per image output. Rate limits: 300 RPM (requests per minute)'
   },
   {
     modelId: 'grok-2-image-latest',
     modelName: 'Grok 2 Image Latest',
     provider: 'xAI',
     inputPrice: 0.07,
-    outputPrice: 0.07,
+    outputPrice: 0.0,
     unit: PricingUnit.PerRequest,
     contextWindow: 0,
-    capabilities: ['image-generation'],
+    capabilities: ['image-generation', 'text-to-image'],
     category: 'image',
     isLatest: true,
     notes:
-      'Alias for latest Grok 2 Image version. Auto-updates with new releases. $0.07 per image, 300 RPM rate limits'
+      'Alias for latest Grok 2 Image version. Auto-updates with new releases. Priced at $0.07 per image output. Rate limits: 300 RPM (requests per minute)'
   }
 ];
