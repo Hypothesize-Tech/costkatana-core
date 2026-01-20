@@ -112,9 +112,9 @@ export class GatewayClient {
             this.config.firewall.promptThreshold.toString();
         }
 
-        if (this.config.firewall.llamaThreshold !== undefined) {
-          requestConfig.headers['CostKatana-Firewall-Llama-Threshold'] =
-            this.config.firewall.llamaThreshold.toString();
+        if (this.config.firewall.openaiThreshold !== undefined) {
+          requestConfig.headers['CostKatana-Firewall-OpenAI-Threshold'] =
+            this.config.firewall.openaiThreshold.toString();
         }
       }
 
@@ -464,9 +464,9 @@ export class GatewayClient {
           headers['CostKatana-Firewall-Prompt-Threshold'] =
             options.firewall.promptThreshold.toString();
         }
-        if (options.firewall.llamaThreshold !== undefined) {
-          headers['CostKatana-Firewall-Llama-Threshold'] =
-            options.firewall.llamaThreshold.toString();
+        if (options.firewall.openaiThreshold !== undefined) {
+          headers['CostKatana-Firewall-OpenAI-Threshold'] =
+            options.firewall.openaiThreshold.toString();
         }
       }
     }

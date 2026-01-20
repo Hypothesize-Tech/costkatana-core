@@ -48,12 +48,12 @@ export interface KeyVaultConfig {
 export interface FirewallConfig {
   /** Enable basic firewall (Prompt Guard) */
   enabled?: boolean;
-  /** Enable advanced firewall (Llama Guard) */
+  /** Enable advanced firewall (OpenAI Safeguard) */
   advanced?: boolean;
   /** Prompt Guard confidence threshold (0.0-1.0) */
   promptThreshold?: number;
-  /** Llama Guard confidence threshold (0.0-1.0) */
-  llamaThreshold?: number;
+  /** OpenAI Safeguard confidence threshold (0.0-1.0) */
+  openaiThreshold?: number;
 }
 
 export interface FailoverConfig {
@@ -461,7 +461,7 @@ export interface ThreatDetectionResult {
   /** Human-readable reason */
   reason: string;
   /** Detection stage */
-  stage: 'prompt-guard' | 'llama-guard';
+  stage: 'prompt-guard' | 'openai-safeguard';
   /** Additional details */
   details?: any;
 }
@@ -492,6 +492,6 @@ export interface FirewallOptions {
   advanced?: boolean;
   /** Custom prompt threshold */
   promptThreshold?: number;
-  /** Custom llama threshold */
-  llamaThreshold?: number;
+  /** Custom OpenAI Safeguard threshold */
+  openaiThreshold?: number;
 }
