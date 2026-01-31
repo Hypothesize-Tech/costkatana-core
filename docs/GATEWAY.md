@@ -111,29 +111,7 @@ console.log(`Average cost/message: $${(session.totalCost / 3).toFixed(4)}`);
 // View in dashboard: https://costkatana.com/dashboard
 ```
 
-### Disable Auto-Tracking
-
-You can disable automatic tracking while still using the gateway proxy:
-
-```typescript
-import { AICostTracker } from 'cost-katana';
-
-const tracker = await AICostTracker.create({
-  // ... config
-});
-
-// Initialize gateway with autoTrack disabled
-const gateway = tracker.initializeGateway({
-  autoTrack: false  // Gateway still proxies, but doesn't track usage
-});
-
-// Or disable per-request
-const response = await gateway.openai(request, {
-  autoTrack: false  // This request won't be tracked
-});
-```
-
-When `autoTrack: false`, the gateway will still proxy requests to AI providers but will skip all tracking operations in the database.
+Tracking is always on by default. No configuration is required—every gateway request is automatically tracked in your dashboard.
 
 ### Cache Management
 

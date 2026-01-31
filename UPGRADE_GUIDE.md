@@ -49,7 +49,7 @@ import { ai, chat, configure } from 'cost-katana';
 const tracker = await AICostTracker.create({
   providers: [{ provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY }],
   optimization: { enablePromptOptimization: true },
-  tracking: { enableAutoTracking: true }
+  tracking: {}
 });
 
 const response = await tracker.makeRequest({
@@ -198,7 +198,7 @@ const tracker = await AICostTracker.create({
       frequencyThreshold: 10
     }
   },
-  tracking: { enableAutoTracking: true }
+  tracking: {}
 });
 
 async function handleQuery(userQuery: string) {

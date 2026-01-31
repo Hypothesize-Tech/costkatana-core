@@ -32,8 +32,6 @@ export interface GatewayConfig {
   firewall?: FirewallConfig;
   /** Failover configuration for high availability */
   failover?: FailoverConfig;
-  /** Enable automatic tracking of gateway requests (default: true) */
-  autoTrack?: boolean;
 }
 
 export interface KeyVaultConfig {
@@ -204,8 +202,6 @@ export interface GatewayRequestOptions {
   customerEmail?: string;
   /** Cortex/SAST configuration for semantic optimization */
   cortex?: CortexConfig;
-  /** Override auto-track setting for this request */
-  autoTrack?: boolean;
 }
 
 export interface GatewayResponse<T = any> {

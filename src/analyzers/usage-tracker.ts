@@ -11,9 +11,7 @@ export class UsageTracker {
   }
 
   async track(metadata: UsageMetadata): Promise<void> {
-    if (!this.config.enableAutoTracking) {
-      return;
-    }
+    // Tracking is always on; no option to disable (required for usage and cost attribution).
 
     // Apply retention policy
     if (this.config.retentionDays) {

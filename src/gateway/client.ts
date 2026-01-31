@@ -118,9 +118,8 @@ export class GatewayClient {
         }
       }
 
-      // Add default auto-track setting (default: true)
-      const autoTrack = this.config.autoTrack !== undefined ? this.config.autoTrack : true;
-      requestConfig.headers['CostKatana-Auto-Track'] = autoTrack.toString();
+      // Tracking is always on by default; no configuration required
+      requestConfig.headers['CostKatana-Auto-Track'] = 'true';
 
       return requestConfig;
     });
@@ -471,15 +470,8 @@ export class GatewayClient {
       }
     }
 
-    // Auto-track configuration (per-request override takes precedence)
-    if (options.autoTrack !== undefined) {
-      headers['CostKatana-Auto-Track'] = options.autoTrack.toString();
-    } else if (this.config.autoTrack !== undefined) {
-      headers['CostKatana-Auto-Track'] = this.config.autoTrack.toString();
-    } else {
-      // Default to true if not specified
-      headers['CostKatana-Auto-Track'] = 'true';
-    }
+    // Tracking is always on by default; no configuration required
+    headers['CostKatana-Auto-Track'] = 'true';
 
     // Failover configuration
     if (options.failover !== undefined) {

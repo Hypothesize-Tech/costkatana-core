@@ -35,7 +35,7 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
     authMethod: 'gateway',
     enableCache: true,
     enableRetries: true,
-    autoTrack: true, // Default to true for backward compatibility
+    // Tracking is always on by default; no configuration required
     retryConfig: {
       count: 3,
       factor: 2,

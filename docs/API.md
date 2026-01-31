@@ -224,7 +224,7 @@ const tracker = await AICostTracker.create({
     enableModelSuggestions: true,
     enableCachingSuggestions: true
   },
-  tracking: { enableAutoTracking: true }
+  tracking: {}
 });
 
 // Full API methods available

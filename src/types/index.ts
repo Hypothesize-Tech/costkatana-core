@@ -176,7 +176,8 @@ import { LoggerConfig } from '../utils/logger';
 export interface TrackerConfig {
   providers: ProviderConfig[];
   optimization: OptimizationConfig;
-  tracking: TrackingConfig;
+  /** Optional. When omitted, tracking is always on (default). No configuration required. */
+  tracking?: TrackingConfig;
   alerts?: AlertConfig;
   logger?: LoggerConfig;
   apiUrl?: string;
@@ -238,7 +239,7 @@ export interface BedrockConfig {
 }
 
 export interface TrackingConfig {
-  enableAutoTracking: boolean;
+  /** Retention for local usage data (days). Tracking is always on; no option to disable. */
   retentionDays?: number;
 }
 

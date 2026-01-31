@@ -2,6 +2,19 @@
 
 All notable changes to Cost Katana will be documented in this file.
 
+## [2.2.0] - 2025-01-31
+
+### Changed
+
+- **Tracking is always on**: Usage and cost tracking can no longer be disabled. There is no `enableAutoTracking`, `autoTrack`, or any configuration to turn tracking off. This ensures usage and token/cost attribution are never lost.
+- Removed `enableAutoTracking` from `TrackingConfig` (core and gateway).
+- Removed `autoTrack` from gateway config and request options; backend always tracks gateway requests.
+- `TrackingConfig` now only supports optional `retentionDays`; tracking itself is always enabled.
+
+### Migration
+
+- If you previously passed `tracking: { enableAutoTracking: false }` or `autoTrack: false`, remove those options; tracking is always on and the options are ignored/removed.
+
 ## [2.0.0] - 2025-01-XX
 
 ### 🚀 Major Release: Complete Simplification
@@ -53,7 +66,7 @@ const tracker = await AICostTracker.create({
     enableModelSuggestions: true,
     enableCachingSuggestions: true
   },
-  tracking: { enableAutoTracking: true }
+  tracking: {}
 });
 
 const response = await tracker.makeRequest({

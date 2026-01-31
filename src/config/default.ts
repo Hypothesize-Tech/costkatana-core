@@ -20,7 +20,6 @@ export const defaultConfig: Partial<TrackerConfig> = {
     thresholds: optimizationThresholds
   },
   tracking: {
-    enableAutoTracking: true,
     retentionDays: 30
   },
   alerts: {

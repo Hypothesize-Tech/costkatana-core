@@ -267,8 +267,11 @@ import { getModelPricing } from './config/pricing-data';
 
 const DEFAULT_API_URL = 'https://api.costkatana.com/api';
 
+/** Internal config type: tracking is always set (defaults applied in constructor). */
+type ResolvedTrackerConfig = TrackerConfig & { tracking: NonNullable<TrackerConfig['tracking']> };
+
 export class AICostTracker {
-  private config: TrackerConfig;
+  private config: ResolvedTrackerConfig;
   private providers: Map<AIProvider, BaseProvider> = new Map();
   private costAnalyzer: CostAnalyzer;
   private usageTracker: UsageTracker;
@@ -280,35 +283,40 @@ export class AICostTracker {
   private templateManagerInstance?: TemplateManager;
 
   private constructor(config: TrackerConfig, apiClient: AxiosInstance) {
-    validateTrackerConfig(config);
-    this.config = config;
+    // Tracking is always on; no option to disable (required for usage and cost attribution).
+    const tracking = {
+      retentionDays: 30,
+      ...config.tracking
+    };
+    this.config = { ...config, tracking } as ResolvedTrackerConfig;
+    validateTrackerConfig(this.config);
     this.apiClient = apiClient;
 
     // Initialize providers
-    config.providers.forEach(providerConfig => {
+    this.config.providers.forEach(providerConfig => {
       const provider = createProvider(providerConfig);
       this.providers.set(providerConfig.provider, provider);
     });
 
     // Initialize analyzers and optimizers
     this.costAnalyzer = new CostAnalyzer();
-    this.usageTracker = new UsageTracker(config.tracking);
+    this.usageTracker = new UsageTracker(this.config.tracking);
     this.suggestionEngine = new SuggestionEngine({
-      bedrockConfig: config.optimization.bedrockConfig,
+      bedrockConfig: this.config.optimization.bedrockConfig,
       thresholds: optimizationThresholds
     });
 
     // Initialize the enhanced prompt optimizer
     this.promptOptimizer = new PromptOptimizer(
-      config.optimization,
-      config.optimization.bedrockConfig
+      this.config.optimization,
+      this.config.optimization.bedrockConfig
     );
 
     // Initialize AI logger if enabled
-    if ((config as any).enableAILogging !== false) {
+    if ((this.config as any).enableAILogging !== false) {
       this.aiLoggerInstance = new AILogger({
         apiKey: process.env.COST_KATANA_API_KEY,
-        projectId: (config as any).projectId || process.env.PROJECT_ID,
+        projectId: (this.config as any).projectId || process.env.PROJECT_ID,
         enableLogging: true
       });
     }
@@ -319,7 +327,7 @@ export class AICostTracker {
     });
 
     logger.info('AICostTracker initialized', {
-      providers: config.providers.map(p => p.provider)
+      providers: this.config.providers.map(p => p.provider)
     });
   }
 
@@ -413,20 +421,16 @@ export class AICostTracker {
       // Make the actual API request
       const response = await providerInstance.makeRequest(request);
 
-      // Track usage if enabled
-      if (this.config.tracking.enableAutoTracking) {
-        const usageMetadata = providerInstance.trackUsage(request, response, startTime);
-
-        this.trackUsage(usageMetadata);
-
-        logger.logRequest(
-          provider,
-          request.model,
-          usageMetadata.totalTokens,
-          usageMetadata.estimatedCost,
-          Date.now() - startTime
-        );
-      }
+      // Always track usage (required for usage and cost attribution)
+      const usageMetadata = providerInstance.trackUsage(request, response, startTime);
+      this.trackUsage(usageMetadata);
+      logger.logRequest(
+        provider,
+        request.model,
+        usageMetadata.totalTokens,
+        usageMetadata.estimatedCost,
+        Date.now() - startTime
+      );
 
       timer();
       return response;
@@ -743,7 +747,7 @@ export class AICostTracker {
       apiKey,
       enableCache: true,
       enableRetries: true,
-      autoTrack: true, // Default to true for backward compatibility
+      // Tracking is always on by default; no configuration required
       retryConfig: {
         count: 3,
         factor: 2,
@@ -819,10 +823,8 @@ export class AICostTracker {
       // Make the gateway request
       const response = await this.gatewayClient.makeRequest(endpoint, data, options);
 
-      // Auto-track usage if enabled
-      if (this.config.tracking.enableAutoTracking) {
-        await this.trackGatewayUsage(data, response, startTime, options);
-      }
+      // Always track gateway usage (required for usage and cost attribution)
+      await this.trackGatewayUsage(data, response, startTime, options);
 
       return response;
     } catch (error) {
@@ -856,10 +858,7 @@ export class AICostTracker {
       }
 
       const response = await this.gatewayClient.openai(request, options);
-
-      if (this.config.tracking.enableAutoTracking) {
-        await this.trackGatewayUsage(request, response, startTime, options);
-      }
+      await this.trackGatewayUsage(request, response, startTime, options);
 
       return response;
     } catch (error) {
@@ -893,10 +892,7 @@ export class AICostTracker {
       }
 
       const response = await this.gatewayClient.anthropic(request, options);
-
-      if (this.config.tracking.enableAutoTracking) {
-        await this.trackGatewayUsage(request, response, startTime, options);
-      }
+      await this.trackGatewayUsage(request, response, startTime, options);
 
       return response;
     } catch (error) {
@@ -1210,10 +1206,7 @@ export class AICostTracker {
         ...options,
         firewall: firewallOptions
       });
-
-      if (this.config.tracking.enableAutoTracking) {
-        await this.trackGatewayUsage(request, response, startTime, options);
-      }
+      await this.trackGatewayUsage(request, response, startTime, options);
 
       return response;
     } catch (error) {
@@ -1251,10 +1244,7 @@ export class AICostTracker {
         ...options,
         firewall: firewallOptions
       });
-
-      if (this.config.tracking.enableAutoTracking) {
-        await this.trackGatewayUsage(request, response, startTime, options);
-      }
+      await this.trackGatewayUsage(request, response, startTime, options);
 
       return response;
     } catch (error) {
@@ -1402,7 +1392,6 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
     region?: string;
     projectId?: string;
     enableOptimization?: boolean;
-    enableAutoTracking?: boolean;
   }): Promise<SimpleCostTracker<T>> {
     // Build provider config based on provider type
     const providerConfig: ProviderConfig = {
@@ -1428,9 +1417,7 @@ class SimpleCostTracker<T extends keyof ProviderModelMap = keyof ProviderModelMa
           frequencyThreshold: 10
         }
       },
-      tracking: {
-        enableAutoTracking: config.enableAutoTracking ?? true
-      },
+      tracking: {},
       ...(config.projectId && { projectId: config.projectId })
     };
 
@@ -1900,10 +1887,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
             enableCachingSuggestions: true,
             thresholds: optimizationThresholds
           },
-          tracking: {
-            enableAutoTracking: true,
-            storageType: 'memory'
-          }
+          tracking: {}
         },
         null // No API client for limited mode
       );
@@ -1926,9 +1910,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
         enableCachingSuggestions: true,
         thresholds: optimizationThresholds
       },
-      tracking: {
-        enableAutoTracking: true
-      }
+      tracking: {}
     };
 
     // Auto-detect and add providers

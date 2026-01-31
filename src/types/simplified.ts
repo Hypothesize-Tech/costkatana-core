@@ -50,7 +50,6 @@ export interface SimpleConfig<T extends keyof ProviderModelMap> {
   region?: string; // For AWS Bedrock
   projectId?: string; // For tracking and analytics
   enableOptimization?: boolean;
-  enableAutoTracking?: boolean;
 }
 
 // Union type for all possible simple configs
