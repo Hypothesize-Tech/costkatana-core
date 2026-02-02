@@ -11,8 +11,8 @@ import {
   GatewayResponse,
   GatewayStats,
   CacheStats,
-  WorkflowSummary,
-  WorkflowDetails,
+  AgentTraceSummary,
+  AgentTraceDetails,
   OpenAIRequest,
   AnthropicRequest,
   GoogleAIRequest,
@@ -283,59 +283,59 @@ export class GatewayClient {
   }
 
   /**
-   * Get workflow summaries
+   * Get agent trace summaries
    */
-  async getWorkflows(
+  async getAgentTraces(
     options: {
       startDate?: Date;
       endDate?: Date;
-      workflowName?: string;
+      traceName?: string;
       limit?: number;
     } = {}
-  ): Promise<WorkflowSummary[]> {
+  ): Promise<AgentTraceSummary[]> {
     try {
       const params = new URLSearchParams();
       if (options.startDate) params.append('startDate', options.startDate.toISOString());
       if (options.endDate) params.append('endDate', options.endDate.toISOString());
-      if (options.workflowName) params.append('workflowName', options.workflowName);
+      if (options.traceName) params.append('traceName', options.traceName);
       if (options.limit) params.append('limit', options.limit.toString());
 
-      const response = await this.client.get(`/workflows/summary?${params.toString()}`);
+      const response = await this.client.get(`/agent-trace?${params.toString()}`);
       return response.data.data;
     } catch (error) {
-      logger.error('Failed to get workflows', error as Error);
+      logger.error('Failed to get agent traces', error as Error);
       throw error;
     }
   }
 
   /**
-   * Get detailed workflow information
+   * Get detailed agent trace information
    */
-  async getWorkflowDetails(workflowId: string): Promise<WorkflowDetails> {
+  async getAgentTraceDetails(traceId: string): Promise<AgentTraceDetails> {
     try {
-      const response = await this.client.get(`/workflows/${workflowId}`);
+      const response = await this.client.get(`/agent-trace/${traceId}`);
       return response.data.data;
     } catch (error) {
-      logger.error('Failed to get workflow details', error as Error, { workflowId });
+      logger.error('Failed to get agent trace details', error as Error, { traceId });
       throw error;
     }
   }
 
   /**
-   * Export workflow data as CSV
+   * Export agent trace data as CSV
    */
-  async exportWorkflows(
+  async exportAgentTraces(
     options: {
       startDate?: Date;
       endDate?: Date;
-      workflowName?: string;
+      traceName?: string;
     } = {}
   ): Promise<string> {
     try {
-      const workflows = await this.getWorkflows(options);
-      return this.workflowsToCSV(workflows);
+      const traces = await this.getAgentTraces(options);
+      return this.agentTracesToCSV(traces);
     } catch (error) {
-      logger.error('Failed to export workflows', error as Error);
+      logger.error('Failed to export agent traces', error as Error);
       throw error;
     }
   }
@@ -427,12 +427,23 @@ export class GatewayClient {
       }
     }
 
-    // Workflow configuration
+    // Agent trace configuration
+    if (options.trace) {
+      headers['CostKatana-Trace-Id'] = options.trace.traceId;
+      headers['CostKatana-Trace-Name'] = options.trace.traceName;
+      if (options.trace.traceStep) {
+        headers['CostKatana-Trace-Step'] = options.trace.traceStep;
+      }
+      if (options.trace.traceSequence !== undefined) {
+        headers['CostKatana-Trace-Sequence'] = options.trace.traceSequence.toString();
+      }
+    }
+    // Legacy workflow headers (deprecated)
     if (options.workflow) {
-      headers['CostKatana-Workflow-Id'] = options.workflow.workflowId;
-      headers['CostKatana-Workflow-Name'] = options.workflow.workflowName;
+      headers['CostKatana-Trace-Id'] = options.workflow.workflowId;
+      headers['CostKatana-Trace-Name'] = options.workflow.workflowName;
       if (options.workflow.workflowStep) {
-        headers['CostKatana-Workflow-Step'] = options.workflow.workflowStep;
+        headers['CostKatana-Trace-Step'] = options.workflow.workflowStep;
       }
     }
 
@@ -562,12 +573,12 @@ export class GatewayClient {
   }
 
   /**
-   * Convert workflow summaries to CSV format
+   * Convert agent trace summaries to CSV format
    */
-  private workflowsToCSV(workflows: WorkflowSummary[]): string {
+  private agentTracesToCSV(traces: AgentTraceSummary[]): string {
     const headers = [
-      'Workflow ID',
-      'Workflow Name',
+      'Trace ID',
+      'Trace Name',
       'Start Time',
       'End Time',
       'Duration (ms)',
@@ -578,17 +589,17 @@ export class GatewayClient {
       'Steps'
     ];
 
-    const rows = workflows.map(workflow => [
-      workflow.workflowId,
-      workflow.workflowName,
-      new Date(workflow.startTime).toISOString(),
-      new Date(workflow.endTime).toISOString(),
-      workflow.duration.toString(),
-      workflow.totalCost.toFixed(6),
-      workflow.totalTokens.toString(),
-      workflow.requestCount.toString(),
-      workflow.averageCost.toFixed(6),
-      workflow.steps.map(step => `${step.step} (${step.cost.toFixed(6)}$)`).join('; ')
+    const rows = traces.map(trace => [
+      trace.traceId,
+      trace.traceName,
+      new Date(trace.startTime).toISOString(),
+      new Date(trace.endTime).toISOString(),
+      trace.duration.toString(),
+      trace.totalCost.toFixed(6),
+      trace.totalTokens.toString(),
+      trace.requestCount.toString(),
+      trace.averageCost.toFixed(6),
+      trace.steps.map(step => `${step.step} (${step.cost.toFixed(6)}$)`).join('; ')
     ]);
 
     const csvContent = [

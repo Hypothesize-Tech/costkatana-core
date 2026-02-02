@@ -150,13 +150,22 @@ export interface CacheConfig {
   bucketMaxSize?: number;
 }
 
+/** @deprecated Use TraceConfig for agent trace tracking */
 export interface WorkflowConfig {
-  /** Unique workflow identifier */
   workflowId: string;
-  /** Human-readable workflow name */
   workflowName: string;
-  /** Current step in the workflow */
   workflowStep?: string;
+}
+
+export interface TraceConfig {
+  /** Unique trace identifier */
+  traceId: string;
+  /** Human-readable trace name */
+  traceName: string;
+  /** Current step in the trace */
+  traceStep?: string;
+  /** Step sequence number */
+  traceSequence?: number;
 }
 
 export interface GatewayRequestOptions {
@@ -168,7 +177,9 @@ export interface GatewayRequestOptions {
   retry?: boolean | RetryConfig;
   /** Custom properties for cost attribution */
   properties?: Record<string, string>;
-  /** Workflow tracking configuration */
+  /** Agent trace tracking configuration */
+  trace?: TraceConfig;
+  /** @deprecated Use trace for agent trace tracking */
   workflow?: WorkflowConfig;
   /** Budget/project ID for cost allocation */
   budgetId?: string;
@@ -284,9 +295,9 @@ export interface CacheBucket {
   entries: CacheEntry[];
 }
 
-export interface WorkflowSummary {
-  workflowId: string;
-  workflowName: string;
+export interface AgentTraceSummary {
+  traceId: string;
+  traceName: string;
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -294,37 +305,46 @@ export interface WorkflowSummary {
   totalTokens: number;
   requestCount: number;
   averageCost: number;
-  steps: WorkflowStep[];
+  steps: AgentTraceStep[];
 }
 
-export interface WorkflowStep {
+export interface AgentTraceStep {
   step: string;
   cost: number;
   tokens: number;
   requestCount: number;
 }
 
-export interface WorkflowDetails {
-  workflowId: string;
-  workflowName: string;
-  requests: WorkflowRequest[];
+export interface AgentTraceDetails {
+  traceId: string;
+  traceName: string;
+  requests: AgentTraceRequest[];
   totalCost: number;
   totalTokens: number;
   duration: number;
   steps: string[];
 }
 
-export interface WorkflowRequest {
+export interface AgentTraceRequest {
   _id: string;
   model: string;
   service: string;
   cost: number;
   totalTokens: number;
-  workflowStep: string;
-  workflowSequence: number;
+  traceStep: string;
+  traceSequence: number;
   createdAt: Date;
   prompt?: string;
 }
+
+/** @deprecated Use AgentTraceSummary */
+export type WorkflowSummary = AgentTraceSummary;
+/** @deprecated Use AgentTraceStep */
+export type WorkflowStep = AgentTraceStep;
+/** @deprecated Use AgentTraceDetails */
+export type WorkflowDetails = AgentTraceDetails;
+/** @deprecated Use AgentTraceRequest */
+export type WorkflowRequest = AgentTraceRequest;
 
 /**
  * OpenAI-compatible request format for the gateway
