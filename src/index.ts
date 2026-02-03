@@ -245,6 +245,10 @@ import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
 import { GatewayClient } from './gateway/client';
 import {
+  ClientSideRequestData,
+  installComprehensiveTracking
+} from './interceptors/comprehensive-tracking.interceptor';
+import {
   FirewallAnalytics,
   FirewallOptions,
   GatewayConfig,
@@ -298,6 +302,12 @@ export class AICostTracker {
     // Initialize providers
     this.config.providers.forEach(providerConfig => {
       const provider = createProvider(providerConfig);
+      
+      // Register comprehensive tracking callback for automatic tracking
+      provider.setComprehensiveTrackingCallback(async (data: ClientSideRequestData) => {
+        await this.handleComprehensiveTrackingData(data);
+      });
+      
       this.providers.set(providerConfig.provider, provider);
     });
 
@@ -329,8 +339,17 @@ export class AICostTracker {
       apiKey: process.env.COST_KATANA_API_KEY || ''
     });
 
+    // Initialize comprehensive tracking interceptor
+    installComprehensiveTracking(
+      this.apiClient,
+      async (data: ClientSideRequestData) => {
+        await this.handleComprehensiveTrackingData(data);
+      }
+    );
+
     logger.info('AICostTracker initialized', {
-      providers: this.config.providers.map(p => p.provider)
+      providers: this.config.providers.map(p => p.provider),
+      comprehensiveTracking: true
     });
   }
 
@@ -555,7 +574,6 @@ export class AICostTracker {
     // Continue with local tracking
     await this.usageTracker.track(payload);
     this.costAnalyzer.addUsageData(payload);
-    await this.checkAlerts(payload);
   }
 
   /**
@@ -668,44 +686,110 @@ export class AICostTracker {
     return modelInfo.provider;
   }
 
-  private async checkAlerts(
-    _metadata: Omit<UsageMetadata, 'prompt' | 'completion'>
-  ): Promise<void> {
-    if (!this.config.alerts) return;
-
-    // The backend now handles user-specific alerts based on the token.
-    // This client-side check can be simplified or removed if backend handles all alerting.
-    // For now, let's assume we might want some local, non-user-specific alerts,
-    // or we could adapt this to use a non-user-specific cache.
-    // Let's remove user-specific parts.
-
-    // Daily totals would need to be aggregated differently without a userId key.
-    // This part of the logic needs to be re-evaluated.
-    // For now, I will comment out the user-specific parts to fix the build.
-    // In a real-world scenario, we would either remove this client-side alerting
-    // in favor of the backend, or implement a local aggregation method.
-
-    /*
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const todayUsage = await this.usageTracker.getUsageHistory(undefined, today);
-
-    const dailyCost = todayUsage.reduce((sum, item) => sum + item.estimatedCost, 0);
-    const dailyTokens = todayUsage.reduce((sum, item) => sum + item.totalTokens, 0);
-
-    if (costThreshold && dailyCost > costThreshold) {
-      logger.logCostAlert('all_users', dailyCost, costThreshold, 'daily');
-    }
-
-    if (tokenThreshold && dailyTokens > tokenThreshold) {
-      logger.warn(`Token threshold exceeded`, {
-        scope: 'all_users',
-        dailyTokens,
-        threshold: tokenThreshold
+  /**
+   * Handle comprehensive tracking data from client-side interceptor
+   */
+  private async handleComprehensiveTrackingData(data: ClientSideRequestData): Promise<void> {
+    try {
+      // Prepare comprehensive payload for backend
+      const comprehensivePayload = {
+        // Client-side data
+        clientEnvironment: data.clientEnvironment,
+        networking: data.networking,
+        requestData: data.request,
+        responseData: data.response,
+        performanceMetrics: data.performance,
+        context: data.context,
+        
+        // Compatibility with existing backend schema
+        provider: data.context.provider || this.inferProviderFromUrl(data.request.url),
+        model: data.context.model || this.extractModelFromRequest(data.request.body),
+        
+        // Request/response metadata for existing fields
+        ipAddress: data.networking.remoteIP,
+        userAgent: data.clientEnvironment.userAgent,
+        responseTime: data.performance.totalTime,
+        
+        // Project context
+        projectId: data.context.projectId || process.env.PROJECT_ID,
+        sessionId: data.context.sessionId,
+        
+        // Enhanced metadata
+        requestMetadata: {
+          method: data.request.method,
+          path: data.request.path,
+          headers: data.request.headers,
+          size: data.request.size,
+          clientEnvironment: data.clientEnvironment,
+          networking: data.networking
+        },
+        
+        responseMetadata: data.response ? {
+          statusCode: data.response.statusCode,
+          headers: data.response.headers,
+          size: data.response.size,
+          processingTime: data.performance.totalTime
+        } : undefined,
+        
+        // Performance tracking
+        comprehensiveTracking: {
+          clientSideTime: data.performance.totalTime,
+          networkMetrics: {
+            dnsTime: data.performance.dnsTime,
+            connectTime: data.performance.connectTime,
+            uploadTime: data.performance.uploadTime,
+            downloadTime: data.performance.downloadTime,
+            redirectTime: data.performance.redirectTime
+          },
+          dataTransferred: {
+            requestBytes: data.request.size,
+            responseBytes: data.response?.size || 0
+          }
+        }
+      };
+      
+      // Send to backend comprehensive tracking endpoint
+      await this.apiClient.post('/usage/track-comprehensive', comprehensivePayload);
+      
+      logger.debug('Comprehensive tracking data sent successfully', {
+        requestId: data.context.requestId,
+        provider: comprehensivePayload.provider,
+        totalTime: data.performance.totalTime
       });
+      
+    } catch (error) {
+      logger.error('Failed to send comprehensive tracking data', error as Error, {
+        requestId: data.context.requestId,
+        provider: data.context.provider
+      });
+      // Don't throw - allow request to continue
     }
-    */
+  }
+
+  /**
+   * Infer AI provider from URL
+   */
+  private inferProviderFromUrl(url: string): string {
+    const lowerUrl = url.toLowerCase();
+    
+    if (lowerUrl.includes('openai.com')) return 'openai';
+    if (lowerUrl.includes('anthropic.com')) return 'anthropic';
+    if (lowerUrl.includes('googleapis.com')) return 'google-ai';
+    if (lowerUrl.includes('cohere.ai')) return 'cohere';
+    if (lowerUrl.includes('bedrock')) return 'aws-bedrock';
+    if (lowerUrl.includes('costkatana.com')) return 'dashboard-analytics';
+    
+    return 'unknown';
+  }
+
+  /**
+   * Extract model name from request body
+   */
+  private extractModelFromRequest(body: any): string {
+    if (body && typeof body === 'object') {
+      return body.model || body.Model || body.modelId || 'unknown';
+    }
+    return 'unknown';
   }
 
   /**

@@ -372,59 +372,110 @@ console.log(`Provider used: ${response.provider}`);
 
 ---
 
-## 📊 Session Replay & Tracing
+## 📊 Comprehensive Usage Tracking & Analytics
 
-### Record AI Sessions
+### Real-time Performance Monitoring
+
+Cost Katana now provides comprehensive tracking of every request, including network performance, client environment, and optimization opportunities:
 
 ```typescript
-import { SessionReplayClient } from 'cost-katana/trace';
+import { AICostTracker, OPENAI } from 'cost-katana';
 
-const replay = new SessionReplayClient({
+const tracker = new AICostTracker({
+  apiKey: process.env.COST_KATANA_API_KEY,
+  // Enable comprehensive tracking
+  comprehensiveTracking: true,
+  // Optional: configure tracking endpoints
+  trackingEndpoint: 'https://api.costkatana.com/usage/track-comprehensive'
+});
+
+const response = await tracker.chat(OPENAI.GPT_4, 'Explain quantum computing');
+
+console.log('Response:', response.text);
+console.log('Cost:', response.cost);
+console.log('Tokens:', response.tokens);
+console.log('Response Time:', response.responseTime);
+
+// Comprehensive tracking data is automatically sent to your dashboard
+// Including network metrics, client environment, and optimization suggestions
+```
+
+### View Analytics in Dashboard
+
+Once tracking is enabled, you can view detailed analytics at your dashboard:
+
+- **Network Performance**: DNS lookup time, TCP connection time, total response time
+- **Client Environment**: User agent, platform, IP geolocation
+- **Request/Response Data**: Full request and response payloads (sanitized)
+- **Optimization Opportunities**: AI-powered suggestions to reduce costs
+- **Performance Metrics**: Real-time monitoring with anomaly detection
+
+### Manual Usage Tracking
+
+For custom implementations or additional tracking:
+
+```typescript
+import { AICostTracker } from 'cost-katana';
+
+const tracker = new AICostTracker({
   apiKey: process.env.COST_KATANA_API_KEY
 });
 
-// Start recording
-const { sessionId } = await replay.startRecording({
-  userId: 'user123',
-  feature: 'chat',
-  label: 'Support Conversation'
+// Manually track usage with additional metadata
+await tracker.trackUsage({
+  model: 'gpt-4',
+  provider: 'openai',
+  prompt: 'Hello, world!',
+  completion: 'Hello! How can I help you today?',
+  promptTokens: 3,
+  completionTokens: 9,
+  totalTokens: 12,
+  cost: 0.00036,
+  responseTime: 850,
+  userId: 'user_123',
+  sessionId: 'session_abc',
+  tags: ['chat', 'greeting'],
+  // Additional metadata for comprehensive tracking
+  requestMetadata: {
+    userAgent: navigator?.userAgent,
+    clientIP: await fetch('https://api.ipify.org').then(r => r.text()),
+    feature: 'chat-interface'
+  }
+});
+```
+
+### Session Replay & Distributed Tracing
+
+```typescript
+import { AICostTracker } from 'cost-katana';
+
+const tracker = new AICostTracker({
+  apiKey: process.env.COST_KATANA_API_KEY,
+  sessionReplay: true,
+  distributedTracing: true
 });
 
-// Record interactions
-await replay.recordInteraction({
-  sessionId,
-  interaction: {
-    timestamp: new Date(),
-    model: 'gpt-4',
-    prompt: 'How do I reset my password?',
-    response: 'To reset your password...',
-    tokens: { input: 8, output: 45 },
-    cost: 0.0012,
-    latency: 850
+// Start a traced session
+const sessionId = tracker.startSession({
+  userId: 'user_123',
+  feature: 'customer-support',
+  metadata: {
+    source: 'web-app',
+    version: '1.2.3'
   }
 });
 
-// End and retrieve
-await replay.endRecording(sessionId);
-const session = await replay.getSessionReplay(sessionId);
-```
-
-### Distributed Tracing
-
-```typescript
-import { TraceClient, createTraceMiddleware } from 'cost-katana/trace';
-import express from 'express';
-
-const app = express();
-const trace = new TraceClient({ apiKey: process.env.COST_KATANA_API_KEY });
-
-app.use(createTraceMiddleware({ traceService: trace }));
-
-// All routes automatically traced
-app.post('/api/chat', async (req, res) => {
-  const response = await ai(OPENAI.GPT_4, req.body.message);
-  res.json(response);
+// All requests in this session will be automatically traced
+const response = await tracker.chat(OPENAI.GPT_4, 'How can I cancel my subscription?', {
+  sessionId,
+  tags: ['support', 'billing']
 });
+
+// End session and get analytics
+const sessionStats = await tracker.endSession(sessionId);
+console.log('Session cost:', sessionStats.totalCost);
+console.log('Session duration:', sessionStats.duration);
+console.log('Requests made:', sessionStats.requestCount);
 ```
 
 ---

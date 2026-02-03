@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { logger } from '../utils/logger';
+import { installComprehensiveTracking, ClientSideRequestData } from '../interceptors/comprehensive-tracking.interceptor';
 import {
   GatewayConfig,
   GatewayRequestOptions,
@@ -28,6 +29,7 @@ import {
 export class GatewayClient {
   private config: GatewayConfig;
   private client: AxiosInstance;
+  private comprehensiveTrackingData: ClientSideRequestData[] = [];
 
   constructor(config: GatewayConfig) {
     this.config = config;
@@ -124,10 +126,24 @@ export class GatewayClient {
       return requestConfig;
     });
 
+    // Install comprehensive tracking interceptor for gateway requests
+    installComprehensiveTracking(
+      this.client,
+      async (data: ClientSideRequestData) => {
+        this.comprehensiveTrackingData.push(data);
+        logger.debug('Gateway comprehensive tracking data captured', {
+          requestId: data.context.requestId,
+          provider: data.context.provider,
+          totalTime: data.performance.totalTime
+        });
+      }
+    );
+
     logger.info('Gateway client initialized', {
       baseUrl: config.baseUrl,
       enableCache: config.enableCache,
-      enableRetries: config.enableRetries
+      enableRetries: config.enableRetries,
+      comprehensiveTracking: true
     });
   }
 
@@ -947,6 +963,20 @@ export class GatewayClient {
    */
   async getTelescopeDemo(options: GatewayRequestOptions = {}): Promise<GatewayResponse> {
     return this.makeRequest('/sast/telescope-demo', {}, options);
+  }
+
+  /**
+   * Get comprehensive tracking data for recent requests
+   */
+  getComprehensiveTrackingData(): ClientSideRequestData[] {
+    return [...this.comprehensiveTrackingData];
+  }
+
+  /**
+   * Clear comprehensive tracking data
+   */
+  clearComprehensiveTrackingData(): void {
+    this.comprehensiveTrackingData = [];
   }
 
   /**
