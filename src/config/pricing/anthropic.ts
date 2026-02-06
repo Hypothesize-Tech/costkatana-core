@@ -170,9 +170,85 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
       'multilingual'
     ],
     category: 'text',
-    isLatest: true,
+    isLatest: false,
     notes:
       'Claude Opus 4.5 via AWS Bedrock - premium model combining maximum intelligence with practical performance. Reliable knowledge cutoff: May 2025. Training data cutoff: Aug 2025. Max output: 64K tokens'
+  },
+
+  // === Claude Opus 4.6 Series (Latest) ===
+  {
+    modelId: 'claude-opus-4-6-v1',
+    modelName: 'Claude Opus 4.6',
+    provider: 'Anthropic',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_000_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Next-gen flagship: best for coding, enterprise agents, and professional work. Max context: 1M tokens (beta). Verify pricing on Bedrock console.'
+  },
+  {
+    modelId: 'claude-opus-4-6',
+    modelName: 'Claude Opus 4.6 (Alias)',
+    provider: 'Anthropic',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_000_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes: 'Alias for claude-opus-4-6-v1'
+  },
+  {
+    modelId: 'anthropic.claude-opus-4-6-v1',
+    modelName: 'Claude Opus 4.6 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_000_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Claude Opus 4.6 on AWS Bedrock - next-gen flagship for agents, coding, enterprise workflows. Max tokens: 1M (beta). Serverless. Verify pricing on Bedrock.'
   },
 
   // === Claude 4 Series (Legacy) ===
