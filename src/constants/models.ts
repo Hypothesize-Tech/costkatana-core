@@ -117,6 +117,7 @@ export namespace ANTHROPIC {
   // Claude 4.6 Series (Latest)
   export const CLAUDE_OPUS_4_6 = 'claude-opus-4-6';
   export const CLAUDE_OPUS_4_6_V1 = 'claude-opus-4-6-v1';
+  export const CLAUDE_SONNET_4_6 = 'claude-sonnet-4-6';
 
   // Claude 4.5 Series
   export const CLAUDE_SONNET_4_5 = 'claude-sonnet-4-5';
@@ -226,6 +227,7 @@ export namespace AWS_BEDROCK {
 
   // Anthropic Claude on Bedrock
   export const CLAUDE_OPUS_4_6 = 'anthropic.claude-opus-4-6-v1';
+  export const CLAUDE_SONNET_4_6 = 'anthropic.claude-sonnet-4-6-v1:0';
   export const CLAUDE_SONNET_4_5 = 'anthropic.claude-sonnet-4-5-v1:0';
   export const CLAUDE_HAIKU_4_5 = 'anthropic.claude-haiku-4-5-v1:0';
   export const CLAUDE_OPUS_4_1_20250805 = 'anthropic.claude-opus-4-1-20250805-v1:0';

@@ -1,8 +1,56 @@
 import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 
 export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
-  // === Claude 4.5 Series (Latest) ===
-  // === Claude 4.5 Series (Latest) ===
+  // === Claude 4.6 Series (Latest) ===
+  {
+    modelId: 'claude-sonnet-4-6',
+    modelName: 'Claude Sonnet 4.6',
+    provider: 'Anthropic',
+    inputPrice: 3.0,
+    outputPrice: 15.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'coding',
+      'agents',
+      'extended-thinking',
+      'multilingual',
+      'computer-use'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Latest Claude Sonnet model. Full upgrade for coding, computer use, long-context reasoning, agents. 1M context (beta). Same pricing as 4.5. Cached: $0.30. Batch: $1.50/$7.50'
+  },
+  {
+    modelId: 'anthropic.claude-sonnet-4-6-v1:0',
+    modelName: 'Claude Sonnet 4.6 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 3.0,
+    outputPrice: 15.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'coding',
+      'agents',
+      'extended-thinking',
+      'multilingual',
+      'computer-use'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Claude Sonnet 4.6 via AWS Bedrock - latest Claude Sonnet. 1M context (beta). Max output: 64K tokens'
+  },
+  // === Claude 4.5 Series ===
   {
     modelId: 'claude-sonnet-4-5-20250929',
     modelName: 'Claude Sonnet 4.5',
@@ -22,7 +70,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
       'multilingual'
     ],
     category: 'text',
-    isLatest: true,
+    isLatest: false,
     notes:
       'Latest Claude Sonnet model with enhanced capabilities and 1M context window support (beta). Reliable knowledge cutoff: Jan 2025. Training data cutoff: Jul 2025. Max output: 64K tokens. Cached: $0.30. Batch: $1.50/$7.50'
   },
@@ -45,7 +93,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
       'multilingual'
     ],
     category: 'text',
-    isLatest: true,
+    isLatest: false,
     notes: 'Alias for claude-sonnet-4-5-20250929 - automatically points to latest snapshot'
   },
   {
@@ -65,7 +113,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
       'multilingual'
     ],
     category: 'text',
-    isLatest: true,
+    isLatest: false,
     notes:
       'Claude Sonnet 4.5 via AWS Bedrock - latest Claude Sonnet model with enhanced capabilities. Reliable knowledge cutoff: Jan 2025. Training data cutoff: Jul 2025. Max output: 64K tokens'
   },
