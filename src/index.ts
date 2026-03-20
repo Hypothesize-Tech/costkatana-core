@@ -1000,12 +1000,32 @@ export class AICostTracker {
       // Extract usage information from the response
       const responseTime = Date.now() - startTime;
 
-      // Estimate tokens and cost (this would be enhanced with actual response parsing)
       const promptText = this.extractPromptFromRequest(request);
       const completionText = this.extractCompletionFromResponse(response.data);
 
-      const promptTokens = Math.ceil(promptText.length / 4); // Rough estimation
-      const completionTokens = Math.ceil(completionText.length / 4);
+      const usageFromResponse = response.data?.usage as
+        | {
+            input_tokens?: number;
+            output_tokens?: number;
+            prompt_tokens?: number;
+            completion_tokens?: number;
+          }
+        | undefined;
+      const promptTokens =
+        usageFromResponse?.input_tokens ??
+        usageFromResponse?.prompt_tokens ??
+        Math.ceil(promptText.length / 4);
+      const completionTokens =
+        usageFromResponse?.output_tokens ??
+        usageFromResponse?.completion_tokens ??
+        Math.ceil(completionText.length / 4);
+
+      const modelForPricing =
+        request.model || (response.data as { model?: string } | undefined)?.model || 'unknown';
+      const estimatedCost = calculateCostFromUsage(modelForPricing, {
+        promptTokens,
+        completionTokens
+      });
 
       const usageMetadata: UsageMetadata = {
         provider: this.inferProviderFromOptions(options),
@@ -1013,7 +1033,7 @@ export class AICostTracker {
         promptTokens,
         completionTokens,
         totalTokens: promptTokens + completionTokens,
-        estimatedCost: 0.001, // Would be calculated based on actual pricing
+        estimatedCost,
         prompt: promptText,
         completion: completionText,
         responseTime,
@@ -2494,10 +2514,14 @@ function extractTextFromGatewayResponse(response: any): string {
 }
 
 function extractUsageFromGatewayResponse(response: any): any {
+  const u = response?.usage;
+  const promptTokens = u?.prompt_tokens ?? u?.input_tokens ?? 0;
+  const completionTokens = u?.completion_tokens ?? u?.output_tokens ?? 0;
+  const totalTokens = u?.total_tokens ?? promptTokens + completionTokens;
   return {
-    promptTokens: response.usage?.prompt_tokens || 0,
-    completionTokens: response.usage?.completion_tokens || 0,
-    totalTokens: response.usage?.total_tokens || 0
+    promptTokens,
+    completionTokens,
+    totalTokens
   };
 }
 
