@@ -26,6 +26,10 @@ npx ts-node examples/cost-comparison.ts
 
 ## Examples
 
+### Gateway usage vs dashboard “request” (`GATEWAY_USAGE_AND_TRACKING.md`)
+
+Read this if you use the **HTTP/SDK gateway** with **multi-turn** chat and want Usage / analytics to show the **current user message** (not the whole thread), or if you mix **gateway** traffic with **`trackUsage`**. Covers React/state pitfalls and OpenAI vs Anthropic route + model ids.
+
 ### 1. Simple Usage (`simple-usage.ts`)
 Basic examples showing the simplest ways to use Cost Katana.
 

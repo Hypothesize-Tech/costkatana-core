@@ -571,6 +571,31 @@ const res = await gateway.anthropic({
 });
 ```
 
+### Usage in the dashboard: gateway vs `trackUsage`
+
+There are two common ways costs show up in Cost Katana:
+
+| Path | What you send | How usage is attributed |
+|------|----------------|-------------------------|
+| **Gateway** (`gateway.openai` / `gateway.anthropic`, or HTTP to `/api/gateway/...`) | Provider-shaped JSON (`model`, `messages`, etc.) | The server records a usage row from that **HTTP body** (project from `PROJECT_ID` / headers). |
+| **SDK tracking** (`AICostTracker`, `trackUsage`, comprehensive tracking) | Your own fields (prompt text, tokens, model, metadata) | The client (or your backend) posts structured usage payloads to the tracking API. |
+
+They answer different questions: the gateway row reflects **what was proxied upstream**; `trackUsage` reflects **whatever you choose to log** (e.g. a summarized label).
+
+**Multi-turn chat:** The model still needs the **full** `messages` array (user / assistant alternation). For display in Usage / request details, the stored **“request” / prompt** should represent the **current user turn** (typically the **last** message with `role: "user"`), not a single string that concatenates every turn—otherwise the UI looks like “old user text + previous assistant reply” is your input.
+
+**Input tokens vs. Request text:** **costkatana-backend-nest** stores each gateway Usage row as **one turn**: **Request** is the latest user message; when the body includes **multiple** chat messages, stored **prompt tokens** (and cost from those tokens) are **estimated** from that latest user line only—while the **full** `messages` array is still forwarded to the provider if you send it. See `examples/GATEWAY_USAGE_AND_TRACKING.md`.
+
+**Client apps (React, Next.js, etc.):** Capture the new user text in a variable (e.g. `const userText = input.trim()`), clear the input, then build the payload as `[...priorMessages, { role: 'user', content: userText }]`. Relying on stale state or reusing assistant text by mistake breaks both the model context and what you think was “the prompt.”
+
+**Model / route pitfalls:**
+
+- OpenAI-style chat → `/v1/chat/completions` with `messages` + a **chat** model id.
+- Anthropic Messages → `/v1/messages` with `messages` + **`max_tokens`** + a **Claude** model id (names differ from OpenAI).
+- Prefer **typed model constants** (`OPENAI.*`, `ANTHROPIC.*`, …) over raw strings to avoid “valid JSON, wrong provider” failures.
+
+Longer notes and patterns: [`examples/GATEWAY_USAGE_AND_TRACKING.md`](./examples/GATEWAY_USAGE_AND_TRACKING.md). Runnable samples: [costkatana-examples `2-gateway`](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/2-gateway) (multi-turn + HTTP).
+
 ---
 
 ## 📚 More Examples
