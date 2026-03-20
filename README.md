@@ -535,6 +535,44 @@ try {
 
 ---
 
+## 🌐 AI Gateway (simple mental model)
+
+The gateway is an **HTTP proxy**: your app calls **Cost Katana’s URL** (for example `https://api.costkatana.com/api/gateway/...`) with your **Cost Katana API key**. The server can **forward** that request to OpenAI, Anthropic, Google, Cohere, etc., and attach **usage tracking, caching, budgets, firewall**, and other features.
+
+### What is `CostKatana-Target-Url` for?
+
+It tells the proxy **which provider’s base URL** to use (for example `https://api.anthropic.com` or `https://api.openai.com`). The proxy then combines that **origin** with your route (such as `/v1/messages`) to build the real upstream request.
+
+**It is not your API key.** Keys are either:
+
+- **Provider keys** configured on the **server** (for example `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`), or  
+- **Proxy keys** (`ck-proxy-...`) that map to a stored provider key in Cost Katana.
+
+The target URL only answers: *“which vendor’s HTTP API are we talking to?”*
+
+### Easy default (you usually skip the header)
+
+For normal routes (`/v1/chat/completions`, `/v1/messages`, Google `generateContent`, Cohere `/v1/generate`, etc.), the gateway **infers** the provider from the path, and the SDK **omits** `CostKatana-Target-Url` when you use `createGatewayClientFromEnv()` or `createCostKatanaGatewayClient()`.
+
+Set `CostKatana-Target-Url` (or `targetUrl` in SDK options) when you use a **non-default base URL** (Azure OpenAI, a private endpoint, another OpenAI-compatible host) or a path the server cannot infer.
+
+On **Cost Katana’s hosted gateway**, **`/v1/messages` (Anthropic)** needs **no extra SDK or client configuration**: if the server has **no** `ANTHROPIC_API_KEY`, the gateway **automatically** runs Claude on **AWS Bedrock** (Cost Katana’s AWS account/credentials). Your app still calls the normal gateway URL and `gateway.anthropic(...)` as usual. Streaming (`stream: true`) is not supported on that automatic Bedrock path yet—use non-streaming or set `ANTHROPIC_API_KEY` on the server for direct Anthropic streaming.
+
+```typescript
+import { createGatewayClientFromEnv } from 'cost-katana';
+
+const gateway = createGatewayClientFromEnv();
+
+// No target header needed — gateway infers Anthropic from /v1/messages
+const res = await gateway.anthropic({
+  model: 'claude-sonnet-4-5-20250929',
+  max_tokens: 256,
+  messages: [{ role: 'user', content: 'Hello' }],
+});
+```
+
+---
+
 ## 📚 More Examples
 
 Explore 45+ complete examples in our examples repository:

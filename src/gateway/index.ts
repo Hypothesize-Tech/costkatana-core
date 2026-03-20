@@ -33,6 +33,7 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
     baseUrl,
     apiKey,
     authMethod: 'gateway',
+    inferTargetUrl: true,
     enableCache: true,
     enableRetries: true,
     // Tracking is always on by default; no configuration required
@@ -70,6 +71,7 @@ export function createCostKatanaGatewayClient(
   config: Omit<GatewayConfig, 'authMethod'>
 ): GatewayClient {
   return createGatewayClient({
+    inferTargetUrl: true,
     ...config,
     authMethod: 'gateway'
   });

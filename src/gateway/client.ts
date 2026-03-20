@@ -5,7 +5,10 @@
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { logger } from '../utils/logger';
-import { installComprehensiveTracking, ClientSideRequestData } from '../interceptors/comprehensive-tracking.interceptor';
+import {
+  installComprehensiveTracking,
+  ClientSideRequestData
+} from '../interceptors/comprehensive-tracking.interceptor';
 import {
   GatewayConfig,
   GatewayRequestOptions,
@@ -127,24 +130,27 @@ export class GatewayClient {
     });
 
     // Install comprehensive tracking interceptor for gateway requests
-    installComprehensiveTracking(
-      this.client,
-      async (data: ClientSideRequestData) => {
-        this.comprehensiveTrackingData.push(data);
-        logger.debug('Gateway comprehensive tracking data captured', {
-          requestId: data.context.requestId,
-          provider: data.context.provider,
-          totalTime: data.performance.totalTime
-        });
-      }
-    );
+    installComprehensiveTracking(this.client, async (data: ClientSideRequestData) => {
+      this.comprehensiveTrackingData.push(data);
+      logger.debug('Gateway comprehensive tracking data captured', {
+        requestId: data.context.requestId,
+        provider: data.context.provider,
+        totalTime: data.performance.totalTime
+      });
+    });
 
     logger.info('Gateway client initialized', {
       baseUrl: config.baseUrl,
       enableCache: config.enableCache,
       enableRetries: config.enableRetries,
+      inferTargetUrl: config.inferTargetUrl === true,
       comprehensiveTracking: true
     });
+  }
+
+  /** When true, omit default CostKatana-Target-Url; gateway infers upstream from path. */
+  private shouldInferTargetUrl(): boolean {
+    return this.config.inferTargetUrl === true;
   }
 
   /**
@@ -154,20 +160,24 @@ export class GatewayClient {
     request: OpenAIRequest,
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse> {
-    const targetUrl = options.targetUrl || 'https://api.openai.com';
+    const targetUrl =
+      options.targetUrl ?? (this.shouldInferTargetUrl() ? undefined : 'https://api.openai.com');
     const endpoint = '/v1/chat/completions';
 
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
   }
 
   /**
-   * Make a request through the gateway with Anthropic-compatible format
+   * Anthropic Messages API via the Cost Katana gateway (`POST /v1/messages`).
+   * On the hosted gateway you do not pass an Anthropic key in the SDK; the server may use
+   * direct Anthropic (if `ANTHROPIC_API_KEY` is set there) or AWS Bedrock automatically.
    */
   async anthropic(
     request: AnthropicRequest,
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse> {
-    const targetUrl = options.targetUrl || 'https://api.anthropic.com';
+    const targetUrl =
+      options.targetUrl ?? (this.shouldInferTargetUrl() ? undefined : 'https://api.anthropic.com');
     const endpoint = '/v1/messages';
 
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
@@ -181,7 +191,9 @@ export class GatewayClient {
     request: GoogleAIRequest,
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse> {
-    const targetUrl = options.targetUrl || 'https://generativelanguage.googleapis.com';
+    const targetUrl =
+      options.targetUrl ??
+      (this.shouldInferTargetUrl() ? undefined : 'https://generativelanguage.googleapis.com');
     const endpoint = `/v1/models/${model}:generateContent`;
 
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
@@ -194,7 +206,8 @@ export class GatewayClient {
     request: CohereRequest,
     options: GatewayRequestOptions = {}
   ): Promise<GatewayResponse> {
-    const targetUrl = options.targetUrl || 'https://api.cohere.ai';
+    const targetUrl =
+      options.targetUrl ?? (this.shouldInferTargetUrl() ? undefined : 'https://api.cohere.ai');
     const endpoint = '/v1/generate';
 
     return this.makeRequest(endpoint, request, { ...options, targetUrl });
@@ -389,9 +402,10 @@ export class GatewayClient {
   private buildHeaders(options: GatewayRequestOptions): Record<string, string> {
     const headers: Record<string, string> = {};
 
-    // Target URL
-    if (options.targetUrl || this.config.defaultTargetUrl) {
-      headers['CostKatana-Target-Url'] = options.targetUrl || this.config.defaultTargetUrl!;
+    // Target URL (optional when gateway infers from path)
+    const resolvedTarget = options.targetUrl ?? this.config.defaultTargetUrl;
+    if (resolvedTarget) {
+      headers['CostKatana-Target-Url'] = resolvedTarget;
     }
 
     // Project ID

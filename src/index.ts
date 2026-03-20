@@ -302,12 +302,12 @@ export class AICostTracker {
     // Initialize providers
     this.config.providers.forEach(providerConfig => {
       const provider = createProvider(providerConfig);
-      
+
       // Register comprehensive tracking callback for automatic tracking
       provider.setComprehensiveTrackingCallback(async (data: ClientSideRequestData) => {
         await this.handleComprehensiveTrackingData(data);
       });
-      
+
       this.providers.set(providerConfig.provider, provider);
     });
 
@@ -340,12 +340,9 @@ export class AICostTracker {
     });
 
     // Initialize comprehensive tracking interceptor
-    installComprehensiveTracking(
-      this.apiClient,
-      async (data: ClientSideRequestData) => {
-        await this.handleComprehensiveTrackingData(data);
-      }
-    );
+    installComprehensiveTracking(this.apiClient, async (data: ClientSideRequestData) => {
+      await this.handleComprehensiveTrackingData(data);
+    });
 
     logger.info('AICostTracker initialized', {
       providers: this.config.providers.map(p => p.provider),
@@ -700,20 +697,20 @@ export class AICostTracker {
         responseData: data.response,
         performanceMetrics: data.performance,
         context: data.context,
-        
+
         // Compatibility with existing backend schema
         provider: data.context.provider || this.inferProviderFromUrl(data.request.url),
         model: data.context.model || this.extractModelFromRequest(data.request.body),
-        
+
         // Request/response metadata for existing fields
         ipAddress: data.networking.remoteIP,
         userAgent: data.clientEnvironment.userAgent,
         responseTime: data.performance.totalTime,
-        
+
         // Project context
         projectId: data.context.projectId || process.env.PROJECT_ID,
         sessionId: data.context.sessionId,
-        
+
         // Enhanced metadata
         requestMetadata: {
           method: data.request.method,
@@ -723,14 +720,16 @@ export class AICostTracker {
           clientEnvironment: data.clientEnvironment,
           networking: data.networking
         },
-        
-        responseMetadata: data.response ? {
-          statusCode: data.response.statusCode,
-          headers: data.response.headers,
-          size: data.response.size,
-          processingTime: data.performance.totalTime
-        } : undefined,
-        
+
+        responseMetadata: data.response
+          ? {
+              statusCode: data.response.statusCode,
+              headers: data.response.headers,
+              size: data.response.size,
+              processingTime: data.performance.totalTime
+            }
+          : undefined,
+
         // Performance tracking
         comprehensiveTracking: {
           clientSideTime: data.performance.totalTime,
@@ -747,16 +746,15 @@ export class AICostTracker {
           }
         }
       };
-      
+
       // Send to backend comprehensive tracking endpoint
       await this.apiClient.post('/usage/track-comprehensive', comprehensivePayload);
-      
+
       logger.debug('Comprehensive tracking data sent successfully', {
         requestId: data.context.requestId,
         provider: comprehensivePayload.provider,
         totalTime: data.performance.totalTime
       });
-      
     } catch (error) {
       logger.error('Failed to send comprehensive tracking data', error as Error, {
         requestId: data.context.requestId,
@@ -771,14 +769,14 @@ export class AICostTracker {
    */
   private inferProviderFromUrl(url: string): string {
     const lowerUrl = url.toLowerCase();
-    
+
     if (lowerUrl.includes('openai.com')) return 'openai';
     if (lowerUrl.includes('anthropic.com')) return 'anthropic';
     if (lowerUrl.includes('googleapis.com')) return 'google-ai';
     if (lowerUrl.includes('cohere.ai')) return 'cohere';
     if (lowerUrl.includes('bedrock')) return 'aws-bedrock';
     if (lowerUrl.includes('costkatana.com')) return 'dashboard-analytics';
-    
+
     return 'unknown';
   }
 
@@ -832,6 +830,7 @@ export class AICostTracker {
     const defaultConfig: GatewayConfig = {
       baseUrl: 'https://api.costkatana.com/api/gateway',
       apiKey,
+      inferTargetUrl: true,
       enableCache: true,
       enableRetries: true,
       // Tracking is always on by default; no configuration required

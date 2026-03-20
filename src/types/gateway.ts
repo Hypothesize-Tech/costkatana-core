@@ -16,6 +16,17 @@ export interface GatewayConfig {
   authMethod?: 'gateway' | 'standard';
   /** Default target URL for requests */
   defaultTargetUrl?: string;
+  /**
+   * When true, provider helpers (`openai`, `anthropic`, etc.) omit `CostKatana-Target-Url` so the
+   * gateway can infer the upstream from the request path. Enabled by default in
+   * `createGatewayClientFromEnv` and `createCostKatanaGatewayClient`; off by default for bare
+   * `createGatewayClient` unless you set this to `true`.
+   *
+   * **Hosted Cost Katana gateway:** `anthropic()` / `/v1/messages` does not require an Anthropic API
+   * key in your app. If the server has no `ANTHROPIC_API_KEY`, the gateway may run Claude on AWS
+   * Bedrock automatically — no extra SDK flags or URLs.
+   */
+  inferTargetUrl?: boolean;
   /** Enable caching by default */
   enableCache?: boolean;
   /** Enable retries by default */
