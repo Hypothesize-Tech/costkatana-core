@@ -122,7 +122,7 @@ export class TraceClient implements TraceService {
 
   async startSpan(input: StartSpanInput): Promise<{ traceId: string; sessionId: string }> {
     try {
-      const response = await this.request('POST', '/v1/traces/start', input);
+      const response = await this.request('POST', '/api/traces/start', input);
       return {
         traceId: response.traceId,
         sessionId: response.sessionId
@@ -139,7 +139,7 @@ export class TraceClient implements TraceService {
 
   async endSpan(traceId: string, input: EndSpanInput): Promise<void> {
     try {
-      await this.request('POST', `/v1/traces/${traceId}/end`, input);
+      await this.request('POST', `/api/traces/${traceId}/end`, input);
     } catch (error) {
       console.error('Failed to end trace span:', error);
       // Fail silently to prevent breaking the application
@@ -148,7 +148,7 @@ export class TraceClient implements TraceService {
 
   async recordMessage(input: RecordMessageInput): Promise<void> {
     try {
-      await this.request('POST', '/v1/traces/messages', input);
+      await this.request('POST', '/api/traces/messages', input);
     } catch (error) {
       console.error('Failed to record message:', error);
       // Fail silently
@@ -156,12 +156,12 @@ export class TraceClient implements TraceService {
   }
 
   async getSessionGraph(sessionId: string): Promise<SessionGraph> {
-    const response = await this.request('GET', `/v1/sessions/${sessionId}/graph`);
+    const response = await this.request('GET', `/api/sessions/${sessionId}/graph`);
     return response;
   }
 
   async getSessionDetails(sessionId: string): Promise<SessionDetails> {
-    const response = await this.request('GET', `/v1/sessions/${sessionId}/details`);
+    const response = await this.request('GET', `/api/sessions/${sessionId}/details`);
     return response;
   }
 
@@ -192,7 +192,7 @@ export class TraceClient implements TraceService {
       if (params.limit) queryParams.append('limit', params.limit.toString());
     }
 
-    const response = await this.request('GET', `/v1/sessions?${queryParams}`);
+    const response = await this.request('GET', `/api/sessions?${queryParams}`);
     return response;
   }
 
@@ -213,7 +213,7 @@ export class TraceClient implements TraceService {
       if (params.to) queryParams.append('to', params.to.toISOString());
     }
 
-    const response = await this.request('GET', `/v1/sessions/summary?${queryParams}`);
+    const response = await this.request('GET', `/api/sessions/summary?${queryParams}`);
     return response;
   }
 
@@ -224,7 +224,7 @@ export class TraceClient implements TraceService {
     spans: Array<StartSpanInput & EndSpanInput & { traceId: string }>
   ): Promise<void> {
     try {
-      await this.request('POST', '/v1/traces/ingest', { spans });
+      await this.request('POST', '/api/traces/ingest', { spans });
     } catch (error) {
       console.error('Failed to ingest trace batch:', error);
     }

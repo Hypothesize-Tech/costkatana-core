@@ -4,6 +4,11 @@ All notable changes to Cost Katana will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Trace client** (`src/trace/client.ts`): request paths use `/api/sessions`, `/api/sessions/summary`, `/api/traces/ingest`, etc., matching the NestJS API (no `/api/v1` prefix).
+- **Feedback client** (`src/feedback/client.ts`): paths use `/api/request-feedback/...` on the configured API base (default `https://api.costkatana.com/api`).
+
 ## [2.4.0] - 2025-03-25
 
 ### Added

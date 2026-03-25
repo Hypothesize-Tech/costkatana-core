@@ -31,7 +31,7 @@ export class FeedbackClient {
     feedback: FeedbackOptions
   ): Promise<FeedbackSubmissionResult> {
     try {
-      const response = await this.client.post(`/v1/request/${requestId}/feedback`, feedback);
+      const response = await this.client.post(`/request-feedback/${requestId}/feedback`, feedback);
 
       return {
         success: true,
@@ -55,7 +55,10 @@ export class FeedbackClient {
     signals: ImplicitSignals
   ): Promise<FeedbackSubmissionResult> {
     try {
-      const response = await this.client.put(`/v1/request/${requestId}/implicit-signals`, signals);
+      const response = await this.client.put(
+        `/request-feedback/${requestId}/implicit-signals`,
+        signals
+      );
 
       return {
         success: true,
@@ -76,7 +79,7 @@ export class FeedbackClient {
    */
   async getFeedback(requestId: string): Promise<any> {
     try {
-      const response = await this.client.get(`/v1/request/${requestId}/feedback`);
+      const response = await this.client.get(`/request-feedback/${requestId}/feedback`);
       return response.data.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -91,7 +94,7 @@ export class FeedbackClient {
    */
   async getFeedbackAnalytics(): Promise<FeedbackAnalytics> {
     try {
-      const response = await this.client.get('/v1/feedback/analytics');
+      const response = await this.client.get('/request-feedback/analytics');
       return response.data.data;
     } catch (error: any) {
       throw new Error(
@@ -119,7 +122,7 @@ export class FeedbackClient {
    */
   async getGlobalFeedbackAnalytics(): Promise<FeedbackAnalytics> {
     try {
-      const response = await this.client.get('/v1/feedback/analytics/global');
+      const response = await this.client.get('/request-feedback/analytics/global');
       return response.data.data;
     } catch (error: any) {
       throw new Error(
