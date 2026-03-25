@@ -6,27 +6,73 @@ Cost Katana is a drop-in SDK that wraps your AI calls with automatic cost tracki
 
 ---
 
-## 🚀 Get Started in 60 Seconds
+## Get started in 60 seconds
 
-### Step 1: Install
+Set **`COST_KATANA_API_KEY`**. **`PROJECT_ID`** is optional (recommended for per-project analytics in the dashboard).
+
+### Gateway first (drop-in proxy — like changing base URL + one header)
+
+**HTTP / cURL** — no SDK; send OpenAI-compatible JSON to the gateway:
+
+```bash
+curl -s https://api.costkatana.com/api/gateway/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $COST_KATANA_API_KEY" \
+  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+See also [`examples/curl-http.sh`](./examples/curl-http.sh).
+
+**TypeScript — `gateway()`** — zero extra config; reads `COST_KATANA_API_KEY` (same behavior as `createGatewayClientFromEnv()`):
 
 ```bash
 npm install cost-katana
 ```
 
-### Step 2: Make Your First AI Call
+```typescript
+import { gateway } from 'cost-katana';
+
+const res = await gateway().openai({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(res.data);
+```
+
+### `ai()` — simple typed API with cost on the response
 
 ```typescript
 import { ai, OPENAI } from 'cost-katana';
 
-const response = await ai(OPENAI.GPT_4, 'Explain quantum computing in one sentence');
+const response = await ai(OPENAI.GPT_4O, 'Hello');
 
-console.log(response.text);   // "Quantum computing uses qubits to perform..."
-console.log(response.cost);   // 0.0012
-console.log(response.tokens); // 47
+console.log(response.text, response.cost);
 ```
 
-**That's it.** No configuration files. No complex setup. Just results.
+### Python
+
+```bash
+pip install costkatana
+```
+
+```python
+import cost_katana as ck
+from cost_katana import openai
+
+response = ck.ai(openai.gpt_4o, "Hello")
+print(response.text, response.cost)
+```
+
+### Which API should I use?
+
+| If you want… | Use |
+|--------------|-----|
+| Drop-in HTTP proxy (existing OpenAI clients / curl) | Gateway URL + `Authorization: Bearer`, or **`gateway()`** in TypeScript |
+| Simple AI calls with cost on the response | **`ai()`** / **`chat()`** |
+| Session replay, advanced analytics, or manual `trackUsage` | **`AICostTracker`** (advanced) |
+
+For most apps, **`COST_KATANA_API_KEY`** plus either **`gateway()`** (proxy) or **`ai()`** (SDK) is enough. Optional direct provider keys: see [`.env.example`](./.env.example) if you need them.
 
 ---
 
@@ -222,16 +268,25 @@ DEEPSEEK.DEEPSEEK_CHAT
 
 ### Environment Variables
 
+**Start here:** `COST_KATANA_API_KEY` unlocks routing, tracking, and dashboard features. **`PROJECT_ID`** is optional (set it to scope usage to a project in the dashboard).
+
 ```bash
-# Recommended: Use Cost Katana API key for all features
+# Required for hosted Cost Katana
 COST_KATANA_API_KEY=dak_your_key_here
 
-# Or use provider keys directly
+# Optional — per-project analytics
+PROJECT_ID=your_project_id
+```
+
+Optional: bring your own provider keys, or use AWS Bedrock. **Copy [`.env.example`](./.env.example)** into `.env` and fill in values.
+
+```bash
+# Optional — direct provider keys
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GEMINI_API_KEY=...
 
-# For AWS Bedrock
+# Optional — AWS Bedrock
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 AWS_REGION=us-east-1
@@ -372,33 +427,69 @@ console.log(`Provider used: ${response.provider}`);
 
 ---
 
-## 📊 Comprehensive Usage Tracking & Analytics
+## 📊 Usage tracking & analytics
 
-### Real-time Performance Monitoring
+### Dashboard attribution (stay on `ai()`)
 
-Cost Katana now provides comprehensive tracking of every request, including network performance, client environment, and optimization opportunities:
+Use the same **`ai()`** API as everywhere else. Point usage at your project once with **`configure()`** or env vars—no need to switch to a new class for standard cost and token tracking.
 
 ```typescript
-import { AICostTracker, OPENAI } from 'cost-katana';
+import { configure, ai, OPENAI } from 'cost-katana';
 
-const tracker = new AICostTracker({
+await configure({
   apiKey: process.env.COST_KATANA_API_KEY,
-  // Enable comprehensive tracking
-  comprehensiveTracking: true,
-  // Optional: configure tracking endpoints
-  trackingEndpoint: 'https://api.costkatana.com/usage/track-comprehensive'
+  projectId: process.env.PROJECT_ID,
 });
 
-const response = await tracker.chat(OPENAI.GPT_4, 'Explain quantum computing');
+const response = await ai(OPENAI.GPT_4O, 'Explain quantum computing', {
+  tags: ['demo', 'readme'],
+});
 
-console.log('Response:', response.text);
+console.log(response.text);
 console.log('Cost:', response.cost);
 console.log('Tokens:', response.tokens);
-console.log('Response Time:', response.responseTime);
-
-// Comprehensive tracking data is automatically sent to your dashboard
-// Including network metrics, client environment, and optimization suggestions
+console.log('Response time (ms):', response.responseTime);
 ```
+
+Calls are attributed to your project in the dashboard. You can also pass **`projectId`** on individual `ai()` options when you use multiple projects.
+
+### `AICostTracker` with defaults (recommended)
+
+When you need a **dedicated tracker instance** (not the global `ai()` helper), use **`createCostKatanaTracker()`** or **`AICostTracker.createWithDefaults()`**. They fill in **`TrackerConfig`** from the same environment rules as auto-config: if you set **direct** provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, or AWS Bedrock creds), those providers are registered. If you **only** have **`COST_KATANA_API_KEY`** and **no** provider keys, the default is **Cost Katana hosted models** via the gateway (**`costkatana-backend-nest`**): a single OpenAI-shaped slot with the reserved `proxy` key so **`ai()`** / **`initializeGateway()`** route inference through the hosted API (no OpenAI/Anthropic keys required in your app). Optimization and alerts come from package defaults; pass a **partial** config to override anything.
+
+```typescript
+import { createCostKatanaTracker, AIProvider } from 'cost-katana';
+
+const tracker = await createCostKatanaTracker();
+
+// Optional overrides (merged on top of defaults)
+const custom = await createCostKatanaTracker({
+  optimization: { enablePromptOptimization: false },
+  providers: [{ provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }]
+});
+
+// Same behavior: await AICostTracker.createWithDefaults({ ... })
+// Short alias: import { tracker as costKatana } from 'cost-katana';
+```
+
+Requires **`COST_KATANA_API_KEY`** in the environment (same as `AICostTracker.create()`). **`PROJECT_ID`** remains optional.
+
+### Dedicated tracker instances (advanced)
+
+If you want a **per-provider tracker object** (instead of the global `ai()` helper), use **`createOpenAITracker`** / **`createAnthropicTracker`** / etc. They wrap `AICostTracker` with a small `complete()` API:
+
+```typescript
+import { createOpenAITracker, OPENAI } from 'cost-katana';
+
+const t = await createOpenAITracker({ model: OPENAI.GPT_4O });
+const response = await t.complete({ prompt: 'Explain quantum computing' });
+
+console.log(response.text);
+console.log('Total cost (USD):', response.cost.totalCost);
+console.log('Response time (ms):', response.responseTime);
+```
+
+For **gateway proxying**, **manual `trackUsage`**, or a fully custom **`AICostTracker`** with your own provider list, see [`docs/API.md`](./docs/API.md) and [`examples/`](./examples/).
 
 ### View Analytics in Dashboard
 
@@ -415,11 +506,9 @@ Once tracking is enabled, you can view detailed analytics at your dashboard:
 For custom implementations or additional tracking:
 
 ```typescript
-import { AICostTracker } from 'cost-katana';
+import { createCostKatanaTracker } from 'cost-katana';
 
-const tracker = new AICostTracker({
-  apiKey: process.env.COST_KATANA_API_KEY
-});
+const tracker = await createCostKatanaTracker();
 
 // Manually track usage with additional metadata
 await tracker.trackUsage({
@@ -444,39 +533,9 @@ await tracker.trackUsage({
 });
 ```
 
-### Session Replay & Distributed Tracing
+### Session replay & distributed tracing
 
-```typescript
-import { AICostTracker } from 'cost-katana';
-
-const tracker = new AICostTracker({
-  apiKey: process.env.COST_KATANA_API_KEY,
-  sessionReplay: true,
-  distributedTracing: true
-});
-
-// Start a traced session
-const sessionId = tracker.startSession({
-  userId: 'user_123',
-  feature: 'customer-support',
-  metadata: {
-    source: 'web-app',
-    version: '1.2.3'
-  }
-});
-
-// All requests in this session will be automatically traced
-const response = await tracker.chat(OPENAI.GPT_4, 'How can I cancel my subscription?', {
-  sessionId,
-  tags: ['support', 'billing']
-});
-
-// End session and get analytics
-const sessionStats = await tracker.endSession(sessionId);
-console.log('Session cost:', sessionStats.totalCost);
-console.log('Session duration:', sessionStats.duration);
-console.log('Requests made:', sessionStats.requestCount);
-```
+Session graphs, spans, and trace middleware are provided by the **`trace`** submodule. Start here: [`src/trace/README.md`](./src/trace/README.md) (exported APIs such as `TraceClient`, `LocalTraceService`, and `createTraceMiddleware`).
 
 ---
 
@@ -535,66 +594,14 @@ try {
 
 ---
 
-## 🌐 AI Gateway (simple mental model)
+## 🌐 AI Gateway — details
 
-The gateway is an **HTTP proxy**: your app calls **Cost Katana’s URL** (for example `https://api.costkatana.com/api/gateway/...`) with your **Cost Katana API key**. The server can **forward** that request to OpenAI, Anthropic, Google, Cohere, etc., and attach **usage tracking, caching, budgets, firewall**, and other features.
+The gateway is an **HTTP proxy**: call Cost Katana’s URL with your API key; the service forwards to OpenAI, Anthropic, Google, Cohere, etc., and can attach caching, retries, firewall, and tracking.
 
-### What is `CostKatana-Target-Url` for?
-
-It tells the proxy **which provider’s base URL** to use (for example `https://api.anthropic.com` or `https://api.openai.com`). The proxy then combines that **origin** with your route (such as `/v1/messages`) to build the real upstream request.
-
-**It is not your API key.** Keys are either:
-
-- **Provider keys** configured on the **server** (for example `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`), or  
-- **Proxy keys** (`ck-proxy-...`) that map to a stored provider key in Cost Katana.
-
-The target URL only answers: *“which vendor’s HTTP API are we talking to?”*
-
-### Easy default (you usually skip the header)
-
-For normal routes (`/v1/chat/completions`, `/v1/messages`, Google `generateContent`, Cohere `/v1/generate`, etc.), the gateway **infers** the provider from the path, and the SDK **omits** `CostKatana-Target-Url` when you use `createGatewayClientFromEnv()` or `createCostKatanaGatewayClient()`.
-
-Set `CostKatana-Target-Url` (or `targetUrl` in SDK options) when you use a **non-default base URL** (Azure OpenAI, a private endpoint, another OpenAI-compatible host) or a path the server cannot infer.
-
-On **Cost Katana’s hosted gateway**, **`/v1/messages` (Anthropic)** needs **no extra SDK or client configuration**: if the server has **no** `ANTHROPIC_API_KEY`, the gateway **automatically** runs Claude on **AWS Bedrock** (Cost Katana’s AWS account/credentials). Your app still calls the normal gateway URL and `gateway.anthropic(...)` as usual. Streaming (`stream: true`) is not supported on that automatic Bedrock path yet—use non-streaming or set `ANTHROPIC_API_KEY` on the server for direct Anthropic streaming.
-
-```typescript
-import { createGatewayClientFromEnv } from 'cost-katana';
-
-const gateway = createGatewayClientFromEnv();
-
-// No target header needed — gateway infers Anthropic from /v1/messages
-const res = await gateway.anthropic({
-  model: 'claude-sonnet-4-5-20250929',
-  max_tokens: 256,
-  messages: [{ role: 'user', content: 'Hello' }],
-});
-```
-
-### Usage in the dashboard: gateway vs `trackUsage`
-
-There are two common ways costs show up in Cost Katana:
-
-| Path | What you send | How usage is attributed |
-|------|----------------|-------------------------|
-| **Gateway** (`gateway.openai` / `gateway.anthropic`, or HTTP to `/api/gateway/...`) | Provider-shaped JSON (`model`, `messages`, etc.) | The server records a usage row from that **HTTP body** (project from `PROJECT_ID` / headers). |
-| **SDK tracking** (`AICostTracker`, `trackUsage`, comprehensive tracking) | Your own fields (prompt text, tokens, model, metadata) | The client (or your backend) posts structured usage payloads to the tracking API. |
-
-They answer different questions: the gateway row reflects **what was proxied upstream**; `trackUsage` reflects **whatever you choose to log** (e.g. a summarized label).
-
-**Multi-turn chat:** The model still needs the **full** `messages` array (user / assistant alternation). For display in Usage / request details, the stored **“request” / prompt** should represent the **current user turn** (typically the **last** message with `role: "user"`), not a single string that concatenates every turn—otherwise the UI looks like “old user text + previous assistant reply” is your input.
-
-**Input tokens vs. Request text:** **costkatana-backend-nest** stores each gateway Usage row as **one turn**: **Request** is the latest user message; when the body includes **multiple** chat messages, stored **prompt tokens** (and cost from those tokens) are **estimated** from that latest user line only—while the **full** `messages` array is still forwarded to the provider if you send it. See `examples/GATEWAY_USAGE_AND_TRACKING.md`.
-
-**Client apps (React, Next.js, etc.):** Capture the new user text in a variable (e.g. `const userText = input.trim()`), clear the input, then build the payload as `[...priorMessages, { role: 'user', content: userText }]`. Relying on stale state or reusing assistant text by mistake breaks both the model context and what you think was “the prompt.”
-
-**Model / route pitfalls:**
-
-- OpenAI-style chat → `/v1/chat/completions` with `messages` + a **chat** model id.
-- Anthropic Messages → `/v1/messages` with `messages` + **`max_tokens`** + a **Claude** model id (names differ from OpenAI).
-- Prefer **typed model constants** (`OPENAI.*`, `ANTHROPIC.*`, …) over raw strings to avoid “valid JSON, wrong provider” failures.
-
-Longer notes and patterns: [`examples/GATEWAY_USAGE_AND_TRACKING.md`](./examples/GATEWAY_USAGE_AND_TRACKING.md). Runnable samples: [costkatana-examples `2-gateway`](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/2-gateway) (multi-turn + HTTP).
+- **Quick start:** see [Get started in 60 seconds](#get-started-in-60-seconds) above (`gateway()` or curl).
+- **`CostKatana-Target-Url`:** only needed for non-default upstream URLs (Azure OpenAI, private endpoints). For standard routes (`/v1/chat/completions`, `/v1/messages`, …), **`gateway()`** uses `inferTargetUrl: true` and usually omits it.
+- **Anthropic on hosted gateway:** `gateway.anthropic(...)` / `/v1/messages` often needs no Anthropic key in your app; the service may use Bedrock when no server `ANTHROPIC_API_KEY` is set (see docs for streaming limitations).
+- **Dashboard rows:** gateway traffic reflects **proxied** bodies; `AICostTracker` / `trackUsage` is for **custom** structured logging. Multi-turn and token accounting nuances: [`examples/GATEWAY_USAGE_AND_TRACKING.md`](./examples/GATEWAY_USAGE_AND_TRACKING.md) and [costkatana-examples `2-gateway`](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/2-gateway).
 
 ---
 

@@ -53,6 +53,7 @@ export {
   GatewayClient,
   createGatewayClient,
   createGatewayClientFromEnv,
+  gateway,
   createStandardGatewayClient,
   createCostKatanaGatewayClient
 } from './gateway';
@@ -190,6 +191,14 @@ export {
   optimizationThresholds,
   alertThresholds
 } from './config/default';
+export {
+  COST_KATANA_HOSTED_MODELS_PROXY_KEY,
+  costKatanaHostedModelsProviderEntry,
+  createDefaultTrackerConfig,
+  detectProvidersFromEnv,
+  hasCostKatanaApiKeyInEnv,
+  hasDirectProviderApiKeysInEnv
+} from './config/tracker-defaults';
 
 // Model types and utilities from config
 export {
@@ -240,6 +249,7 @@ import { PromptOptimizer } from './optimizers/prompt-optimizer';
 import { validateTrackerConfig, validatePrompt, validateUserId } from './utils/validators';
 import { logger, LogLevel } from './utils/logger';
 import { optimizationThresholds } from './config/default';
+import { createDefaultTrackerConfig } from './config/tracker-defaults';
 import { getModelById } from './types/models';
 import { ProviderRequest } from './types/providers';
 import axios, { AxiosInstance } from 'axios';
@@ -352,7 +362,10 @@ export class AICostTracker {
 
   public static async create(config: TrackerConfig): Promise<AICostTracker> {
     const apiKey = process.env.COST_KATANA_API_KEY || '';
-    const projectId = process.env.PROJECT_ID;
+    const projectId =
+      process.env.PROJECT_ID ||
+      process.env.COST_KATANA_PROJECT ||
+      process.env.COSTKATANA_PROJECT_ID;
     const apiUrl = config.apiUrl || DEFAULT_API_URL;
 
     if (!apiKey) {
@@ -361,18 +374,22 @@ export class AICostTracker {
       );
     }
     if (!projectId) {
-      throw new Error(
-        'PROJECT_ID environment variable not set. Please get your Project ID from the Cost Katana dashboard.'
+      logger.warn(
+        'PROJECT_ID not set — requests use your account without a project scope. Set PROJECT_ID for per-project dashboard filtering.'
       );
+    }
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    };
+    if (projectId) {
+      headers['x-project-id'] = projectId;
     }
 
     const apiClient = axios.create({
       baseURL: apiUrl,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'x-project-id': projectId
-      }
+      headers
     });
 
     try {
@@ -386,12 +403,30 @@ export class AICostTracker {
     }
 
     // Optionally inject projectId into config for downstream use
-    if (!config.projectId) {
+    if (!config.projectId && projectId) {
       (config as any).projectId = projectId;
     }
 
     const tracker = new AICostTracker(config, apiClient);
     return tracker;
+  }
+
+  /**
+   * Create a tracker with defaults: providers from environment (or OpenAI proxy), optimization and alerts from package defaults.
+   * Pass partial {@link TrackerConfig} to override any field.
+   *
+   * @example
+   * ```ts
+   * const t = await AICostTracker.createWithDefaults();
+   * const t2 = await AICostTracker.createWithDefaults({
+   *   optimization: { enablePromptOptimization: false }
+   * });
+   * ```
+   */
+  public static async createWithDefaults(
+    overrides: Partial<TrackerConfig> = {}
+  ): Promise<AICostTracker> {
+    return AICostTracker.create(createDefaultTrackerConfig(overrides));
   }
 
   /**
@@ -1455,6 +1490,29 @@ export class AICostTracker {
 // Export the main class as default
 export default AICostTracker;
 
+/**
+ * Create {@link AICostTracker} with sensible defaults: providers from environment (or OpenAI proxy),
+ * optimization and alerts from package defaults. Pass a partial {@link TrackerConfig} to override anything.
+ *
+ * @example
+ * ```ts
+ * const t = await createCostKatanaTracker();
+ * const custom = await createCostKatanaTracker({
+ *   providers: [{ provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }]
+ * });
+ * ```
+ */
+export async function createCostKatanaTracker(
+  overrides: Partial<TrackerConfig> = {}
+): Promise<AICostTracker> {
+  return AICostTracker.createWithDefaults(overrides);
+}
+
+/** Short alias for {@link createCostKatanaTracker}. */
+export async function tracker(overrides: Partial<TrackerConfig> = {}): Promise<AICostTracker> {
+  return createCostKatanaTracker(overrides);
+}
+
 // ============================================================================
 // LOGGING & TEMPLATES EXPORTS
 // ============================================================================
@@ -1909,7 +1967,8 @@ let globalAILogger: AILogger | null = null;
 let globalTemplateManager: TemplateManager | null = null;
 
 /**
- * Auto-configure Cost Katana from environment variables
+ * Auto-configure Cost Katana from environment variables.
+ * `COST_KATANA_API_KEY` enables full dashboard mode; `PROJECT_ID` is optional but recommended for per-project analytics.
  */
 async function autoConfigureIfNeeded(): Promise<void> {
   if (globalTracker) return;
@@ -1926,9 +1985,9 @@ async function autoConfigureIfNeeded(): Promise<void> {
       process.env.PROJECT_ID ||
       process.env.COSTKATANA_PROJECT_ID;
 
-    // If no Cost Katana credentials, try to work with provider keys directly
-    if (!apiKey || !projectId) {
-      logger.info('Cost Katana credentials not found, attempting direct provider mode');
+    // No Cost Katana API key — try direct provider keys only (limited mode)
+    if (!apiKey) {
+      logger.info('Cost Katana API key not found, attempting direct provider mode');
 
       // Check for any provider keys
       const hasOpenAI = !!process.env.OPENAI_API_KEY;
@@ -1942,7 +2001,7 @@ async function autoConfigureIfNeeded(): Promise<void> {
             `Please set up Cost Katana for the best experience:\n\n` +
             `  Option 1: Cost Katana (Recommended)\n` +
             `    export COST_KATANA_API_KEY="dak_your_key"\n` +
-            `    export PROJECT_ID="your_project_id"\n` +
+            `    export PROJECT_ID="your_project_id"   # optional; omit for account-level only\n` +
             `    Get your keys at: https://costkatana.com/settings/api-keys\n\n` +
             `  Option 2: Direct Provider Keys\n` +
             `    export OPENAI_API_KEY="sk-..."\n` +
@@ -2007,56 +2066,14 @@ async function autoConfigureIfNeeded(): Promise<void> {
       return;
     }
 
-    // Full Cost Katana mode
-    const config: TrackerConfig = {
-      providers: [],
-      optimization: {
-        enablePromptOptimization: true,
-        enableModelSuggestions: true,
-        enableCachingSuggestions: true,
-        thresholds: optimizationThresholds
-      },
-      tracking: {}
-    };
-
-    // Auto-detect and add providers
-    if (process.env.OPENAI_API_KEY) {
-      config.providers.push({
-        provider: AIProvider.OpenAI,
-        apiKey: process.env.OPENAI_API_KEY
-      });
+    if (!projectId) {
+      logger.warn(
+        'PROJECT_ID not set — usage will attribute to your account without a project scope. Set PROJECT_ID for per-project dashboard filtering.'
+      );
     }
 
-    if (process.env.ANTHROPIC_API_KEY) {
-      config.providers.push({
-        provider: AIProvider.Anthropic,
-        apiKey: process.env.ANTHROPIC_API_KEY
-      });
-    }
-
-    if (process.env.GOOGLE_API_KEY) {
-      config.providers.push({
-        provider: AIProvider.Google,
-        apiKey: process.env.GOOGLE_API_KEY
-      });
-    }
-
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-      config.providers.push({
-        provider: AIProvider.AWSBedrock,
-        region: process.env.AWS_REGION || 'us-east-1'
-      });
-    }
-
-    // If no providers configured, add a default one with proxy key support
-    if (config.providers.length === 0) {
-      config.providers.push({
-        provider: AIProvider.OpenAI,
-        apiKey: 'proxy' // Will use Cost Katana proxy keys
-      });
-    }
-
-    // Create the tracker
+    // Full Cost Katana mode (API key required; project optional)
+    const config = createDefaultTrackerConfig();
     globalTracker = await AICostTracker.create(config);
 
     // Auto-initialize gateway if credentials available

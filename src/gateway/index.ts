@@ -53,6 +53,14 @@ export function createGatewayClientFromEnv(overrides: Partial<GatewayConfig> = {
 }
 
 /**
+ * Zero-config gateway client — reads `COST_KATANA_API_KEY` (and optional `COSTKATANA_GATEWAY_URL`) from env.
+ * Same behavior as {@link createGatewayClientFromEnv}; use whichever name reads clearest in your codebase.
+ */
+export function gateway(overrides: Partial<GatewayConfig> = {}): GatewayClient {
+  return createGatewayClientFromEnv(overrides);
+}
+
+/**
  * Create a gateway client with standard Authorization header (for direct API calls)
  */
 export function createStandardGatewayClient(

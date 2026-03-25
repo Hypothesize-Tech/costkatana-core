@@ -2,6 +2,21 @@
 
 All notable changes to Cost Katana will be documented in this file.
 
+## [Unreleased]
+
+## [2.4.0] - 2025-03-25
+
+### Added
+
+- **`gateway()`**: alias for `createGatewayClientFromEnv()` for minimal gateway setup in docs and examples.
+- **Default tracker setup**: `createDefaultTrackerConfig()`, `detectProvidersFromEnv()`, **`createCostKatanaTracker()`**, **`tracker()`** (alias), and **`AICostTracker.createWithDefaults()`** — env-based providers + package defaults with optional partial `TrackerConfig` overrides.
+- **Hosted models default**: `COST_KATANA_HOSTED_MODELS_PROXY_KEY`, **`costKatanaHostedModelsProviderEntry()`**, **`hasCostKatanaApiKeyInEnv()`**, **`hasDirectProviderApiKeysInEnv()`** — when there are **no** direct provider API keys, defaults target **Cost Katana hosted models** through the gateway (`costkatana-backend-nest`); document this explicitly (same `proxy` provider slot as before).
+
+### Changed
+
+- **`PROJECT_ID`** is optional for `AICostTracker.create()` and for `ai()` auto-configuration. When omitted, a warning is logged; usage is still authenticated with `COST_KATANA_API_KEY`.
+- Auto-configure (`ai()` path): full Cost Katana mode runs when **`COST_KATANA_API_KEY`** is set, even if **`PROJECT_ID`** is missing (previously fell through to limited provider-only mode). Full-mode tracker config now uses **`createDefaultTrackerConfig()`** (same defaults as `createCostKatanaTracker()`).
+
 ## [2.2.0] - 2025-01-31
 
 ### Changed
