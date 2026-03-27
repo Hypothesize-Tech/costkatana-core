@@ -43,6 +43,16 @@ export interface GatewayConfig {
   firewall?: FirewallConfig;
   /** Failover configuration for high availability */
   failover?: FailoverConfig;
+  /**
+   * When `false`, sends `CostKatana-LLM-Security-Enabled: false` to disable input firewall defaults.
+   * Omit or `true` to use server default (basic firewall on). Matches gateway `securityEnabled`.
+   */
+  securityEnabled?: boolean;
+  /**
+   * When `false`, sends `CostKatana-Output-Moderation-Enabled: false` to disable output moderation.
+   * Omit or `true` to use server default (moderation on).
+   */
+  outputModerationEnabled?: boolean;
 }
 
 export interface KeyVaultConfig {
@@ -204,8 +214,16 @@ export interface GatewayRequestOptions {
   omitRequest?: boolean;
   /** Omit response content from logs (privacy) */
   omitResponse?: boolean;
-  /** Enable LLM security scanning */
+  /**
+   * LLM security / input firewall. `false` sends `CostKatana-LLM-Security-Enabled: false`.
+   * `true` explicitly enables; omit to inherit {@link GatewayConfig.securityEnabled} / server default.
+   */
   security?: boolean;
+  /**
+   * Output moderation. `false` sends `CostKatana-Output-Moderation-Enabled: false`.
+   * `true` explicitly enables; omit to inherit {@link GatewayConfig.outputModerationEnabled} / server default.
+   */
+  outputModeration?: boolean;
   /** Firewall configuration for this request */
   firewall?: boolean | FirewallOptions;
   /** Failover configuration for this request */
@@ -507,6 +525,18 @@ export interface FirewallAnalytics {
   threatsByCategory: Record<string, number>;
   /** Cost savings by threat type */
   savingsByThreatType: Record<string, number>;
+}
+
+/**
+ * Aggregated gateway security dashboard data (ThreatLog + usage moderation metadata).
+ */
+export interface GatewaySecuritySummary {
+  totalBlockedByFirewall: number;
+  threatsByCategory: Record<string, number>;
+  firewallCostSaved: number;
+  totalModerationActions: number;
+  moderationActionsByType: Record<string, number>;
+  moderationCategories: Record<string, number>;
 }
 
 /**

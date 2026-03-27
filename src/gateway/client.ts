@@ -25,6 +25,7 @@ import {
   FirewallOptions,
   ProxyKeyUsageOptions,
   FirewallAnalytics,
+  GatewaySecuritySummary,
   CortexConfig,
   SastConfig
 } from '../types/gateway';
@@ -121,6 +122,14 @@ export class GatewayClient {
           requestConfig.headers['CostKatana-Firewall-OpenAI-Threshold'] =
             this.config.firewall.openaiThreshold.toString();
         }
+      }
+
+      // Server defaults: LLM security + output moderation ON; send false only to opt out
+      if (this.config.securityEnabled === false) {
+        requestConfig.headers['CostKatana-LLM-Security-Enabled'] = 'false';
+      }
+      if (this.config.outputModerationEnabled === false) {
+        requestConfig.headers['CostKatana-Output-Moderation-Enabled'] = 'false';
       }
 
       // Tracking is always on by default; no configuration required
@@ -290,6 +299,19 @@ export class GatewayClient {
       return response.data.data;
     } catch (error) {
       logger.error('Failed to get cache stats', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Aggregated input firewall (ThreatLog) + output moderation stats for the gateway dashboard.
+   */
+  async getSecuritySummary(): Promise<GatewaySecuritySummary> {
+    try {
+      const response = await this.client.get('/security/summary');
+      return response.data.data as GatewaySecuritySummary;
+    } catch (error) {
+      logger.error('Failed to get gateway security summary', error as Error);
       throw error;
     }
   }
@@ -489,7 +511,24 @@ export class GatewayClient {
     if (options.modelOverride) headers['CostKatana-Model-Override'] = options.modelOverride;
     if (options.omitRequest) headers['CostKatana-Omit-Request'] = 'true';
     if (options.omitResponse) headers['CostKatana-Omit-Response'] = 'true';
-    if (options.security) headers['CostKatana-LLM-Security-Enabled'] = 'true';
+
+    const securityDisabled =
+      options.security === false ||
+      (options.security === undefined && this.config.securityEnabled === false);
+    if (securityDisabled) {
+      headers['CostKatana-LLM-Security-Enabled'] = 'false';
+    } else if (options.security === true) {
+      headers['CostKatana-LLM-Security-Enabled'] = 'true';
+    }
+
+    const outputModerationDisabled =
+      options.outputModeration === false ||
+      (options.outputModeration === undefined && this.config.outputModerationEnabled === false);
+    if (outputModerationDisabled) {
+      headers['CostKatana-Output-Moderation-Enabled'] = 'false';
+    } else if (options.outputModeration === true) {
+      headers['CostKatana-Output-Moderation-Enabled'] = 'true';
+    }
 
     // Firewall configuration
     if (options.firewall !== undefined) {

@@ -81,7 +81,8 @@ export type {
   ProxyKeyUsageOptions,
   ThreatDetectionResult,
   FirewallAnalytics,
-  FirewallOptions
+  FirewallOptions,
+  GatewaySecuritySummary
 } from './types/gateway';
 
 // Feedback exports

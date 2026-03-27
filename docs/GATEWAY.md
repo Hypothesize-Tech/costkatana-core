@@ -389,6 +389,15 @@ const response = await ai('gpt-4o-mini', 'Hello', {
 });
 ```
 
+## Gateway client: security defaults (TypeScript SDK)
+
+The hosted gateway runs **input firewall** and **output moderation** by default. In `GatewayClient`:
+
+- Set `securityEnabled: false` or per-request `security: false` to send `CostKatana-LLM-Security-Enabled: false`.
+- Set `outputModerationEnabled: false` or per-request `outputModeration: false` to disable output moderation.
+
+Call `gateway.getSecuritySummary()` for dashboard-style aggregates (`GET /api/gateway/security/summary`).
+
 ## Support
 
 - **Documentation**: https://docs.costkatana.com
