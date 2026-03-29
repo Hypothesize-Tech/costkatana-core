@@ -1,18 +1,72 @@
-# Cost Katana 🥷
+# Cost Katana
+
+[![npm](https://img.shields.io/npm/v/cost-katana.svg)](https://www.npmjs.com/package/cost-katana)
+[![PyPI](https://img.shields.io/pypi/v/cost-katana.svg)](https://pypi.org/project/cost-katana/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue)](https://pypi.org/project/cost-katana/)
 
 > **Cut your AI costs in half. Without cutting corners.**
 
 Cost Katana is a drop-in SDK that wraps your AI calls with automatic cost tracking, smart caching, and optimization—all in one line of code.
 
+## Table of contents
+
+1. [Installation](#installation)
+2. [Quick start](#quick-start)
+3. [Configuration](#configuration)
+4. [Core APIs](#core-apis)
+   - [`ai()`](#ai)
+   - [`chat()`](#chat)
+   - [`gateway()`](#gateway)
+5. [Provider-independent design](#provider-independent-design)
+6. [Type-safe model constants](#type-safe-model-constants)
+7. [Cost optimization](#cost-optimization)
+8. [Security and reliability](#security-and-reliability)
+9. [Usage tracking and analytics](#usage-tracking-and-analytics)
+10. [Framework integration](#framework-integration)
+11. [Error handling](#error-handling)
+12. [AI gateway (details)](#ai-gateway-details)
+13. [Experimentation (hosted API)](#experimentation-hosted-api)
+14. [Examples and documentation](#examples-and-documentation)
+15. [Migration guides](#migration-guides)
+16. [Contributing](#contributing)
+17. [Support](#support)
+18. [License](#license)
+
 ---
 
-## Get started in 60 seconds
+## Installation
+
+**TypeScript / Node**
+
+```bash
+npm install cost-katana
+```
+
+**Python** — published on PyPI as [`cost-katana`](https://pypi.org/project/cost-katana/) (install name uses a hyphen; import uses an underscore).
+
+```bash
+pip install cost-katana
+```
+
+```python
+import cost_katana as ck  # package import: cost_katana
+```
+
+Requires **Node.js 18+** for the npm package and **Python 3.8+** for the PyPI package.
+
+---
+
+## Quick start
 
 Set **`COST_KATANA_API_KEY`**. **`PROJECT_ID`** is optional (recommended for per-project analytics in the dashboard).
 
-### Gateway first (drop-in proxy — like changing base URL + one header)
+### Path A — Gateway (HTTP proxy)
 
-**HTTP / cURL** — no SDK; send OpenAI-compatible JSON to the gateway:
+Use this when you want a **drop-in proxy**: change base URL and send `Authorization: Bearer`, or use **`gateway()`** in TypeScript with no extra config (reads `COST_KATANA_API_KEY`, same behavior as `createGatewayClientFromEnv()`).
+
+**cURL** (no SDK; OpenAI-compatible JSON):
 
 ```bash
 curl -s https://api.costkatana.com/api/gateway/v1/chat/completions \
@@ -21,26 +75,20 @@ curl -s https://api.costkatana.com/api/gateway/v1/chat/completions \
   -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-See also [`examples/curl-http.sh`](./examples/curl-http.sh).
-
-**TypeScript — `gateway()`** — zero extra config; reads `COST_KATANA_API_KEY` (same behavior as `createGatewayClientFromEnv()`):
-
-```bash
-npm install cost-katana
-```
+**TypeScript**
 
 ```typescript
-import { gateway } from 'cost-katana';
+import { gateway, OPENAI } from 'cost-katana';
 
 const res = await gateway().openai({
-  model: 'gpt-4o',
+  model: OPENAI.GPT_4O,
   messages: [{ role: 'user', content: 'Hello!' }],
 });
 
 console.log(res.data);
 ```
 
-### `ai()` — simple typed API with cost on the response
+### Path B — `ai()` (simple API, cost on the response)
 
 ```typescript
 import { ai, OPENAI } from 'cost-katana';
@@ -50,11 +98,9 @@ const response = await ai(OPENAI.GPT_4O, 'Hello');
 console.log(response.text, response.cost);
 ```
 
-### Python
+### Path C — Python
 
-```bash
-pip install costkatana
-```
+Install [`cost-katana` from PyPI](https://pypi.org/project/cost-katana/), set `COST_KATANA_API_KEY` (and optionally `PROJECT_ID`), then:
 
 ```python
 import cost_katana as ck
@@ -64,211 +110,27 @@ response = ck.ai(openai.gpt_4o, "Hello")
 print(response.text, response.cost)
 ```
 
+The Python SDK talks to the same hosted backend as TypeScript (`https://api.costkatana.com` by default). For HTTP gateway usage (OpenAI- or Anthropic-shaped JSON), see the [package README on PyPI](https://pypi.org/project/cost-katana/).
+
 ### Which API should I use?
 
 | If you want… | Use |
 |--------------|-----|
-| Drop-in HTTP proxy (existing OpenAI clients / curl) | Gateway URL + `Authorization: Bearer`, or **`gateway()`** in TypeScript |
+| Drop-in HTTP proxy (existing OpenAI clients / cURL) | Gateway URL + `Authorization: Bearer`, or **`gateway()`** in TypeScript |
 | Simple AI calls with cost on the response | **`ai()`** / **`chat()`** |
 | Session replay, advanced analytics, or manual `trackUsage` | **`AICostTracker`** (advanced) |
 
-For most apps, **`COST_KATANA_API_KEY`** plus either **`gateway()`** (proxy) or **`ai()`** (SDK) is enough. Optional direct provider keys: see [`.env.example`](./.env.example) if you need them.
+For most apps, **`COST_KATANA_API_KEY`** plus either **`gateway()`** (proxy) or **`ai()`** (SDK) is enough. For optional direct provider keys, add them to your environment as shown in [Configuration](#configuration).
 
 ---
 
-## 🌍 Provider-Independent by Design
+## Configuration
 
-Cost Katana is **completely provider-agnostic**. Never lock yourself into a single vendor.
+### Environment variables
 
-### ✅ Use Capability-Based Routing
+**Start here:** `COST_KATANA_API_KEY` unlocks routing, tracking, and dashboard features. **`PROJECT_ID`** is optional (scopes usage to a project in the dashboard).
 
-```typescript
-import { ai, ModelCapability } from 'cost-katana';
-
-// Automatically selects best model for each task
-const code = await ai(ModelCapability.CODE_GENERATION, 'Write a React component');
-const chat = await ai(ModelCapability.CONVERSATION, 'Hello!');
-const vision = await ai(ModelCapability.VISION, 'Describe this image', { image });
-```
-
-### ✅ Optimize by Performance Characteristics
-
-```typescript
-import { ai } from 'cost-katana';
-
-// Fastest model available
-const fast = await ai({ speed: 'fastest' }, prompt);
-
-// Cheapest model available
-const cheap = await ai({ cost: 'cheapest' }, prompt);
-
-// Best quality model
-const best = await ai({ quality: 'best' }, prompt);
-
-// Balanced approach
-const balanced = await ai({ speed: 'fast', cost: 'cheap' }, prompt);
-```
-
-**Benefits:**
-- 🔄 **Automatic Failover** - Seamlessly switch providers if one goes down
-- 💰 **Cost Optimization** - Routes to the cheapest provider automatically
-- 🚀 **Future-Proof** - New providers added without code changes
-- 🔓 **Zero Lock-In** - Switch providers anytime, no refactoring needed
-
-[Read the full Provider-Agnostic Guide →](https://github.com/Hypothesize-Tech/costkatana-examples/blob/main/PROVIDER_AGNOSTIC_GUIDE.md)
-
----
-
-## 📖 Tutorial: Build a Cost-Aware Chatbot
-
-Let's build something real. In this tutorial, you'll create a chatbot that:
-- ✅ Tracks every dollar spent
-- ✅ Caches repeated questions (saving 100% on duplicates)
-- ✅ Optimizes long responses (40-75% savings)
-
-### Part 1: Basic Chat Session
-
-```typescript
-import { chat, OPENAI } from 'cost-katana';
-
-// Create a persistent chat session
-const session = chat(OPENAI.GPT_4);
-
-// Send messages and track costs
-await session.send('Hello! What can you help me with?');
-await session.send('Tell me a programming joke');
-await session.send('Now explain it');
-
-// See exactly what you spent
-console.log(`💰 Total cost: $${session.totalCost.toFixed(4)}`);
-console.log(`📊 Messages: ${session.messages.length}`);
-console.log(`🎯 Tokens used: ${session.totalTokens}`);
-```
-
-### Part 2: Add Smart Caching
-
-Cache identical questions to avoid paying twice:
-
-```typescript
-import { ai, OPENAI } from 'cost-katana';
-
-// First call - hits the API
-const response1 = await ai(OPENAI.GPT_4, 'What is 2+2?', { cache: true });
-console.log(`Cached: ${response1.cached}`);  // false
-console.log(`Cost: $${response1.cost}`);     // $0.0008
-
-// Second call - served from cache (FREE!)
-const response2 = await ai(OPENAI.GPT_4, 'What is 2+2?', { cache: true });
-console.log(`Cached: ${response2.cached}`);  // true
-console.log(`Cost: $${response2.cost}`);     // $0.0000 🎉
-```
-
-### Part 3: Enable Cortex Optimization
-
-For long-form content, Cortex compresses prompts intelligently:
-
-```typescript
-import { ai, OPENAI } from 'cost-katana';
-
-const response = await ai(
-  OPENAI.GPT_4,
-  'Write a comprehensive guide to machine learning for beginners',
-  { 
-    cortex: true,      // Enable 40-75% cost reduction
-    maxTokens: 2000 
-  }
-);
-
-console.log(`Optimized: ${response.optimized}`);
-console.log(`Saved: $${response.savedAmount}`);
-```
-
-### Part 4: Compare Models Side-by-Side
-
-Find the best price-to-quality ratio for your use case:
-
-```typescript
-import { ai, OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';
-
-const prompt = 'Summarize the theory of relativity in 50 words';
-
-const models = [
-  { name: 'GPT-4', id: OPENAI.GPT_4 },
-  { name: 'Claude 3.5 Sonnet', id: ANTHROPIC.CLAUDE_3_5_SONNET_20241022 },
-  { name: 'Gemini 2.5 Pro', id: GOOGLE.GEMINI_2_5_PRO },
-  { name: 'GPT-3.5 Turbo', id: OPENAI.GPT_3_5_TURBO }
-];
-
-console.log('📊 Model Cost Comparison\n');
-
-for (const model of models) {
-  const response = await ai(model.id, prompt);
-  console.log(`${model.name.padEnd(20)} $${response.cost.toFixed(6)}`);
-}
-```
-
-**Sample Output:**
-```
-📊 Model Cost Comparison
-
-GPT-4                $0.001200
-Claude 3.5 Sonnet    $0.000900
-Gemini 2.5 Pro       $0.000150
-GPT-3.5 Turbo        $0.000080
-```
-
----
-
-## 🎯 Type-Safe Model Selection
-
-Stop guessing model names. Get autocomplete and catch typos at compile time:
-
-```typescript
-import { OPENAI, ANTHROPIC, GOOGLE, AWS_BEDROCK, XAI, DEEPSEEK } from 'cost-katana';
-
-// OpenAI
-OPENAI.GPT_5
-OPENAI.GPT_4
-OPENAI.GPT_4O
-OPENAI.GPT_3_5_TURBO
-OPENAI.O1
-OPENAI.O3
-
-// Anthropic
-ANTHROPIC.CLAUDE_SONNET_4_5
-ANTHROPIC.CLAUDE_3_5_SONNET_20241022
-ANTHROPIC.CLAUDE_3_5_HAIKU_20241022
-
-// Google
-GOOGLE.GEMINI_2_5_PRO
-GOOGLE.GEMINI_2_5_FLASH
-GOOGLE.GEMINI_1_5_PRO
-
-// AWS Bedrock
-AWS_BEDROCK.NOVA_PRO
-AWS_BEDROCK.NOVA_LITE
-AWS_BEDROCK.CLAUDE_SONNET_4_5
-
-// Others
-XAI.GROK_2_1212
-DEEPSEEK.DEEPSEEK_CHAT
-```
-
-**Why constants over strings?**
-| Feature | String `'gpt-4'` | Constant `OPENAI.GPT_4` |
-|---------|------------------|-------------------------|
-| Autocomplete | ❌ | ✅ |
-| Typo protection | ❌ | ✅ |
-| Refactor safely | ❌ | ✅ |
-| Self-documenting | ❌ | ✅ |
-
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-**Start here:** `COST_KATANA_API_KEY` unlocks routing, tracking, and dashboard features. **`PROJECT_ID`** is optional (set it to scope usage to a project in the dashboard).
+Create a `.env` in your project (or export in your shell) with the variables you need:
 
 ```bash
 # Required for hosted Cost Katana
@@ -276,15 +138,11 @@ COST_KATANA_API_KEY=dak_your_key_here
 
 # Optional — per-project analytics
 PROJECT_ID=your_project_id
-```
 
-Optional: bring your own provider keys, or use AWS Bedrock. **Copy [`.env.example`](./.env.example)** into `.env` and fill in values.
-
-```bash
-# Optional — direct provider keys
+# Optional — direct provider keys (bring your own keys)
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=...
+GOOGLE_API_KEY=...
 
 # Optional — AWS Bedrock
 AWS_ACCESS_KEY_ID=...
@@ -292,35 +150,411 @@ AWS_SECRET_ACCESS_KEY=...
 AWS_REGION=us-east-1
 ```
 
-### Programmatic Configuration
+There is no `.env.example` file in this repository; copy the block above into your own `.env` and fill in values.
+
+### Programmatic configuration
 
 ```typescript
 import { configure } from 'cost-katana';
 
 await configure({
   apiKey: 'dak_your_key',
-  cortex: true,     // 40-75% cost savings
-  cache: true,      // Smart caching
-  firewall: true    // Block prompt injections
+  cortex: true, // 40–75% cost savings (when enabled on requests)
+  cache: true, // Smart caching (when enabled on requests)
+  firewall: true, // Block prompt injections
 });
 ```
 
-### Request Options
+### Common request options (`ai()`)
+
+| Option | Description |
+|--------|-------------|
+| `temperature` | Creativity (0–2), default `0.7` |
+| `maxTokens` | Max response tokens, default `1000` |
+| `systemMessage` | System prompt |
+| `cache` | Enable caching |
+| `cortex` | Enable optimization (Cortex) |
 
 ```typescript
-const response = await ai(OPENAI.GPT_4, 'Your prompt', {
-  temperature: 0.7,                        // Creativity (0-2)
-  maxTokens: 500,                          // Response limit
-  systemMessage: 'You are a helpful AI',   // System prompt
-  cache: true,                             // Enable caching
-  cortex: true,                            // Enable optimization
-  retry: true                              // Auto-retry on failures
+import { ai, OPENAI } from 'cost-katana';
+
+const response = await ai(OPENAI.GPT_4O, 'Your prompt', {
+  temperature: 0.7,
+  maxTokens: 500,
+  systemMessage: 'You are a helpful AI',
+  cache: true,
+  cortex: true,
 });
 ```
 
 ---
 
-## 🔌 Framework Integration
+## Core APIs
+
+### `ai()`
+
+The simplest way to make AI requests with automatic cost tracking.
+
+**Signature**
+
+```typescript
+await ai(model, prompt, options?);
+```
+
+- **`model`** — Use type-safe constants (e.g. `OPENAI.GPT_4O`). String model IDs still work but are deprecated.
+- **`prompt`** — User prompt text.
+- **`options`** — See [Common request options](#common-request-options-ai).
+
+**Returns:** `text`, `cost`, `tokens`, `model`, `provider`, and optionally `cached`, `optimized`, `templateUsed` when applicable.
+
+```typescript
+import { ai, OPENAI } from 'cost-katana';
+
+const response = await ai(OPENAI.GPT_4O, 'Explain quantum computing', {
+  temperature: 0.7,
+  maxTokens: 500,
+});
+
+console.log(response.text);
+console.log(`Cost: $${response.cost}`);
+```
+
+### `chat()`
+
+Create a **session** with conversation history and cost tracking.
+
+**Signature**
+
+```typescript
+const session = chat(model, options?);
+```
+
+**Session API**
+
+| Member | Description |
+|--------|-------------|
+| `send(message)` | Send a message and append assistant reply |
+| `messages` | Full conversation history |
+| `totalCost` | Running total cost (USD) |
+| `totalTokens` | Running token count |
+| `clear()` | Reset conversation (keeps system message if set) |
+
+```typescript
+import { chat, OPENAI } from 'cost-katana';
+
+const session = chat(OPENAI.GPT_4O, {
+  systemMessage: 'You are a helpful AI assistant.',
+  temperature: 0.7,
+});
+
+await session.send('Hello! What can you help me with?');
+await session.send('Tell me a programming joke');
+await session.send('Now explain it');
+
+console.log(`Total cost: $${session.totalCost.toFixed(4)}`);
+console.log(`Messages: ${session.messages.length}`);
+console.log(`Tokens used: ${session.totalTokens}`);
+```
+
+### `gateway()`
+
+Zero extra config for the hosted gateway: **`COST_KATANA_API_KEY`** is read from the environment. Use the same OpenAI-shaped request bodies you would send upstream.
+
+For advanced gateway features (headers, proxy keys, firewall), see [`docs/GATEWAY.md`](./docs/GATEWAY.md) and [`docs/API.md`](./docs/API.md).
+
+---
+
+## Provider-independent design
+
+Cost Katana is **provider-agnostic**: the same **`ai()`** API works across OpenAI, Anthropic, Google, and more—pick a **model constant** per provider.
+
+```typescript
+import { ai, OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';
+
+const a = await ai(OPENAI.GPT_4O, 'Hello');
+const b = await ai(ANTHROPIC.CLAUDE_3_5_SONNET_20241022, 'Hello');
+const c = await ai(GOOGLE.GEMINI_2_5_PRO, 'Hello');
+```
+
+**Benefits**
+
+- **Automatic failover** — Seamlessly switch providers when configured (see [Security and reliability](#security-and-reliability)).
+- **Cost optimization** — Choose cheaper models with constants and the [cost optimization](#cost-optimization) patterns below.
+- **Future-proof** — New providers and models are added to the registry without changing your mental model.
+- **Zero lock-in** — Swap model constants as your stack evolves.
+
+For deeper routing patterns (capabilities, load balancing, multi-provider setups), see the [Provider-Agnostic Guide](https://github.com/Hypothesize-Tech/costkatana-examples/blob/main/PROVIDER_AGNOSTIC_GUIDE.md).
+
+---
+
+## Type-safe model constants
+
+Stop guessing model names: use namespaces for autocomplete and typo safety.
+
+```typescript
+import { OPENAI, ANTHROPIC, GOOGLE, AWS_BEDROCK, XAI, DEEPSEEK } from 'cost-katana';
+
+// OpenAI
+OPENAI.GPT_5;
+OPENAI.GPT_4;
+OPENAI.GPT_4O;
+OPENAI.GPT_3_5_TURBO;
+OPENAI.O1;
+OPENAI.O3;
+
+// Anthropic
+ANTHROPIC.CLAUDE_SONNET_4_5;
+ANTHROPIC.CLAUDE_3_5_SONNET_20241022;
+ANTHROPIC.CLAUDE_3_5_HAIKU_20241022;
+
+// Google
+GOOGLE.GEMINI_2_5_PRO;
+GOOGLE.GEMINI_2_5_FLASH;
+GOOGLE.GEMINI_1_5_PRO;
+
+// AWS Bedrock
+AWS_BEDROCK.NOVA_PRO;
+AWS_BEDROCK.NOVA_LITE;
+AWS_BEDROCK.CLAUDE_SONNET_4_5;
+
+// Others
+XAI.GROK_2_1212;
+DEEPSEEK.DEEPSEEK_CHAT;
+```
+
+**Prefer constants over raw strings** — They give IDE autocomplete, catch typos early, refactor safely, and document which provider you intended.
+
+---
+
+## Cost optimization
+
+### Cheatsheet
+
+| Strategy | Typical savings | When to use |
+|----------|-----------------|-------------|
+| Use a smaller/faster model (e.g. GPT-3.5 vs GPT-4) | Large on simple tasks | Trivial Q&A, classification, translation |
+| **Caching** | 100% on cache hits | Repeated queries, FAQs |
+| **Cortex** | 40–75% on eligible workloads | Long-form generation |
+| **Chat sessions** | 10–20% | Related multi-turn work |
+| **Gemini Flash** (vs heavy flagship models) | Very high $/token delta | High volume, cost-sensitive |
+
+### Caching
+
+```typescript
+import { ai, OPENAI } from 'cost-katana';
+
+const response1 = await ai(OPENAI.GPT_4O, 'What is 2+2?', { cache: true });
+console.log(`Cached: ${response1.cached}`);
+console.log(`Cost: $${response1.cost}`);
+
+const response2 = await ai(OPENAI.GPT_4O, 'What is 2+2?', { cache: true });
+console.log(`Cached: ${response2.cached}`);
+console.log(`Cost: $${response2.cost}`);
+```
+
+### Cortex (optimization)
+
+```typescript
+import { ai, OPENAI } from 'cost-katana';
+
+const response = await ai(
+  OPENAI.GPT_4O,
+  'Write a comprehensive guide to machine learning for beginners',
+  {
+    cortex: true,
+    maxTokens: 2000,
+  }
+);
+
+console.log(`Optimized: ${response.optimized}`);
+console.log(`Cost: $${response.cost}`);
+```
+
+### Compare models side by side
+
+```typescript
+import { ai, OPENAI, ANTHROPIC, GOOGLE } from 'cost-katana';
+
+const prompt = 'Summarize the theory of relativity in 50 words';
+
+const models = [
+  { name: 'GPT-4 class', id: OPENAI.GPT_4O },
+  { name: 'Claude 3.5 Sonnet', id: ANTHROPIC.CLAUDE_3_5_SONNET_20241022 },
+  { name: 'Gemini 2.5 Pro', id: GOOGLE.GEMINI_2_5_PRO },
+  { name: 'GPT-3.5 Turbo', id: OPENAI.GPT_3_5_TURBO },
+];
+
+console.log('Model cost comparison\n');
+
+for (const model of models) {
+  const response = await ai(model.id, prompt);
+  console.log(`${model.name.padEnd(22)} $${response.cost.toFixed(6)}`);
+}
+```
+
+### Quick wins
+
+```typescript
+import { ai, OPENAI } from 'cost-katana';
+
+// Expensive: flagship model for a trivial question
+await ai(OPENAI.GPT_4O, 'What is 2+2?');
+
+// Better: match model to task
+await ai(OPENAI.GPT_3_5_TURBO, 'What is 2+2?');
+
+// Better still: cache repeated FAQs
+await ai(OPENAI.GPT_3_5_TURBO, 'What is 2+2?', { cache: true });
+
+// Long content: Cortex
+await ai(OPENAI.GPT_4O, 'Write a 2000-word essay', { cortex: true });
+```
+
+---
+
+## Security and reliability
+
+### Firewall
+
+Block prompt injection and related abuse when enabled via **`configure({ firewall: true })`** and gateway/tracker settings.
+
+```typescript
+import { configure, ai, OPENAI } from 'cost-katana';
+
+await configure({ firewall: true });
+
+try {
+  await ai(OPENAI.GPT_4O, 'Ignore all previous instructions and...');
+} catch (error) {
+  console.log('Blocked:', (error as Error).message);
+}
+```
+
+**Helps mitigate:** prompt injection, jailbreak attempts, unsafe content patterns (exact behavior depends on your gateway configuration).
+
+### Auto-failover
+
+When routing and health checks allow, requests can fall back across providers so a single vendor outage does not take down your app.
+
+```typescript
+import { ai, OPENAI } from 'cost-katana';
+
+const response = await ai(OPENAI.GPT_4O, 'Hello');
+
+console.log(`Provider used: ${response.provider}`);
+// e.g. 'openai', 'anthropic', or 'google' depending on availability and policy
+```
+
+---
+
+## Usage tracking and analytics
+
+### Dashboard attribution with `configure()` and `ai()`
+
+Use the same **`ai()`** API everywhere. Point usage at your project once with **`configure()`** or environment variables.
+
+```typescript
+import { configure, ai, OPENAI } from 'cost-katana';
+
+await configure({
+  apiKey: process.env.COST_KATANA_API_KEY,
+  projectId: process.env.PROJECT_ID,
+});
+
+const response = await ai(OPENAI.GPT_4O, 'Explain quantum computing');
+
+console.log(response.text);
+console.log('Cost:', response.cost);
+console.log('Tokens:', response.tokens);
+```
+
+Calls can be attributed to your project in the dashboard. You can also pass **`projectId`** through tracker/gateway options where supported when using multiple projects.
+
+### `AICostTracker` with defaults (advanced)
+
+When you need a **dedicated tracker instance** (not only the global `ai()` helper), use **`createCostKatanaTracker()`** or **`AICostTracker.createWithDefaults()`**. They populate **`TrackerConfig`** from the same environment rules as auto-config:
+
+- If you set **direct** provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, or AWS Bedrock credentials), those providers are registered.
+- If you **only** have **`COST_KATANA_API_KEY`** and **no** direct provider keys, the default is **Cost Katana hosted models** via the gateway: inference can route through the hosted API without embedding vendor keys in your app.
+
+```typescript
+import { createCostKatanaTracker, AIProvider } from 'cost-katana';
+
+const tracker = await createCostKatanaTracker();
+
+const custom = await createCostKatanaTracker({
+  optimization: { enablePromptOptimization: false },
+  providers: [{ provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }],
+});
+
+// Same idea: await AICostTracker.createWithDefaults({ ... })
+// Short alias: import { tracker as costKatana } from 'cost-katana';
+```
+
+Requires **`COST_KATANA_API_KEY`** in the environment (same as `AICostTracker.create()`). **`PROJECT_ID`** remains optional.
+
+### Dedicated per-provider trackers
+
+For a **small `complete()`-style API** on top of `AICostTracker`, use **`createOpenAITracker`**, **`createAnthropicTracker`**, etc.
+
+```typescript
+import { createOpenAITracker, OPENAI } from 'cost-katana';
+
+const t = await createOpenAITracker({ model: OPENAI.GPT_4O });
+const response = await t.complete({ prompt: 'Explain quantum computing' });
+
+console.log(response.text);
+console.log('Total cost (USD):', response.cost.totalCost);
+console.log('Response time (ms):', response.responseTime);
+```
+
+For **gateway proxying**, **manual `trackUsage`**, or a fully custom **`AICostTracker`**, see [`docs/API.md`](./docs/API.md) and [`examples/`](./examples/).
+
+### View analytics in the dashboard
+
+With tracking enabled, you can inspect:
+
+- **Network performance** — DNS, TCP, total response time
+- **Client environment** — User agent, platform, IP geolocation (where collected)
+- **Request/response data** — Payloads (sanitized)
+- **Optimization opportunities** — Suggestions to reduce cost
+- **Performance metrics** — Monitoring and anomaly signals
+
+### Manual usage tracking
+
+```typescript
+import { createCostKatanaTracker } from 'cost-katana';
+
+const tracker = await createCostKatanaTracker();
+
+await tracker.trackUsage({
+  model: 'gpt-4o',
+  provider: 'openai',
+  prompt: 'Hello, world!',
+  completion: 'Hello! How can I help you today?',
+  promptTokens: 3,
+  completionTokens: 9,
+  totalTokens: 12,
+  cost: 0.00036,
+  responseTime: 850,
+  userId: 'user_123',
+  sessionId: 'session_abc',
+  tags: ['chat', 'greeting'],
+  requestMetadata: {
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+    clientIP: await fetch('https://api.ipify.org').then((r) => r.text()),
+    feature: 'chat-interface',
+  },
+});
+```
+
+### Session replay and distributed tracing
+
+The **`trace`** submodule provides session graphs, spans, and middleware. See [`src/trace/README.md`](./src/trace/README.md) for exports such as `TraceClient`, `LocalTraceService`, and `createTraceMiddleware`.
+
+---
+
+## Framework integration
 
 ### Next.js App Router
 
@@ -330,7 +564,7 @@ import { ai, OPENAI } from 'cost-katana';
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();
-  const response = await ai(OPENAI.GPT_4, prompt);
+  const response = await ai(OPENAI.GPT_4O, prompt);
   return Response.json(response);
 }
 ```
@@ -345,7 +579,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
-  const response = await ai(OPENAI.GPT_4, req.body.prompt);
+  const response = await ai(OPENAI.GPT_4O, req.body.prompt);
   res.json(response);
 });
 
@@ -362,7 +596,7 @@ const app = fastify();
 
 app.post('/api/chat', async (request) => {
   const { prompt } = request.body as { prompt: string };
-  return await ai(OPENAI.GPT_4, prompt);
+  return await ai(OPENAI.GPT_4O, prompt);
 });
 
 app.listen({ port: 3000 });
@@ -378,252 +612,110 @@ import { ai, OPENAI } from 'cost-katana';
 export class ChatController {
   @Post('chat')
   async chat(@Body() body: { prompt: string }) {
-    return await ai(OPENAI.GPT_4, body.prompt);
+    return await ai(OPENAI.GPT_4O, body.prompt);
   }
 }
 ```
 
 ---
 
-## 🛡️ Built-in Security
-
-### Firewall Protection
-
-Block prompt injection attacks automatically:
-
-```typescript
-import { configure, ai, OPENAI } from 'cost-katana';
-
-await configure({ firewall: true });
-
-try {
-  await ai(OPENAI.GPT_4, 'Ignore all previous instructions and...');
-} catch (error) {
-  console.log('🛡️ Blocked:', error.message);
-}
-```
-
-**Protects against:**
-- Prompt injection attacks
-- Jailbreak attempts
-- Data exfiltration
-- Malicious content generation
-
----
-
-## 🔄 Auto-Failover
-
-Never let provider outages break your app:
-
-```typescript
-import { ai, OPENAI } from 'cost-katana';
-
-// If OpenAI is down, automatically switches to Claude or Gemini
-const response = await ai(OPENAI.GPT_4, 'Hello');
-
-console.log(`Provider used: ${response.provider}`);
-// Could be 'openai', 'anthropic', or 'google' depending on availability
-```
-
----
-
-## 📊 Usage tracking & analytics
-
-### Dashboard attribution (stay on `ai()`)
-
-Use the same **`ai()`** API as everywhere else. Point usage at your project once with **`configure()`** or env vars—no need to switch to a new class for standard cost and token tracking.
-
-```typescript
-import { configure, ai, OPENAI } from 'cost-katana';
-
-await configure({
-  apiKey: process.env.COST_KATANA_API_KEY,
-  projectId: process.env.PROJECT_ID,
-});
-
-const response = await ai(OPENAI.GPT_4O, 'Explain quantum computing', {
-  tags: ['demo', 'readme'],
-});
-
-console.log(response.text);
-console.log('Cost:', response.cost);
-console.log('Tokens:', response.tokens);
-console.log('Response time (ms):', response.responseTime);
-```
-
-Calls are attributed to your project in the dashboard. You can also pass **`projectId`** on individual `ai()` options when you use multiple projects.
-
-### `AICostTracker` with defaults (recommended)
-
-When you need a **dedicated tracker instance** (not the global `ai()` helper), use **`createCostKatanaTracker()`** or **`AICostTracker.createWithDefaults()`**. They fill in **`TrackerConfig`** from the same environment rules as auto-config: if you set **direct** provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, or AWS Bedrock creds), those providers are registered. If you **only** have **`COST_KATANA_API_KEY`** and **no** provider keys, the default is **Cost Katana hosted models** via the gateway (**`costkatana-backend-nest`**): a single OpenAI-shaped slot with the reserved `proxy` key so **`ai()`** / **`initializeGateway()`** route inference through the hosted API (no OpenAI/Anthropic keys required in your app). Optimization and alerts come from package defaults; pass a **partial** config to override anything.
-
-```typescript
-import { createCostKatanaTracker, AIProvider } from 'cost-katana';
-
-const tracker = await createCostKatanaTracker();
-
-// Optional overrides (merged on top of defaults)
-const custom = await createCostKatanaTracker({
-  optimization: { enablePromptOptimization: false },
-  providers: [{ provider: AIProvider.OpenAI, apiKey: process.env.OPENAI_API_KEY! }]
-});
-
-// Same behavior: await AICostTracker.createWithDefaults({ ... })
-// Short alias: import { tracker as costKatana } from 'cost-katana';
-```
-
-Requires **`COST_KATANA_API_KEY`** in the environment (same as `AICostTracker.create()`). **`PROJECT_ID`** remains optional.
-
-### Dedicated tracker instances (advanced)
-
-If you want a **per-provider tracker object** (instead of the global `ai()` helper), use **`createOpenAITracker`** / **`createAnthropicTracker`** / etc. They wrap `AICostTracker` with a small `complete()` API:
-
-```typescript
-import { createOpenAITracker, OPENAI } from 'cost-katana';
-
-const t = await createOpenAITracker({ model: OPENAI.GPT_4O });
-const response = await t.complete({ prompt: 'Explain quantum computing' });
-
-console.log(response.text);
-console.log('Total cost (USD):', response.cost.totalCost);
-console.log('Response time (ms):', response.responseTime);
-```
-
-For **gateway proxying**, **manual `trackUsage`**, or a fully custom **`AICostTracker`** with your own provider list, see [`docs/API.md`](./docs/API.md) and [`examples/`](./examples/).
-
-### View Analytics in Dashboard
-
-Once tracking is enabled, you can view detailed analytics at your dashboard:
-
-- **Network Performance**: DNS lookup time, TCP connection time, total response time
-- **Client Environment**: User agent, platform, IP geolocation
-- **Request/Response Data**: Full request and response payloads (sanitized)
-- **Optimization Opportunities**: AI-powered suggestions to reduce costs
-- **Performance Metrics**: Real-time monitoring with anomaly detection
-
-### Manual Usage Tracking
-
-For custom implementations or additional tracking:
-
-```typescript
-import { createCostKatanaTracker } from 'cost-katana';
-
-const tracker = await createCostKatanaTracker();
-
-// Manually track usage with additional metadata
-await tracker.trackUsage({
-  model: 'gpt-4',
-  provider: 'openai',
-  prompt: 'Hello, world!',
-  completion: 'Hello! How can I help you today?',
-  promptTokens: 3,
-  completionTokens: 9,
-  totalTokens: 12,
-  cost: 0.00036,
-  responseTime: 850,
-  userId: 'user_123',
-  sessionId: 'session_abc',
-  tags: ['chat', 'greeting'],
-  // Additional metadata for comprehensive tracking
-  requestMetadata: {
-    userAgent: navigator?.userAgent,
-    clientIP: await fetch('https://api.ipify.org').then(r => r.text()),
-    feature: 'chat-interface'
-  }
-});
-```
-
-### Session replay & distributed tracing
-
-Session graphs, spans, and trace middleware are provided by the **`trace`** submodule. Start here: [`src/trace/README.md`](./src/trace/README.md) (exported APIs such as `TraceClient`, `LocalTraceService`, and `createTraceMiddleware`).
-
----
-
-## 💡 Cost Optimization Cheatsheet
-
-| Strategy | Savings | When to Use |
-|----------|---------|-------------|
-| **Use GPT-3.5 over GPT-4** | 90% | Simple tasks, translations |
-| **Enable caching** | 100% on hits | Repeated queries, FAQs |
-| **Enable Cortex** | 40-75% | Long-form content |
-| **Batch in sessions** | 10-20% | Related queries |
-| **Use Gemini Flash** | 95% vs GPT-4 | High-volume, cost-sensitive |
-
-### Quick Wins
-
-```typescript
-// ❌ Expensive: Using GPT-4 for everything
-await ai(OPENAI.GPT_4, 'What is 2+2?');  // $0.001
-
-// ✅ Smart: Match model to task
-await ai(OPENAI.GPT_3_5_TURBO, 'What is 2+2?');  // $0.0001
-
-// ✅ Smarter: Cache common queries
-await ai(OPENAI.GPT_3_5_TURBO, 'What is 2+2?', { cache: true });  // $0 on repeat
-
-// ✅ Smartest: Cortex for long content
-await ai(OPENAI.GPT_4, 'Write a 2000-word essay', { cortex: true });  // 40-75% off
-```
-
----
-
-## 🔧 Error Handling
+## Error handling
 
 ```typescript
 import { ai, OPENAI } from 'cost-katana';
 
 try {
-  const response = await ai(OPENAI.GPT_4, 'Hello');
+  const response = await ai(OPENAI.GPT_4O, 'Hello');
   console.log(response.text);
 } catch (error) {
-  switch (error.code) {
+  const err = error as Error & { code?: string; availableModels?: string[] };
+  switch (err.code) {
     case 'NO_API_KEY':
-      console.log('Set COST_KATANA_API_KEY or OPENAI_API_KEY');
+      console.log('Set COST_KATANA_API_KEY or a provider API key');
       break;
     case 'RATE_LIMIT':
-      console.log('Rate limited. Retrying...');
+      console.log('Rate limited. Retry with backoff.');
       break;
     case 'INVALID_MODEL':
-      console.log('Model not found. Available:', error.availableModels);
+      console.log('Model not found. Available:', err.availableModels);
       break;
     default:
-      console.log('Error:', error.message);
+      console.log('Error:', err.message);
   }
 }
 ```
 
----
-
-## 🌐 AI Gateway — details
-
-The gateway is an **HTTP proxy**: call Cost Katana’s URL with your API key; the service forwards to OpenAI, Anthropic, Google, Cohere, etc., and can attach caching, retries, firewall, and tracking.
-
-- **Quick start:** see [Get started in 60 seconds](#get-started-in-60-seconds) above (`gateway()` or curl).
-- **`CostKatana-Target-Url`:** only needed for non-default upstream URLs (Azure OpenAI, private endpoints). For standard routes (`/v1/chat/completions`, `/v1/messages`, …), **`gateway()`** uses `inferTargetUrl: true` and usually omits it.
-- **Anthropic on hosted gateway:** `gateway.anthropic(...)` / `/v1/messages` often needs no Anthropic key in your app; the service may use Bedrock when no server `ANTHROPIC_API_KEY` is set (see docs for streaming limitations).
-- **Dashboard rows:** gateway traffic reflects **proxied** bodies; `AICostTracker` / `trackUsage` is for **custom** structured logging. Multi-turn and token accounting nuances: [`examples/GATEWAY_USAGE_AND_TRACKING.md`](./examples/GATEWAY_USAGE_AND_TRACKING.md) and [costkatana-examples `2-gateway`](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/2-gateway).
+Exact **`code`** values depend on the failure path (gateway vs direct provider). Always log **`message`** for support.
 
 ---
 
-## 📚 More Examples
+## AI gateway (details)
 
-Explore 45+ complete examples in our examples repository:
+The gateway is an **HTTP proxy**: call Cost Katana’s URL with your API key; the service forwards to OpenAI, Anthropic, Google, Cohere, and others, and can attach caching, retries, firewall, and tracking.
 
-**🔗 [github.com/Hypothesize-Tech/costkatana-examples](https://github.com/Hypothesize-Tech/costkatana-examples)**
+- **Quick start:** [Quick start — Path A](#path-a--gateway-http-proxy) (`gateway()` or cURL).
+- **`CostKatana-Target-Url`:** Use for non-default upstream URLs (Azure OpenAI, private endpoints). For standard routes (`/v1/chat/completions`, `/v1/messages`, …), **`gateway()`** often uses `inferTargetUrl: true` and omits it.
+- **Anthropic on hosted gateway:** `gateway.anthropic(...)` / `/v1/messages` may not require an Anthropic key in your app; the service may use Bedrock when no server `ANTHROPIC_API_KEY` is set (see docs for streaming limitations).
+- **Dashboard vs custom tracking:** Gateway traffic reflects **proxied** bodies; `AICostTracker` / `trackUsage` supports **custom** structured logging. For multi-turn and token nuances, see [`examples/GATEWAY_USAGE_AND_TRACKING.md`](./examples/GATEWAY_USAGE_AND_TRACKING.md) and [costkatana-examples `2-gateway`](https://github.com/Hypothesize-Tech/costkatana-examples/tree/main/2-gateway).
 
-| Category | Examples |
-|----------|----------|
-| **Cost Tracking** | Basic tracking, budgets, alerts |
+---
+
+## Experimentation (hosted API)
+
+The Cost Katana backend ([`costkatana-backend-nest`](https://github.com/Hypothesize-Tech/costkatana-backend-nest)) exposes **experimentation** REST endpoints under **`/api/experimentation`** on the hosted API (same origin as the gateway, e.g. `https://api.costkatana.com`). The dashboard **Experimentation** UI uses these APIs; you can also integrate them directly.
+
+**What it covers**
+
+- **Model comparison** — Run side-by-side comparisons across providers (`POST /api/experimentation/model-comparison`).
+- **Real-time comparison** — Start a comparison job (`POST /api/experimentation/real-time-comparison`) and stream progress over **SSE** at `GET /api/experimentation/comparison-progress/:sessionId` (session token validated). Poll or reconnect via `GET /api/experimentation/comparison-job/:sessionId` when authenticated.
+- **Catalog** — `GET /api/experimentation/available-models` returns router-registered models (active/inactive) for picking candidates.
+- **Cost estimate** — `POST /api/experimentation/estimate-cost` (public) for experiment cost estimates before you run.
+- **What-if scenarios** — List/create/analyze/delete scenarios (`/api/experimentation/what-if-scenarios`, `.../:scenarioName/analyze`, lifecycle updates).
+- **Real-time simulation** — `POST /api/experimentation/real-time-simulation` (public) for what-if style simulations.
+- **History and insights** — `GET /api/experimentation/history`, `GET /api/experimentation/recommendations`, `GET /api/experimentation/fine-tuning-analysis`.
+- **Exports** — `GET /api/experimentation/:experimentId/export?format=json|csv` for results.
+
+**Auth**
+
+- Most write/read routes require a **dashboard user JWT** (`JwtAuthGuard`).
+- Several routes are marked **public** (estimate cost, available models, real-time simulation, SSE progress with a valid session id). See the controller for the exact list: [`experimentation.controller.ts` in costkatana-backend-nest](https://github.com/Hypothesize-Tech/costkatana-backend-nest/blob/main/src/modules/experimentation/experimentation.controller.ts).
+
+**Server configuration**
+
+- Real model execution for comparisons may require backend flags such as **`ENABLE_REAL_MODEL_COMPARISON=true`** where your deployment enables live API calls to providers.
+
+---
+
+## Examples and documentation
+
+**In this repo**
+
+| Resource | Description |
+|----------|-------------|
+| [`docs/API.md`](./docs/API.md) | API reference |
+| [`docs/EXAMPLES.md`](./docs/EXAMPLES.md) | Examples index |
+| [`docs/GATEWAY.md`](./docs/GATEWAY.md) | Gateway |
+| [`docs/PROMPT_OPTIMIZATION.md`](./docs/PROMPT_OPTIMIZATION.md) | Prompt optimization |
+| [`docs/WEBHOOKS.md`](./docs/WEBHOOKS.md) | Webhooks |
+| [`examples/`](./examples/) | Runnable TypeScript examples |
+
+**External examples repo** — 45+ complete examples:
+
+**[github.com/Hypothesize-Tech/costkatana-examples](https://github.com/Hypothesize-Tech/costkatana-examples)**
+
+| Category | Topics |
+|----------|--------|
+| **Cost tracking** | Budgets, alerts |
 | **Gateway** | Routing, load balancing, failover |
 | **Optimization** | Cortex, caching, compression |
 | **Observability** | OpenTelemetry, tracing, metrics |
 | **Security** | Firewall, rate limiting, moderation |
-| **Workflows** | Multi-step AI orchestration |
+| **Workflows** | Multi-step orchestration |
 | **Frameworks** | Express, Next.js, Fastify, NestJS, FastAPI |
 
 ---
 
-## 🔄 Migration Guides
+## Migration guides
 
 ### From OpenAI SDK
 
@@ -633,7 +725,7 @@ import OpenAI from 'openai';
 const openai = new OpenAI({ apiKey: 'sk-...' });
 const completion = await openai.chat.completions.create({
   model: 'gpt-4',
-  messages: [{ role: 'user', content: 'Hello' }]
+  messages: [{ role: 'user', content: 'Hello' }],
 });
 console.log(completion.choices[0].message.content);
 
@@ -641,7 +733,7 @@ console.log(completion.choices[0].message.content);
 import { ai, OPENAI } from 'cost-katana';
 const response = await ai(OPENAI.GPT_4, 'Hello');
 console.log(response.text);
-console.log(`Cost: $${response.cost}`);  // Bonus: cost tracking!
+console.log(`Cost: $${response.cost}`);
 ```
 
 ### From Anthropic SDK
@@ -652,7 +744,7 @@ import Anthropic from '@anthropic-ai/sdk';
 const anthropic = new Anthropic({ apiKey: 'sk-ant-...' });
 const message = await anthropic.messages.create({
   model: 'claude-3-sonnet-20241022',
-  messages: [{ role: 'user', content: 'Hello' }]
+  messages: [{ role: 'user', content: 'Hello' }],
 });
 
 // After
@@ -675,9 +767,9 @@ const response = await ai(OPENAI.GPT_4, 'Hello');
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions! See our [Contributing Guide](./CONTRIBUTING.md).
+We welcome contributions. See [Contributing Guide](./CONTRIBUTING.md).
 
 ```bash
 git clone https://github.com/Hypothesize-Tech/costkatana-core.git
@@ -693,7 +785,7 @@ npm run build       # Build
 
 ---
 
-## 📞 Support
+## Support
 
 | Channel | Link |
 |---------|------|
@@ -705,7 +797,7 @@ npm run build       # Build
 
 ---
 
-## 📄 License
+## License
 
 MIT © Cost Katana
 
@@ -713,7 +805,7 @@ MIT © Cost Katana
 
 <div align="center">
 
-**Start cutting AI costs today** 🥷
+**Start cutting AI costs today**
 
 ```bash
 npm install cost-katana
