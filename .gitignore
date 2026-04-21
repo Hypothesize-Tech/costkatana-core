@@ -78,3 +78,4 @@ temp/
 # Usage data files
 usage-data.json
 *.usage.json
+.npmrc

@@ -90,7 +90,8 @@ export class BedrockProvider extends BaseProvider {
   }
 
   private formatRequestBody(request: ProviderRequest): any {
-    const { model, prompt, messages, maxTokens, temperature, topP, stopSequences } = request;
+    const { model, prompt, messages, maxTokens, temperature, topP, stopSequences, thinking } =
+      request;
 
     // Handle different model formats
     if (model.includes('claude')) {
@@ -99,7 +100,7 @@ export class BedrockProvider extends BaseProvider {
         ? this.formatClaudeMessages(messages)
         : `\n\nHuman: ${prompt}\n\nAssistant:`;
 
-      return {
+      const body: any = {
         prompt: formattedPrompt,
         max_tokens_to_sample: maxTokens || 1000,
         temperature: temperature || 0.7,
@@ -107,6 +108,28 @@ export class BedrockProvider extends BaseProvider {
         stop_sequences: stopSequences || ['\n\nHuman:'],
         anthropic_version: 'bedrock-2023-05-31'
       };
+
+      // Claude extended thinking. Thinking tokens are billed as output tokens;
+      // when the caller doesn't pin a budget the gateway / Bedrock will use
+      // Cost Katana's dynamic sizing.
+      if (thinking?.enabled) {
+        if (/claude-opus-4-6|claude-opus-4-7|claude-sonnet-4-6/.test(model)) {
+          body.thinking = { type: 'adaptive', effort: thinking.effort ?? 'high' };
+          body.temperature = 1;
+        } else if (
+          /claude-opus-4|claude-opus-4-1|claude-sonnet-4|claude-sonnet-4-5|claude-3-7-sonnet/.test(
+            model
+          )
+        ) {
+          body.thinking =
+            typeof thinking.budgetTokens === 'number'
+              ? { type: 'enabled', budget_tokens: thinking.budgetTokens }
+              : { type: 'enabled' };
+          body.temperature = 1;
+        }
+      }
+
+      return body;
     } else if (model.includes('titan')) {
       // Amazon Titan format
       return {

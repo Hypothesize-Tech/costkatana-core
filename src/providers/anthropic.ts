@@ -89,12 +89,12 @@ export class AnthropicProvider extends BaseProvider {
   }
 
   private formatRequestBody(request: ProviderRequest): any {
-    const { model, messages, prompt, maxTokens, temperature, topP } = request;
+    const { model, messages, prompt, maxTokens, temperature, topP, thinking } = request;
 
     // Anthropic API requires messages format. Convert prompt to messages.
     const requestMessages = messages || [{ role: 'user', content: prompt || '' }];
 
-    return {
+    const body: any = {
       model,
       messages: this.filterSystemMessages(requestMessages),
       system: this.getSystemPrompt(requestMessages),
@@ -102,6 +102,33 @@ export class AnthropicProvider extends BaseProvider {
       temperature,
       top_p: topP
     };
+
+    // Extended thinking: adaptive or enabled+budget_tokens. Claude rejects
+    // custom temperature when thinking is set, so force temperature=1.
+    if (thinking?.enabled) {
+      if (/claude-opus-4-6|claude-opus-4-7|claude-sonnet-4-6/.test(model)) {
+        body.thinking = {
+          type: 'adaptive',
+          effort: thinking.effort ?? 'high'
+        };
+        body.temperature = 1;
+      } else if (
+        /claude-opus-4|claude-opus-4-1|claude-sonnet-4|claude-sonnet-4-5|claude-3-7-sonnet/.test(
+          model
+        )
+      ) {
+        if (typeof thinking.budgetTokens === 'number') {
+          body.thinking = { type: 'enabled', budget_tokens: thinking.budgetTokens };
+          body.temperature = 1;
+        } else {
+          // Let the Cost Katana gateway compute the dynamic budget.
+          body.thinking = { type: 'enabled' };
+          body.temperature = 1;
+        }
+      }
+    }
+
+    return body;
   }
 
   private getSystemPrompt(messages: Message[]): string | undefined {

@@ -245,7 +245,7 @@ export namespace AWS_BEDROCK {
 
   // Meta Llama Models on Bedrock
   export const LLAMA_3_3_70B_INSTRUCT = 'meta.llama3-3-70b-instruct-v1:0';
-  export const LLAMA_3_2_1B_INSTRUCT = 'meta.llama3-2-1b-instruct-v1:0';
+  export const LLAMA_3_2_1B_INSTRUCT = 'meta.llama4-scout-17b-instruct-v1:0';
   export const LLAMA_3_2_3B_INSTRUCT = 'meta.llama3-2-3b-instruct-v1:0';
   export const LLAMA_3_2_11B_VISION_INSTRUCT = 'meta.llama3-2-11b-vision-instruct-v1:0';
   export const LLAMA_3_2_90B_VISION_INSTRUCT = 'meta.llama3-2-90b-vision-instruct-v1:0';

@@ -122,6 +122,24 @@ export interface ProviderRequest {
   stream?: boolean;
   userId?: string;
   metadata?: Record<string, any>;
+  /**
+   * Claude extended thinking (reasoning). Forwarded to Anthropic Messages API
+   * and to Bedrock's `additionalModelRequestFields.thinking`.
+   *
+   * Modes:
+   *   - 'adaptive' — Claude manages reasoning budget (Opus 4.6 / 4.7, Sonnet 4.6).
+   *     Supports `effort`: 'low' | 'medium' | 'high' | 'max' (default 'high').
+   *   - 'enabled'  — fixed budget via `budgetTokens` (Sonnet 3.7 / 4 / 4.5,
+   *     Opus 4 / 4.1). When omitted, the Cost Katana gateway computes a budget
+   *     dynamically from prompt length and model output price.
+   *
+   * Note: thinking tokens are billed as output tokens by Anthropic/Bedrock.
+   */
+  thinking?: {
+    enabled: boolean;
+    effort?: 'low' | 'medium' | 'high' | 'max';
+    budgetTokens?: number;
+  };
 }
 
 export interface Message {
