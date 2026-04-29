@@ -1,7 +1,73 @@
 import { ModelPricingConfig, PricingUnit } from '../pricing-data';
 
 export const OPENAI_PRICING: ModelPricingConfig[] = [
-  // === GPT-5 Models (Latest) ===
+  // === GPT-5.5 / GPT-5.4 (API — aligned with Cost Katana backend) ===
+  {
+    modelId: 'gpt-5.5',
+    modelName: 'GPT-5.5',
+    provider: 'OpenAI',
+    inputPrice: 5.0,
+    outputPrice: 30.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_050_000,
+    capabilities: ['text', 'reasoning', 'analysis', 'coding', 'agents', 'vision'],
+    category: 'text',
+    isLatest: true,
+    notes: 'GPT-5.5 flagship — $5/$30 per 1M tokens; ~1.05M context (verify on OpenAI)'
+  },
+  {
+    modelId: 'gpt-5.5-2026-04-23',
+    modelName: 'GPT-5.5 (2026-04-23 snapshot)',
+    provider: 'OpenAI',
+    inputPrice: 5.0,
+    outputPrice: 30.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_050_000,
+    capabilities: ['text', 'reasoning', 'analysis', 'coding', 'agents', 'vision'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Dated snapshot of GPT-5.5'
+  },
+  {
+    modelId: 'gpt-5.5-pro',
+    modelName: 'GPT-5.5 Pro',
+    provider: 'OpenAI',
+    inputPrice: 30.0,
+    outputPrice: 180.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_050_000,
+    capabilities: ['text', 'reasoning', 'analysis', 'coding', 'agents', 'vision', 'premium'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Higher-throughput GPT-5.5 — $30/$180 per 1M tokens'
+  },
+  {
+    modelId: 'gpt-5.4',
+    modelName: 'GPT-5.4',
+    provider: 'OpenAI',
+    inputPrice: 2.5,
+    outputPrice: 15.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 256_000,
+    capabilities: ['text', 'reasoning', 'analysis', 'coding', 'agents', 'vision'],
+    category: 'text',
+    isLatest: true,
+    notes: 'GPT-5.4 — $2.50/$15.00 per 1M; 256K context'
+  },
+  {
+    modelId: 'gpt-5.4-mini',
+    modelName: 'GPT-5.4 mini',
+    provider: 'OpenAI',
+    inputPrice: 0.75,
+    outputPrice: 4.5,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 256_000,
+    capabilities: ['text', 'reasoning', 'analysis', 'efficient', 'vision'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Efficient GPT-5.4 — $0.75/$4.50 per 1M'
+  },
+  // === GPT-5.2 Models ===
   {
     modelId: 'gpt-5.2',
     modelName: 'GPT-5.2',
@@ -150,43 +216,41 @@ export const OPENAI_PRICING: ModelPricingConfig[] = [
     modelId: 'gpt-5',
     modelName: 'GPT-5',
     provider: 'OpenAI',
-    inputPrice: 1.25,
-    outputPrice: 10.0,
+    inputPrice: 5.0,
+    outputPrice: 30.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 1_050_000,
     capabilities: ['text', 'reasoning', 'analysis', 'coding', 'agents'],
     category: 'text',
     isLatest: true,
     notes:
-      'The best model for coding and agentic tasks across domains. Standard: $1.25/$10.00 per 1M tokens. Batch: $0.625/$5.00. Flex: $0.625/$5.00. Priority: $2.50/$20.00. Cached input: $0.125 (standard), $0.0625 (batch/flex), $0.25 (priority)'
+      'GPT-5 family id — align with live API id. $5/$30 per 1M; ~1.05M context in Cost Katana. Verify batch/flex on OpenAI'
   },
   {
     modelId: 'gpt-5-mini',
     modelName: 'GPT-5 mini',
     provider: 'OpenAI',
-    inputPrice: 0.25,
-    outputPrice: 2.0,
+    inputPrice: 0.75,
+    outputPrice: 4.5,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 256_000,
     capabilities: ['text', 'reasoning', 'analysis', 'efficient'],
     category: 'text',
     isLatest: true,
-    notes:
-      'A faster, cost-efficient version of GPT-5 for well-defined tasks. Standard: $0.25/$2.00 per 1M tokens. Batch: $0.125/$1.00. Flex: $0.125/$1.00. Priority: $0.45/$3.60. Cached input: $0.025 (standard), $0.0125 (batch/flex), $0.045 (priority)'
+    notes: 'Efficient GPT-5-class — $0.75/$4.50 per 1M; 256K context'
   },
   {
     modelId: 'gpt-5-nano',
     modelName: 'GPT-5 nano',
     provider: 'OpenAI',
-    inputPrice: 0.05,
-    outputPrice: 0.4,
+    inputPrice: 0.2,
+    outputPrice: 0.8,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 128_000,
     capabilities: ['text', 'fast', 'cost-effective'],
     category: 'text',
     isLatest: true,
-    notes:
-      'Fastest, most cost-efficient version of GPT-5. Standard: $0.05/$0.40 per 1M tokens. Batch: $0.025/$0.20. Flex: $0.025/$0.20. Cached input: $0.005 (standard), $0.0025 (batch/flex)'
+    notes: 'Lowest-latency GPT-5-class — $0.20/$0.80 per 1M (verify on OpenAI)'
   },
   {
     modelId: 'gpt-5-pro',
@@ -209,7 +273,7 @@ export const OPENAI_PRICING: ModelPricingConfig[] = [
     inputPrice: 1.25,
     outputPrice: 10.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 256_000,
     capabilities: ['code', 'programming', 'agents', 'coding'],
     category: 'code',
     isLatest: true,
@@ -217,17 +281,30 @@ export const OPENAI_PRICING: ModelPricingConfig[] = [
       'A version of GPT-5 optimized for agentic coding in Codex. Standard: $1.25/$10.00 per 1M tokens. Priority: $2.50/$20.00. Cached input: $0.125 (standard), $0.25 (priority)'
   },
   {
-    modelId: 'gpt-5-chat-latest',
+    modelId: 'gpt-5-chat',
     modelName: 'GPT-5 Chat',
     provider: 'OpenAI',
-    inputPrice: 1.25,
-    outputPrice: 10.0,
+    inputPrice: 5.0,
+    outputPrice: 30.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 128000,
+    contextWindow: 1_050_000,
     capabilities: ['text', 'chat', 'reasoning', 'analysis'],
     category: 'text',
     isLatest: true,
-    notes: 'GPT-5 model used in ChatGPT. Standard: $1.25/$10.00 per 1M tokens. Cached input: $0.125'
+    notes: 'Chat-optimized GPT-5 — $5/$30 per 1M'
+  },
+  {
+    modelId: 'gpt-5-chat-latest',
+    modelName: 'GPT-5 Chat',
+    provider: 'OpenAI',
+    inputPrice: 5.0,
+    outputPrice: 30.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_050_000,
+    capabilities: ['text', 'chat', 'reasoning', 'analysis'],
+    category: 'text',
+    isLatest: true,
+    notes: 'Rolling GPT-5 chat alias — $5/$30 per 1M'
   },
 
   // === GPT-4.1 Series (Latest) ===

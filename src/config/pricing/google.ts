@@ -34,15 +34,28 @@ export const GOOGLE_PRICING: ModelPricingConfig[] = [
     modelId: 'gemini-3-flash-preview',
     modelName: 'Gemini 3 Flash Preview',
     provider: 'Google AI',
-    inputPrice: 0.5,
-    outputPrice: 3.0,
+    inputPrice: 0.35,
+    outputPrice: 2.8,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 2000000,
+    contextWindow: 1_000_000,
     capabilities: ['text', 'vision', 'audio', 'fast', 'multimodal'],
     category: 'multimodal',
     isLatest: true,
     notes:
-      'Latest Gemini 3 Flash preview model. Input (text, image, video): $0.50/1M tokens. Input (audio): $1.00/1M tokens. Text output: $3.00/1M tokens. Cached input: $0.05/1M tokens (text/image/video), $0.10/1M tokens (audio). Batch API: $0.25/1M tokens (text/image/video), $0.50/1M tokens (audio) input, $1.50/1M tokens output'
+      'Gemini 3 Flash preview — indicative $0.35/$2.80 per 1M (Cost Katana backend alignment); confirm on Google AI'
+  },
+  {
+    modelId: 'gemini-3.1-pro',
+    modelName: 'Gemini 3.1 Pro',
+    provider: 'Google AI',
+    inputPrice: 2.0,
+    outputPrice: 12.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 2_000_000,
+    capabilities: ['text', 'vision', 'reasoning', 'coding', 'agents', 'multimodal'],
+    category: 'multimodal',
+    isLatest: true,
+    notes: 'Gemini 3.1 Pro — headline tier aligned with Gemini 3 Pro; verify live model id'
   },
   // === Gemini 2.5 Models (Latest) ===
   {

@@ -465,6 +465,30 @@ export const AWS_BEDROCK_PRICING: ModelPricingConfig[] = [
       'Claude Opus 4.6 on AWS Bedrock - next-gen flagship. Input: $5/1M, Output: $25/1M (verify on Bedrock). Max 1M context (beta). Serverless.'
   },
   {
+    modelId: 'anthropic.claude-opus-4-7-v1:0',
+    modelName: 'Claude Opus 4.7',
+    provider: 'AWS Bedrock',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_000_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes: 'Claude Opus 4.7 on Bedrock — verify modelId when AWS publishes; $5/$25 per 1M tier'
+  },
+  {
     modelId: 'anthropic.claude-opus-4-1-20250805-v1:0',
     modelName: 'Claude Opus 4.1',
     provider: 'AWS Bedrock',

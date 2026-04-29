@@ -231,7 +231,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     inputPrice: 5.0,
     outputPrice: 25.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 1_000_000,
+    contextWindow: 200_000,
     capabilities: [
       'text',
       'vision',
@@ -247,7 +247,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Next-gen flagship: best for coding, enterprise agents, and professional work. Max context: 1M tokens (beta). Verify pricing on Bedrock console.'
+      'Claude Opus 4.6 (Messages API). $5/$25 per 1M; 200K context in Cost Katana — verify on docs.anthropic.com'
   },
   {
     modelId: 'claude-opus-4-6',
@@ -256,7 +256,7 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     inputPrice: 5.0,
     outputPrice: 25.0,
     unit: PricingUnit.Per1MTokens,
-    contextWindow: 1_000_000,
+    contextWindow: 200_000,
     capabilities: [
       'text',
       'vision',
@@ -272,6 +272,30 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes: 'Alias for claude-opus-4-6-v1'
+  },
+  {
+    modelId: 'claude-opus-4-7',
+    modelName: 'Claude Opus 4.7',
+    provider: 'Anthropic',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 200_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes: 'Claude Opus 4.7 — same $5/$25 tier as 4.6 (Apr 2026 Cost Katana alignment)'
   },
   {
     modelId: 'anthropic.claude-opus-4-6-v1',
@@ -296,7 +320,33 @@ export const ANTHROPIC_PRICING: ModelPricingConfig[] = [
     category: 'text',
     isLatest: true,
     notes:
-      'Claude Opus 4.6 on AWS Bedrock - next-gen flagship for agents, coding, enterprise workflows. Max tokens: 1M (beta). Serverless. Verify pricing on Bedrock.'
+      'Claude Opus 4.6 on AWS Bedrock — ~1M context in Cost Katana; $5/$25 per 1M. Verify inference profile id'
+  },
+
+  {
+    modelId: 'anthropic.claude-opus-4-7-v1:0',
+    modelName: 'Claude Opus 4.7 (Bedrock)',
+    provider: 'AWS Bedrock',
+    inputPrice: 5.0,
+    outputPrice: 25.0,
+    unit: PricingUnit.Per1MTokens,
+    contextWindow: 1_000_000,
+    capabilities: [
+      'text',
+      'vision',
+      'multimodal',
+      'reasoning',
+      'agents',
+      'coding',
+      'computer-use',
+      'tool-use',
+      'extended-thinking',
+      'multilingual'
+    ],
+    category: 'text',
+    isLatest: true,
+    notes:
+      'Claude Opus 4.7 on Bedrock — verify modelId when AWS publishes; $5/$25 tier aligned with Anthropic GA'
   },
 
   // === Claude 4 Series (Legacy) ===

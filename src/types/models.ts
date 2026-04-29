@@ -8,19 +8,134 @@ import { ProviderModel, PricingUnit } from './providers';
  */
 export const MODELS: Record<string, ProviderModel> = {
   // ==== OpenAI ====
-  // === GPT-5 Models (Latest) ===
+  // === GPT-5.5 / GPT-5.4 / GPT-5 (Latest; $/1M aligned with costkatana-core pricing config) ===
+  'gpt-5.5': {
+    id: 'gpt-5.5',
+    name: 'GPT-5.5',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 1050000,
+    pricing: {
+      prompt: 5.0,
+      completion: 30.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5.5-2026-04-23': {
+    id: 'gpt-5.5-2026-04-23',
+    name: 'GPT-5.5 (2026-04-23 snapshot)',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 1050000,
+    pricing: {
+      prompt: 5.0,
+      completion: 30.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-23'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5.5-pro': {
+    id: 'gpt-5.5-pro',
+    name: 'GPT-5.5 Pro',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 1050000,
+    pricing: {
+      prompt: 30.0,
+      completion: 180.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5.4': {
+    id: 'gpt-5.4',
+    name: 'GPT-5.4',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 256000,
+    pricing: {
+      prompt: 2.5,
+      completion: 15.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5.4-mini': {
+    id: 'gpt-5.4-mini',
+    name: 'GPT-5.4 mini',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 256000,
+    pricing: {
+      prompt: 0.75,
+      completion: 4.5,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
   'gpt-5': {
     id: 'gpt-5',
     name: 'GPT-5',
     provider: AIProvider.OpenAI,
     maxTokens: 128000,
-    contextWindow: 128000,
+    contextWindow: 1050000,
     pricing: {
-      prompt: 0.00125,
-      completion: 0.01,
-      unit: PricingUnit.Per1KTokens,
+      prompt: 5.0,
+      completion: 30.0,
+      unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2025-01-01'
+      effectiveDate: '2026-01-01'
     },
     capabilities: {
       chat: true,
@@ -34,16 +149,16 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'gpt-5-mini': {
     id: 'gpt-5-mini',
-    name: 'GPT-5 Mini',
+    name: 'GPT-5 mini',
     provider: AIProvider.OpenAI,
     maxTokens: 128000,
-    contextWindow: 128000,
+    contextWindow: 256000,
     pricing: {
-      prompt: 0.00025,
-      completion: 0.002,
-      unit: PricingUnit.Per1KTokens,
+      prompt: 0.75,
+      completion: 4.5,
+      unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2025-01-01'
+      effectiveDate: '2026-01-01'
     },
     capabilities: {
       chat: true,
@@ -57,16 +172,85 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'gpt-5-nano': {
     id: 'gpt-5-nano',
-    name: 'GPT-5 Nano',
+    name: 'GPT-5 nano',
     provider: AIProvider.OpenAI,
     maxTokens: 128000,
     contextWindow: 128000,
     pricing: {
-      prompt: 0.00005,
-      completion: 0.0004,
-      unit: PricingUnit.Per1KTokens,
+      prompt: 0.2,
+      completion: 0.8,
+      unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2025-01-01'
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5-pro': {
+    id: 'gpt-5-pro',
+    name: 'GPT-5 pro',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 128000,
+    pricing: {
+      prompt: 15.0,
+      completion: 120.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5-codex': {
+    id: 'gpt-5-codex',
+    name: 'GPT-5-Codex',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 256000,
+    pricing: {
+      prompt: 1.25,
+      completion: 10.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: false,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gpt-5-chat': {
+    id: 'gpt-5-chat',
+    name: 'GPT-5 Chat',
+    provider: AIProvider.OpenAI,
+    maxTokens: 128000,
+    contextWindow: 1050000,
+    pricing: {
+      prompt: 5.0,
+      completion: 30.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
     },
     capabilities: {
       chat: true,
@@ -80,16 +264,16 @@ export const MODELS: Record<string, ProviderModel> = {
   },
   'gpt-5-chat-latest': {
     id: 'gpt-5-chat-latest',
-    name: 'GPT-5 Chat Latest',
+    name: 'GPT-5 Chat (latest)',
     provider: AIProvider.OpenAI,
     maxTokens: 128000,
-    contextWindow: 128000,
+    contextWindow: 1050000,
     pricing: {
-      prompt: 0.00125,
-      completion: 0.01,
-      unit: PricingUnit.Per1KTokens,
+      prompt: 5.0,
+      completion: 30.0,
+      unit: PricingUnit.Per1MTokens,
       currency: 'USD',
-      effectiveDate: '2025-01-01'
+      effectiveDate: '2026-01-01'
     },
     capabilities: {
       chat: true,
@@ -337,6 +521,75 @@ export const MODELS: Record<string, ProviderModel> = {
   },
 
   // ==== Anthropic (Claude) ====
+  'claude-opus-4-7': {
+    id: 'claude-opus-4-7',
+    name: 'Claude Opus 4.7',
+    provider: AIProvider.Anthropic,
+    maxTokens: 64000,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 5.0,
+      completion: 25.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'claude-opus-4-6-v1': {
+    id: 'claude-opus-4-6-v1',
+    name: 'Claude Opus 4.6',
+    provider: AIProvider.Anthropic,
+    maxTokens: 64000,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 5.0,
+      completion: 25.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'claude-opus-4-6': {
+    id: 'claude-opus-4-6',
+    name: 'Claude Opus 4.6 (alias)',
+    provider: AIProvider.Anthropic,
+    maxTokens: 64000,
+    contextWindow: 200000,
+    pricing: {
+      prompt: 5.0,
+      completion: 25.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
   'claude-opus-4-1-20250805': {
     id: 'claude-opus-4-1-20250805',
     name: 'Claude Opus 4.1',
@@ -569,6 +822,52 @@ export const MODELS: Record<string, ProviderModel> = {
   },
 
   // ==== AWS Bedrock (Anthropic, Amazon, Meta, Cohere, Mistral, etc.) ====
+  'anthropic.claude-opus-4-7-v1:0': {
+    id: 'anthropic.claude-opus-4-7-v1:0',
+    name: 'Claude Opus 4.7 (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 64000,
+    contextWindow: 1000000,
+    pricing: {
+      prompt: 5.0,
+      completion: 25.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-04-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'anthropic.claude-opus-4-6-v1': {
+    id: 'anthropic.claude-opus-4-6-v1',
+    name: 'Claude Opus 4.6 (Bedrock)',
+    provider: AIProvider.AWSBedrock,
+    maxTokens: 64000,
+    contextWindow: 1000000,
+    pricing: {
+      prompt: 5.0,
+      completion: 25.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
   'anthropic.claude-opus-4-1-20250805-v1:0': {
     id: 'anthropic.claude-opus-4-1-20250805-v1:0',
     name: 'Claude Opus 4.1 (Bedrock)',
@@ -1284,6 +1583,99 @@ export const MODELS: Record<string, ProviderModel> = {
   },
 
   // ==== Google Gemini ====
+  // === Gemini 3 Models (Latest) ===
+  'gemini-3-pro-preview': {
+    id: 'gemini-3-pro-preview',
+    name: 'Gemini 3 Pro Preview',
+    provider: AIProvider.Google,
+    maxTokens: 32000,
+    contextWindow: 2000000,
+    pricing: {
+      prompt: 2.0,
+      completion: 12.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
+  'gemini-3-pro-image-preview': {
+    id: 'gemini-3-pro-image-preview',
+    name: 'Gemini 3 Pro Image Preview',
+    provider: AIProvider.Google,
+    maxTokens: 32000,
+    contextWindow: 2000000,
+    pricing: {
+      prompt: 2.0,
+      completion: 12.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: false,
+      streaming: true
+    }
+  },
+  'gemini-3-flash-preview': {
+    id: 'gemini-3-flash-preview',
+    name: 'Gemini 3 Flash Preview',
+    provider: AIProvider.Google,
+    maxTokens: 32000,
+    contextWindow: 1000000,
+    pricing: {
+      prompt: 0.35,
+      completion: 2.8,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
+  'gemini-3.1-pro': {
+    id: 'gemini-3.1-pro',
+    name: 'Gemini 3.1 Pro',
+    provider: AIProvider.Google,
+    maxTokens: 32000,
+    contextWindow: 2000000,
+    pricing: {
+      prompt: 2.0,
+      completion: 12.0,
+      unit: PricingUnit.Per1MTokens,
+      currency: 'USD',
+      effectiveDate: '2026-01-01'
+    },
+    capabilities: {
+      chat: true,
+      completion: true,
+      embedding: false,
+      functionCalling: true,
+      vision: true,
+      audio: true,
+      streaming: true
+    }
+  },
   // === Gemini 2.5 Models (Latest) ===
   'gemini-2.5-pro': {
     id: 'gemini-2.5-pro',
